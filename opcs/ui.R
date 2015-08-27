@@ -3,7 +3,7 @@ library(dplyr)
 library(stringr)
 
 # provide data "as of date"
-date <- "20150825"
+date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
 # Read in data file
@@ -74,7 +74,20 @@ shinyUI(navbarPage("",
         ),
         
         tabPanel("Map",
-                 htmlOutput("map")
+        fluidPage( 
+                fluidRow(
+                        column(12, 
+                                helpText("Note that projects are mapped to pins using the lead applicant's address entered into OPCS.  For an applicant 
+                                with a P.O. Box address, the project will be mapped to a pin located in the center of the applicant's zip code.")
+                                )
+                        ),
+                        
+                fluidRow(
+                        column(12,
+                               htmlOutput("map")
+                                )
+                        )
+                )
         )
 ))
                                              
