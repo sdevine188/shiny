@@ -1,6 +1,7 @@
 library(shiny)
 library(dplyr)
 library(stringr)
+library(plotGoogleMaps)
 
 # provide data "as of date"
 date <- "20150827"
@@ -67,7 +68,8 @@ shinyUI(navbarPage("",
                 
                 fluidRow(
                         column(12,
-                               htmlOutput("table")
+                               dataTableOutput("table")
+                               #htmlOutput("table")
                                )
                 )
         )
@@ -84,6 +86,7 @@ shinyUI(navbarPage("",
                         
                 fluidRow(
                         column(12,
+                               #uiOutput("map")
                                htmlOutput("map")
                                 )
                         )

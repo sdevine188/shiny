@@ -3,6 +3,7 @@ library(shiny)
 library(dplyr)
 library(datasets)
 library(googleVis)
+library(plotGoogleMaps)
 
 # provide data "as of date"
 date <- "20150827"
@@ -20,8 +21,6 @@ shinyServer(function(input, output, session) {
                         width=1500
                 )
         })
-        
-        #page = ifelse(input$pageable == TRUE, "enable", "disable")
         
         state_data <- reactive({
                 # create placeholder selected_states variable to assign in if statements
@@ -67,7 +66,7 @@ shinyServer(function(input, output, session) {
                         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
                 }
                 
-                data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34, 35, 36)]           
+                data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34:38)]           
         })
         
         # subset data to show/not show jobs or PI columns and show/not show Construction-only projects based on checkbox input
@@ -92,12 +91,15 @@ shinyServer(function(input, output, session) {
                 data_table <- filter(data_table2, FY %in% range)
                 data_table
         })
-        
+                
         # create output table
-        output$table <- renderGvis({
+        output$table <- renderDataTable({
                 data_table_output <- data_table()
-                gvisTable(data_table_output, options = myOptions())         
-        })
+                data_table_output
+                }
+                , options = list(pageLength = 10)
+        )
+        
         
         # create output map
         output$map <- renderGvis({
@@ -106,13 +108,42 @@ shinyServer(function(input, output, session) {
                 names(map_data)[2] <- "tip"
                 
                 map_plot <- gvisMap(map_data, "lat_lon" , "tip", 
-                                    options=list(showTip=TRUE, 
-                                                 showLine=TRUE, 
-                                                 enableScrollWheel=TRUE,
-                                                 mapType='normal', 
-                                                 useMapTypeControl=TRUE))
+                                    options=list(showTip=TRUE, showLine=TRUE, enableScrollWheel=TRUE, mapType='normal', useMapTypeControl=TRUE, 
+                                        width = 800, height = 600))
         })
         
+#         create output map
+#         output$map <- renderUI({
+#                 data_map <- data_table()
+#                 coordinates(data_map) = ~ lon + lat      
+#                 proj4string(data_map) = CRS("+proj=longlat +datum=WGS84")
+#                 data_map_spdf <- SpatialPointsDataFrame(data_map, data = data.frame( ID = row.names(datafile) ) )  
+#                 map <- plotGoogleMaps(data_map_spdf, filename='map.html')
+#                 tags$iframe(
+#                         srcdoc = paste(readLines('map.html'), collapse = '\n'),
+#                         width = "100%",
+#                         height = "600px"
+#                 )
+#         })
+
+# create output map
+#         output$map <- renderUI({
+#                 data_map <- data_table()
+#                 coordinates(data_map) = ~ lon + lat      
+#                 proj4string(data_map) = CRS("+proj=longlat +datum=WGS84")
+#                 data_map_spdf <- SpatialPointsDataFrame(data_map, data = data.frame( ID = row.names(datafile) ) )  
+#                 map <- plotGoogleMaps(data_map_spdf, filename='map.html')
+#                 tags$iframe(
+#                         srcdoc = paste(gsub("http://maps.google.com/", 
+#                                             "https://maps.google.com/", 
+#                                             readLines('myMap1.html'), 
+#                                             fixed=TRUE), collapse = '\n'),
+#                         width = "100%",
+#                         height = "600px"
+#                 )
+#         })
+
+                
         # create download file
         output$downloadData <- downloadHandler(
                 filename = function() {
