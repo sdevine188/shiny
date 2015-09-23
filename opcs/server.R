@@ -2,8 +2,6 @@
 library(shiny)
 library(dplyr)
 library(datasets)
-library(googleVis)
-library(plotGoogleMaps)
 library(leaflet)
 library(stringr)
 
@@ -31,7 +29,7 @@ year_pal <- colorFactor("Set1", domain = year_options)
 
 # shiny server
 shinyServer(function(input, output, session) {
-               
+        
         myOptions <- reactive({
                 list(
                         page = "enable",
@@ -55,14 +53,14 @@ shinyServer(function(input, output, session) {
                 
                 filter(datafile, Proj.ST.Abbr %in% selected_states)        
         })
-              
+        
         # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
         counties <- reactive({
                 state_data <- state_data()
                 state_data <- arrange(state_data, Proj.ST.Abbr, Proj.County.Name)
                 unique(state_data$Proj.County.Name)                
         })
-              
+        
         # observe is a reactive function that repopulates the county select input menu using the reactive variable county
         observe({
                 counties_all <- c("All counties", counties())
@@ -84,9 +82,9 @@ shinyServer(function(input, output, session) {
                         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
                 }
                 
-#                 data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34:38)]  
+                #                 data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34:38)]  
                 data_table1
-
+                
         })
         
         # subset data to show/not show jobs or PI columns and show/not show Construction-only projects based on checkbox input
@@ -98,7 +96,7 @@ shinyServer(function(input, output, session) {
                 }
                 
                 if(input$JobsPIFlag == TRUE){
-                      data_table2 <- filter(data_table1, Cons.Non == "C" | Cons.Non == "B")
+                        data_table2 <- filter(data_table1, Cons.Non == "C" | Cons.Non == "B")
                 }      
                 
                 data_table2
@@ -111,19 +109,20 @@ shinyServer(function(input, output, session) {
                 data_table <- filter(data_table2, FY %in% range)
                 data_table
         })
-                
+        
         # create output table
         output$table <- renderDataTable({
                 data_table_output <- data_table()
                 data_table_output
-                }
-                , options = list(pageLength = 10)
+        }
+        , options = list(pageLength = 10, searching = FALSE)
         )
+
         
         # create output for map
         output$map <- renderLeaflet({
                 data_table3 <- data_table()
-                
+
                 # select legend palette
                 if(input$marker_type == "By program type"){
                         selected_pal <- program_pal
@@ -131,9 +130,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_pal <- year_pal
                 }
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_pal <- fund_pal
-#                 }
+                #                 if(input$marker_type == "By EDA funding level"){
+                #                         selected_pal <- fund_pal
+                #                 }
                 
                 # select legend title
                 if(input$marker_type == "By program type"){
@@ -142,9 +141,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_title <- "Fiscal Year Awarded"
                 }
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_title <- fund_pal
-#                 }
+                #                 if(input$marker_type == "By EDA funding level"){
+                #                         selected_title <- fund_pal
+                #                 }
                 
                 # select legend values
                 if(input$marker_type == "By program type"){
@@ -153,9 +152,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_values <- factor(data_table3$FY)
                 }
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_values <- data_table3$EDA.
-#                 }
+                #                 if(input$marker_type == "By EDA funding level"){
+                #                         selected_values <- data_table3$EDA.
+                #                 }
                 
                 # select circle size
                 if(input$circle_size == "Small circles"){
@@ -173,7 +172,7 @@ shinyServer(function(input, output, session) {
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
                                   title = selected_title, opacity = 1)
         })
-
+        
         # create download file
         output$downloadData <- downloadHandler(
                 filename = function() {
@@ -186,11 +185,3 @@ shinyServer(function(input, output, session) {
 }
 
 )
-
-
-
-
-
-
-
-
