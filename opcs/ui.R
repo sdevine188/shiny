@@ -71,7 +71,6 @@ shinyUI(navbarPage("",
                 fluidRow(
                         column(12,
                                dataTableOutput("table")
-                               #htmlOutput("table")
                                )
                 )
         )
@@ -85,15 +84,21 @@ shinyUI(navbarPage("",
                                img(src = "eda_logo.jpg", height = 150, width = 150)
                         ),
                         
-                        column(3, 
-                               selectInput("marker_type", "Select how to color-code projects:", 
-                                           choices = c("By program type", "By fiscal year awarded"), selected = "By program type")
-                        ),
+                        column(3,
+                               selectInput("marker_type", "Select how to color-code project icons:", 
+                                           choices = c("By program type", "By fiscal year awarded"), selected = "By program type"),
+                               actionLink("icon_link", "Note on project mapping"),
+                               conditionalPanel(
+                                       condition = "input.icon_link == true",
+                                       helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
+                                                For an applicant with a P.O. Box address, the project will be mapped in the center of the 
+                                                applicant's zip code.")
+                                       )
+                               ),
                         
-                        column(6, 
-                                p("Note that projects are mapped to pins using the lead applicant's address that is entered into OPCS."),
-                                p("For an applicant with a P.O. Box address, the project will be mapped to a pin located in the center of the 
-                                  applicant's zip code.")
+                        column(6,
+                              selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
+                                        "Large circles"), selected = "Small circles")
                         )
                 ),
                 
@@ -102,14 +107,8 @@ shinyUI(navbarPage("",
                 ),
                         
                 fluidRow(
-                        column(3,
-                               img(src = "program_legend.png")
-                        ),
-                        
-                        column(9,
-
-                               #uiOutput("map")
-                               htmlOutput("map")
+                        column(12,
+                                leafletOutput("map")
                                 )
                         )
                 )
