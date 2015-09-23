@@ -68,6 +68,7 @@ shinyServer(function(input, output, session) {
                 
 #                 data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34:38)]  
                 data_table1
+
         })
         
         # subset data to show/not show jobs or PI columns and show/not show Construction-only projects based on checkbox input
@@ -101,6 +102,7 @@ shinyServer(function(input, output, session) {
                 , options = list(pageLength = 10)
         )
         
+
         # create output for map
         output$map <- renderUI({
                 data_table3 <- data_table()
@@ -166,6 +168,7 @@ shinyServer(function(input, output, session) {
                 )
         })
 
+
         # create download file
         output$downloadData <- downloadHandler(
                 filename = function() {
@@ -176,6 +179,7 @@ shinyServer(function(input, output, session) {
                 }
         )
 }
+
 )
 
 # create variable for text string of html gvismap output before and after data portion
@@ -438,6 +442,7 @@ R version 3.2.1 (2015-06-18)
 </span></div>
 </body>
 </html>"
+
 
 
 

@@ -28,7 +28,9 @@ shinyUI(navbarPage("",
                                ),
                         
                         column(3,                       
+
                                p(as_of_date)
+
                                )
                 ),
                 
@@ -78,6 +80,7 @@ shinyUI(navbarPage("",
         tabPanel("Map",
         fluidPage( 
                 fluidRow(
+
                         column(3,
                                img(src = "eda_logo.jpg", height = 150, width = 150)
                         ),
@@ -104,6 +107,7 @@ shinyUI(navbarPage("",
                         ),
                         
                         column(9,
+
                                #uiOutput("map")
                                htmlOutput("map")
                                 )
