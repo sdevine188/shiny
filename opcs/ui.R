@@ -2,6 +2,7 @@ library(shiny)
 library(dplyr)
 library(stringr)
 library(leaflet)
+library(DT)
 
 # provide data "as of date"
 date <- "20150827"
@@ -43,6 +44,7 @@ shinyUI(navbarPage("",
                                                    selectInput("state", "Select a State:", 
                                                                choices = state_choices, multiple = TRUE, selected = state_choices[1]),
                                                    
+#                                                    uiOutput("counties")
                                                    selectInput("counties", "Select a County:", choices = "", multiple = TRUE)                    
                                             ),
                                             
@@ -71,7 +73,8 @@ shinyUI(navbarPage("",
                                     
                                     fluidRow(
                                             column(12,
-                                                   dataTableOutput("table")
+#                                                    dataTableOutput("table")
+                                                DT::dataTableOutput("table")
                                             )
                                     )
                             )
