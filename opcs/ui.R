@@ -8,11 +8,11 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
-# Read in data file
-file <- str_c("data/datafile_", date, ".csv")
-datafile <- read.csv(file, stringsAsFactors = FALSE)
-datafile <- arrange(datafile, Proj.ST.Abbr)
-state_choices <- c("All states", unique(datafile$Proj.ST.Abbr))
+# # Read in data file
+# file <- str_c("data/datafile_", date, ".csv")
+# datafile <- read.csv(file, stringsAsFactors = FALSE)
+# datafile <- arrange(datafile, Proj.ST.Abbr)
+# state_choices <- c("All states", unique(datafile$Proj.ST.Abbr))
 
 shinyUI(navbarPage("",
                    tabPanel("Data table",
@@ -41,10 +41,14 @@ shinyUI(navbarPage("",
                                     
                                     fluidRow(
                                             column(3,                       
-                                                   selectInput("state", "Select a State:", 
-                                                               choices = state_choices, multiple = TRUE, selected = state_choices[1]),
-                                                   
-#                                                    uiOutput("counties")
+#                                                    selectInput("state", "Select a State:", 
+#                                                                choices = state_choices, multiple = TRUE, selected = state_choices[1]),
+                                                                                                   
+#                                                 selectInput("state", "Select a State:", 
+#                                                             choices = "", multiple = TRUE),
+                                                        
+                                                        uiOutput("state"),
+
                                                    selectInput("counties", "Select a County:", choices = "", multiple = TRUE)                    
                                             ),
                                             

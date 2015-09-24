@@ -31,6 +31,12 @@ year_pal <- colorFactor("Set1", domain = year_options)
 # shiny server
 shinyServer(function(input, output, session) {
         
+        output$state = renderUI({
+                datafile2 <- arrange(datafile, Proj.ST.Abbr)
+                state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
+                selectInput("state", "Select states", choices = state_choices, multiple = TRUE, selected = state_choices[1])
+        })
+
         state_data <- reactive({
                 # create placeholder selected_states variable to assign in if statements
                 selected_states <- c()
@@ -46,13 +52,6 @@ shinyServer(function(input, output, session) {
                 
                 filter(datafile, Proj.ST.Abbr %in% selected_states)        
         })
-        
-#         output$counties = renderUI({
-#                 state_data = state_data()
-#                 state_data <- arrange(state_data, Proj.ST.Abbr, Proj.County.Name)
-#                 counties <- c("All counties", unique(state_data$Proj.County.Name))
-#                 selectInput('counties', 'Select counties', choices = counties, multiple = TRUE, selected = counties[1])
-#         })
         
         # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
         counties <- reactive({
