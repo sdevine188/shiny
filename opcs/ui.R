@@ -16,7 +16,7 @@ as_of_date <- str_c("Data as of: ", date)
 
 shinyUI(navbarPage("", id = "navbar",
 # shinyUI(navbarPage("",
-                   tabPanel("Data table",
+                   tabPanel("View data",
                 
                             
                             fluidPage(
@@ -79,17 +79,33 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-#                                                 textOutput("rows_all"),   
+                                                textOutput("rows_all"),   
                                                 DT::dataTableOutput("table")
                                             )
                                     )
                             )
 ),
 
-tabPanel("Map",
+tabPanel("Advanced Query",
          fluidPage( 
                  fluidRow(
-                         
+                         column(12,
+                                actionLink("column_link", "Select variables to display in data table"),
+                                conditionalPanel(
+                                        condition = "input.column_link == true",
+                                        helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
+                                                 For an applicant with a P.O. Box address, the project will be mapped in the center of the 
+                                                 applicant's zip code."),
+                                        uiOutput("all_columns")
+                                )
+                         )
+                 )
+         )
+),
+
+tabPanel("View map",
+         fluidPage( 
+                 fluidRow(
                          column(3,
                                 img(src = "eda_logo.jpg", height = 150, width = 150)
                          ),

@@ -13,6 +13,10 @@ date <- "20150827"
 file <- str_c("data/datafile_", date, ".csv")
 datafile <- read.csv(file, stringsAsFactors = FALSE)
 
+# create default columns to display
+default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Name", 
+                                          "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
+
 # create program colors
 program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
                             "GCCMIF", "Research", "CTAA"))
@@ -33,7 +37,17 @@ year_pal <- colorFactor("Set1", domain = year_options)
 # shiny server
 shinyServer(function(input, output, session) {
         
-        output$state = renderUI({
+        output$all_columns <- renderUI({
+                # create columns names in proper display order
+                # will need to specify columns to display once final dataset is arranged, since lat/lon etc aren't needed
+                non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
+                column_display <- c(default_columns, non_default_columns)
+                
+                selectInput("column_input", label = NULL, choices = column_display, multiple = TRUE,
+                            selected = default_columns)
+        })
+        
+        output$state <- renderUI({
                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
                 state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
                 selectInput("state", "Select states", choices = state_choices, multiple = TRUE, selected = state_choices[1])
@@ -115,8 +129,13 @@ shinyServer(function(input, output, session) {
         output$table <- DT::renderDataTable({
                 data_table_output2 <- data.frame()
                 data_table_output <- data_table()
-                data_table_output <- select(data_table_output, c(Project.No., FY, EDA.Program, EDA., Appl.Short.Name, 
-                        Project.Short.Descrip, Project.Location, Proj.ST.Abbr))
+                
+                # set columns to be displayed based on column dropdown menu
+                if(is.null(input$column_input)){
+                        data_table_output <- data_table_output[ , default_columns]
+                } else {
+                        data_table_output <- data_table_output[ , input$column_input]
+                }
                 
                 # create placeholder dataframe to use when user-selected data has zero rows 
                 # to avoid breaking datatable w/ filter
@@ -209,7 +228,11 @@ shinyServer(function(input, output, session) {
         })      
         
 #         output$rows_all <- renderText({
-#                 input$table_rows_all
+#                 if(is.null(input$column_input)){
+#                         default_columns
+#                 } else {
+#                         input$column_input
+#                 }
 #         })
         
         # create download file
