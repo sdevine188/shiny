@@ -43,14 +43,14 @@ shinyServer(function(input, output, session) {
                 non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
                 column_display <- c(default_columns, non_default_columns)
                 
-                selectInput("column_input", label = NULL, choices = column_display, multiple = TRUE,
+                selectInput("column_input", label = "Select columns to display:", choices = column_display, multiple = TRUE,
                             selected = default_columns)
         })
         
         output$state <- renderUI({
                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
                 state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
-                selectInput("state", "Select states", choices = state_choices, multiple = TRUE, selected = state_choices[1])
+                selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
         })
 
         state_data <- reactive({

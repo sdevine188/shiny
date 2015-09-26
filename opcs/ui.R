@@ -51,7 +51,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                         
                                                         uiOutput("state"),
 
-                                                   selectInput("counties", "Select a County:", choices = "", multiple = TRUE)                    
+                                                   selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
                                             ),
                                             
                                             column(3, 
@@ -90,14 +90,7 @@ tabPanel("Advanced Query",
          fluidPage( 
                  fluidRow(
                          column(12,
-                                actionLink("column_link", "Select variables to display in data table"),
-                                conditionalPanel(
-                                        condition = "input.column_link == true",
-                                        helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
-                                                 For an applicant with a P.O. Box address, the project will be mapped in the center of the 
-                                                 applicant's zip code."),
-                                        uiOutput("all_columns")
-                                )
+                                uiOutput("all_columns")
                          )
                  )
          )
