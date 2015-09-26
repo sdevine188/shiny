@@ -14,8 +14,10 @@ as_of_date <- str_c("Data as of: ", date)
 # datafile <- arrange(datafile, Proj.ST.Abbr)
 # state_choices <- c("All states", unique(datafile$Proj.ST.Abbr))
 
-shinyUI(navbarPage("",
+shinyUI(navbarPage("", id = "navbar",
+# shinyUI(navbarPage("",
                    tabPanel("Data table",
+                
                             
                             fluidPage(
                                     
@@ -77,7 +79,7 @@ shinyUI(navbarPage("",
                                     
                                     fluidRow(
                                             column(12,
-#                                                    dataTableOutput("table")
+#                                                 textOutput("rows_all"),   
                                                 DT::dataTableOutput("table")
                                             )
                                     )
@@ -106,7 +108,7 @@ tabPanel("Map",
                          
                          column(6,
                                 selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
-                                                                                                        "Large circles"), selected = "Small circles")
+                                                                                                        "Large circles"), selected = "Large circles")
                          )
                                 ),
                  

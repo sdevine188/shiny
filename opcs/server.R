@@ -14,12 +14,14 @@ file <- str_c("data/datafile_", date, ".csv")
 datafile <- read.csv(file, stringsAsFactors = FALSE)
 
 # create program colors
-program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Disaster Supp",
-                            "GCCMIF", "Research", "CTAA", "Trade Adjst"))
+program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+                            "GCCMIF", "Research", "CTAA"))
 
 year_options <- factor(seq(1995, 2016))
 
 program_pal <- colorFactor("Set1", domain = program_options)
+# program_pal <- colorFactor(c("#FF0000", "#0000FF", "#008080", "#CD6600", "#FF00FF", "#FFFF00", "#00FFFF", "#00FFFF", 
+#         "#0066FF", "#66FF33"), domain = program_options)
 
 year_pal <- colorFactor("Set1", domain = year_options)
 
@@ -106,18 +108,10 @@ shinyServer(function(input, output, session) {
         data_table <- reactive({
                 data_table2 <- data_table2()
                 range <- seq(input$years[1], input$years[2])
-#                 range <- seq(1990, 2015)
                 data_table <- filter(data_table2, FY %in% range)
                 data_table
         })
         
-        # create output table
-#         output$table <- renderDataTable({
-#                 data_table_output <- data_table()
-#                 data_table_output
-#         }
-#         , options = list(pageLength = 10, searching = FALSE)
-#         )
         output$table <- DT::renderDataTable({
                 data_table_output2 <- data.frame()
                 data_table_output <- data_table()
@@ -136,14 +130,74 @@ shinyServer(function(input, output, session) {
                         data_table_output2 <- data_table_output
                         return(datatable(data_table_output2, filter = "top"))
                 }
+                server = TRUE
         })
-
         
         # create output for map
         output$map <- renderLeaflet({
+#                 data_table3 <- data_table()
+#                 data_table3_filtered <- data_table3[input$table_rows_all, ]
+#                 
+#                 # select legend palette
+#                 if(input$marker_type == "By program type"){
+#                         selected_pal <- program_pal
+#                 }
+#                 if(input$marker_type == "By fiscal year awarded"){
+#                         selected_pal <- year_pal
+#                 }
+#                 #                 if(input$marker_type == "By EDA funding level"){
+#                 #                         selected_pal <- fund_pal
+#                 #                 }
+#                 
+#                 # select legend title
+#                 if(input$marker_type == "By program type"){
+#                         selected_title <- "EDA Program"
+#                 }
+#                 if(input$marker_type == "By fiscal year awarded"){
+#                         selected_title <- "Fiscal Year Awarded"
+#                 }
+#                 #                 if(input$marker_type == "By EDA funding level"){
+#                 #                         selected_title <- fund_pal
+#                 #                 }
+#                 
+#                 # select legend values
+#                 if(input$marker_type == "By program type"){
+#                         selected_values <- data_table3$EDA.Program
+#                 }
+#                 if(input$marker_type == "By fiscal year awarded"){
+#                         selected_values <- factor(data_table3$FY)
+#                 }
+#                 #                 if(input$marker_type == "By EDA funding level"){
+#                 #                         selected_values <- data_table3$EDA.
+#                 #                 }
+#                 
+#                 # select circle size
+#                 if(input$circle_size == "Small circles"){
+#                         selected_size <- 1
+#                 }
+#                 if(input$circle_size == "Large circles"){
+#                         selected_size <- 7
+#                 }
+#                 
+#                 # build map
+#                 leaflet(data_table3_filtered) %>%
+#                         addTiles() %>%
+#                         addCircleMarkers(data = data_table3_current, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+#                               color = ~selected_pal(selected_values), opacity = 1, radius = selected_size) %>%
+#                         addLegend("bottomright", pal = selected_pal, values = selected_values,
+#                                   title = selected_title, opacity = 1) %>%
+                leaflet(datafile) %>% addTiles() %>%
+                        fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
+        })
+        
+        observe({
+                observe_navbar <- input$navbar
+                
                 data_table3 <- data_table()
-
+                data_table3_filtered <- data_table3[input$table_rows_all, ]
+                
                 # select legend palette
+                selected_pal <- program_pal
                 if(input$marker_type == "By program type"){
                         selected_pal <- program_pal
                 }
@@ -155,6 +209,7 @@ shinyServer(function(input, output, session) {
                 #                 }
                 
                 # select legend title
+                selected_title <- "EDA Program"
                 if(input$marker_type == "By program type"){
                         selected_title <- "EDA Program"
                 }
@@ -166,33 +221,39 @@ shinyServer(function(input, output, session) {
                 #                 }
                 
                 # select legend values
+                selected_values <- data_table3_filtered$EDA.Program
                 if(input$marker_type == "By program type"){
-                        selected_values <- data_table3$EDA.Program
+                        selected_values <- data_table3_filtered$EDA.Program
                 }
                 if(input$marker_type == "By fiscal year awarded"){
-                        selected_values <- factor(data_table3$FY)
+                        selected_values <- factor(data_table3_filtered$FY)
                 }
                 #                 if(input$marker_type == "By EDA funding level"){
                 #                         selected_values <- data_table3$EDA.
                 #                 }
                 
                 # select circle size
+                selected_size <- 7
                 if(input$circle_size == "Small circles"){
                         selected_size <- 1
                 }
                 if(input$circle_size == "Large circles"){
-                        selected_size <- 6
+                        selected_size <- 7
                 }
                 
-                # build map
-                data_table3_current <- data_table3[input$table_rows_current, ]
-                leaflet(data_table3_current) %>%
-                        addTiles() %>% 
-                        addCircleMarkers(data = data_table3_current, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
-                              color = ~selected_pal(selected_values), opacity = 1, radius = selected_size) %>%
+                leafletProxy("map", data = data_table3_filtered) %>%
+                        clearMarkers() %>%
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                        clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                  title = selected_title, opacity = 1)
-        })
+                                  title = selected_title, opacity = 1)  
+        })      
+        
+#         output$rows_all <- renderText({
+#                 input$table_rows_all
+#         })
         
         # create download file
         output$downloadData <- downloadHandler(
@@ -200,7 +261,7 @@ shinyServer(function(input, output, session) {
                         str_c("datafile_", date, ".csv") 
                 },
                 content = function(file) {
-                        write.csv(data_table3_current, file)
+                        write.csv(data_table3_filtered, file)
                 }
         )
 }
