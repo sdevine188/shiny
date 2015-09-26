@@ -115,6 +115,8 @@ shinyServer(function(input, output, session) {
         output$table <- DT::renderDataTable({
                 data_table_output2 <- data.frame()
                 data_table_output <- data_table()
+                data_table_output <- select(data_table_output, c(Project.No., FY, EDA.Program, EDA., Appl.Short.Name, 
+                        Project.Short.Descrip, Project.Location, Proj.ST.Abbr))
                 
                 # create placeholder dataframe to use when user-selected data has zero rows 
                 # to avoid breaking datatable w/ filter
