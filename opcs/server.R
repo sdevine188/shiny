@@ -135,57 +135,6 @@ shinyServer(function(input, output, session) {
         
         # create output for map
         output$map <- renderLeaflet({
-#                 data_table3 <- data_table()
-#                 data_table3_filtered <- data_table3[input$table_rows_all, ]
-#                 
-#                 # select legend palette
-#                 if(input$marker_type == "By program type"){
-#                         selected_pal <- program_pal
-#                 }
-#                 if(input$marker_type == "By fiscal year awarded"){
-#                         selected_pal <- year_pal
-#                 }
-#                 #                 if(input$marker_type == "By EDA funding level"){
-#                 #                         selected_pal <- fund_pal
-#                 #                 }
-#                 
-#                 # select legend title
-#                 if(input$marker_type == "By program type"){
-#                         selected_title <- "EDA Program"
-#                 }
-#                 if(input$marker_type == "By fiscal year awarded"){
-#                         selected_title <- "Fiscal Year Awarded"
-#                 }
-#                 #                 if(input$marker_type == "By EDA funding level"){
-#                 #                         selected_title <- fund_pal
-#                 #                 }
-#                 
-#                 # select legend values
-#                 if(input$marker_type == "By program type"){
-#                         selected_values <- data_table3$EDA.Program
-#                 }
-#                 if(input$marker_type == "By fiscal year awarded"){
-#                         selected_values <- factor(data_table3$FY)
-#                 }
-#                 #                 if(input$marker_type == "By EDA funding level"){
-#                 #                         selected_values <- data_table3$EDA.
-#                 #                 }
-#                 
-#                 # select circle size
-#                 if(input$circle_size == "Small circles"){
-#                         selected_size <- 1
-#                 }
-#                 if(input$circle_size == "Large circles"){
-#                         selected_size <- 7
-#                 }
-#                 
-#                 # build map
-#                 leaflet(data_table3_filtered) %>%
-#                         addTiles() %>%
-#                         addCircleMarkers(data = data_table3_current, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
-#                               color = ~selected_pal(selected_values), opacity = 1, radius = selected_size) %>%
-#                         addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                   title = selected_title, opacity = 1) %>%
                 leaflet(datafile) %>% addTiles() %>%
                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
         })
@@ -196,6 +145,12 @@ shinyServer(function(input, output, session) {
                 data_table3 <- data_table()
                 data_table3_filtered <- data_table3[input$table_rows_all, ]
                 
+                # create funds palette
+                fund_pal <- colorNumeric(
+                        palette = "Blues",
+                        domain = data_table3_filtered$EDA.
+                )
+                
                 # select legend palette
                 selected_pal <- program_pal
                 if(input$marker_type == "By program type"){
@@ -204,9 +159,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_pal <- year_pal
                 }
-                #                 if(input$marker_type == "By EDA funding level"){
-                #                         selected_pal <- fund_pal
-                #                 }
+                if(input$marker_type == "By EDA funding level"){
+                        selected_pal <- fund_pal
+                }
                 
                 # select legend title
                 selected_title <- "EDA Program"
@@ -216,9 +171,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_title <- "Fiscal Year Awarded"
                 }
-                #                 if(input$marker_type == "By EDA funding level"){
-                #                         selected_title <- fund_pal
-                #                 }
+                if(input$marker_type == "By EDA funding level"){
+                        selected_title <- "EDA Funding Level"
+                }
                 
                 # select legend values
                 selected_values <- data_table3_filtered$EDA.Program
@@ -228,9 +183,9 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By fiscal year awarded"){
                         selected_values <- factor(data_table3_filtered$FY)
                 }
-                #                 if(input$marker_type == "By EDA funding level"){
-                #                         selected_values <- data_table3$EDA.
-                #                 }
+                if(input$marker_type == "By EDA funding level"){
+                        selected_values <- data_table3$EDA.
+                }
                 
                 # select circle size
                 selected_size <- 7

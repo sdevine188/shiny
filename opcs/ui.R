@@ -96,7 +96,8 @@ tabPanel("Map",
                          
                          column(3,
                                 selectInput("marker_type", "Select how to color-code project icons:", 
-                                            choices = c("By program type", "By fiscal year awarded"), selected = "By program type"),
+                                            choices = c("By program type", "By fiscal year awarded", 
+                                                        "By EDA funding level"), selected = "By program type"),
                                 actionLink("icon_link", "Note on project mapping"),
                                 conditionalPanel(
                                         condition = "input.icon_link == true",
