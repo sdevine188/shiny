@@ -18,7 +18,7 @@ default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Nam
                      "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
 
 # create default marker popup info
-# default_popup <- c("")
+# default_popup <- str_c(data_table3_filtered$EDA.Program, data_table3_filtered$FY, data_table3_filtered$EDA.)
 
 # create program colors
 program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
@@ -257,6 +257,11 @@ shinyServer(function(input, output, session) {
         observeEvent(input$marker_type, {
                 data_table3_filtered <- data_table3_filtered()
                 
+                default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
+                                 str_c("FY", data_table3_filtered$FY, sep = " "),
+                               data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                               sep = "<br/>")
+                
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
                 selected_values <- selected_values()
@@ -264,7 +269,7 @@ shinyServer(function(input, output, session) {
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
                         clearMarkers() %>%
-                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
                                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                         clearControls() %>%
@@ -276,6 +281,11 @@ shinyServer(function(input, output, session) {
         observeEvent(input$circle_size, {
                 data_table3_filtered <- data_table3_filtered()
                 
+                default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
+                                       str_c("FY", data_table3_filtered$FY, sep = " "),
+                                       data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                                       sep = "<br/>")
+                
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
                 selected_values <- selected_values()
@@ -283,7 +293,8 @@ shinyServer(function(input, output, session) {
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
                         clearMarkers() %>%
-                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
+                                         popup = default_popup,
                                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2)
         })
@@ -292,13 +303,19 @@ shinyServer(function(input, output, session) {
         observeEvent(input$navbar, {
                 data_table3_filtered <- data_table3_filtered()
                 
+                default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
+                                       str_c("FY", data_table3_filtered$FY, sep = " "),
+                                       data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                                       sep = "<br/>")
+                
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
                 selected_values <- selected_values()
                 selected_size <- selected_size()
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
-                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
+                                         popup = default_popup,
                                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                         clearControls() %>%
