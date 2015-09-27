@@ -253,6 +253,16 @@ shinyServer(function(input, output, session) {
                 selected_size
         })
         
+        # create label format for eda funds $
+        selected_format <- reactive({
+                # select circle size
+                selected_format <- ""
+                if(input$marker_type == "By EDA funding level"){
+                        selected_format <- "$"
+                }
+                selected_format
+        })
+        
         # replace markers and legend whenever marker_type option is changed
         observeEvent(input$marker_type, {
                 data_table3_filtered <- data_table3_filtered()
@@ -266,6 +276,7 @@ shinyServer(function(input, output, session) {
                 selected_title <- selected_title()
                 selected_values <- selected_values()
                 selected_size <- selected_size()
+                selected_format <- selected_format()
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
                         clearMarkers() %>%
@@ -274,7 +285,7 @@ shinyServer(function(input, output, session) {
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                  title = selected_title, opacity = 1)
+                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
         })
         
         # replace markers whenever cicle_size option is changed
@@ -312,15 +323,16 @@ shinyServer(function(input, output, session) {
                 selected_title <- selected_title()
                 selected_values <- selected_values()
                 selected_size <- selected_size()
+                selected_format <- selected_format()
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
                         addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
                                          popup = default_popup,
-                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                         color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                  title = selected_title, opacity = 1)  
+                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
         }) 
         
 #         output$rows_all <- renderText({
