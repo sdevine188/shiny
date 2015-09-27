@@ -15,7 +15,10 @@ datafile <- read.csv(file, stringsAsFactors = FALSE)
 
 # create default columns to display
 default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Name", 
-                                          "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
+                     "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
+
+# create default marker popup info
+# default_popup <- c("")
 
 # create program colors
 program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
@@ -52,7 +55,7 @@ shinyServer(function(input, output, session) {
                 state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
                 selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
         })
-
+        
         state_data <- reactive({
                 # create placeholder selected_states variable to assign in if statements
                 selected_states <- c()
@@ -87,8 +90,8 @@ shinyServer(function(input, output, session) {
                 # assign previously created reactive variables to regular variables
                 state_data <- state_data()
                 counties <- counties()
-#                 counties <- unique(state_data$Proj.County.Name)
-                       
+                #                 counties <- unique(state_data$Proj.County.Name)
+                
                 # create if statements to handle "All counties" option in dropdown menu
                 if("All counties" %in% input$counties){
                         data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
@@ -141,7 +144,7 @@ shinyServer(function(input, output, session) {
                 # to avoid breaking datatable w/ filter
                 x <- data.frame("No projects found based on search")
                 names(x)[1] <- ""
-
+                
                 # assign either the placeholder data or the user-selected data (if rows > 1) to be fed into datatable
                 if(nrow(data_table_output) < 1){
                         data_table_output2 <- x
@@ -160,17 +163,34 @@ shinyServer(function(input, output, session) {
                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
         })
         
-        observe({
-                observe_navbar <- input$navbar
-                
+        # create reactive variable for filtered data
+        data_table3_filtered <- reactive({
                 data_table3 <- data_table()
-                data_table3_filtered <- data_table3[input$table_rows_all, ]
+                data_table3[input$table_rows_all, ]
+        })
+        
+        # clear markers every time data table updates
+        observeEvent(input$table_rows_all, {
+                leafletProxy("map", data = datafile) %>%
+                        clearMarkers()
+        })
+        
+        # create fund_pal separately to avoid timeout/race conditions
+        fund_pal <- reactive({
+                data_table3_filtered <- data_table3_filtered()
                 
                 # create funds palette
                 fund_pal <- colorNumeric(
                         palette = "Blues",
                         domain = data_table3_filtered$EDA.
                 )
+        })
+        
+        # create reactive selected_pal
+        selected_pal <- reactive({
+                data_table3_filtered <- data_table3_filtered()
+                        
+                fund_pal <- fund_pal()
                 
                 # select legend palette
                 selected_pal <- program_pal
@@ -183,7 +203,11 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By EDA funding level"){
                         selected_pal <- fund_pal
                 }
-                
+                selected_pal
+        })
+        
+        # create reactive selected_title
+        selected_title <- reactive({
                 # select legend title
                 selected_title <- "EDA Program"
                 if(input$marker_type == "By program type"){
@@ -195,8 +219,14 @@ shinyServer(function(input, output, session) {
                 if(input$marker_type == "By EDA funding level"){
                         selected_title <- "EDA Funding Level"
                 }
-                
+                selected_title
+        })
+        
+        # create reactive selected_values
+        selected_values <- reactive({
                 # select legend values
+                data_table3_filtered <- data_table3_filtered()
+                
                 selected_values <- data_table3_filtered$EDA.Program
                 if(input$marker_type == "By program type"){
                         selected_values <- data_table3_filtered$EDA.Program
@@ -205,9 +235,13 @@ shinyServer(function(input, output, session) {
                         selected_values <- factor(data_table3_filtered$FY)
                 }
                 if(input$marker_type == "By EDA funding level"){
-                        selected_values <- data_table3$EDA.
+                        selected_values <- data_table3_filtered$EDA.
                 }
-                
+                selected_values
+        })
+        
+        # create reactive selected_size
+        selected_size <- reactive({
                 # select circle size
                 selected_size <- 7
                 if(input$circle_size == "Small circles"){
@@ -216,6 +250,17 @@ shinyServer(function(input, output, session) {
                 if(input$circle_size == "Large circles"){
                         selected_size <- 7
                 }
+                selected_size
+        })
+        
+        # replace markers and legend whenever marker_type option is changed
+        observeEvent(input$marker_type, {
+                data_table3_filtered <- data_table3_filtered()
+                
+                selected_pal <- selected_pal()
+                selected_title <- selected_title()
+                selected_values <- selected_values()
+                selected_size <- selected_size()
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
                         clearMarkers() %>%
@@ -224,15 +269,45 @@ shinyServer(function(input, output, session) {
                                          fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                  title = selected_title, opacity = 1)
+        })
+        
+        # replace markers whenever cicle_size option is changed
+        observeEvent(input$circle_size, {
+                data_table3_filtered <- data_table3_filtered()
+                
+                selected_pal <- selected_pal()
+                selected_title <- selected_title()
+                selected_values <- selected_values()
+                selected_size <- selected_size()
+                
+                leafletProxy("map", data = data_table3_filtered) %>%
+                        clearMarkers() %>%
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2)
+        })
+        
+        # replace map whenever navbar changes
+        observeEvent(input$navbar, {
+                data_table3_filtered <- data_table3_filtered()
+                
+                selected_pal <- selected_pal()
+                selected_title <- selected_title()
+                selected_values <- selected_values()
+                selected_size <- selected_size()
+                
+                leafletProxy("map", data = data_table3_filtered) %>%
+                        addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = ~EDA.Program,
+                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                        clearControls() %>%
+                        addLegend("bottomright", pal = selected_pal, values = selected_values,
                                   title = selected_title, opacity = 1)  
-        })      
+        }) 
         
 #         output$rows_all <- renderText({
-#                 if(is.null(input$column_input)){
-#                         default_columns
-#                 } else {
-#                         input$column_input
-#                 }
+#                 length(input$table_rows_all)
 #         })
         
         # create download file

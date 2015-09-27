@@ -43,15 +43,8 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(3,                       
-#                                                    selectInput("state", "Select a State:", 
-#                                                                choices = state_choices, multiple = TRUE, selected = state_choices[1]),
-                                                                                                   
-#                                                 selectInput("state", "Select a State:", 
-#                                                             choices = "", multiple = TRUE),
-                                                        
-                                                        uiOutput("state"),
-
-                                                   selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+                                                uiOutput("state"),
+                                                selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
                                             ),
                                             
                                             column(3, 
@@ -79,14 +72,14 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                textOutput("rows_all"),   
+#                                                 textOutput("rows_all"),   
                                                 DT::dataTableOutput("table")
                                             )
                                     )
                             )
 ),
 
-tabPanel("Advanced Query",
+tabPanel("Advanced query",
          fluidPage( 
                  fluidRow(
                          column(12,
@@ -116,11 +109,11 @@ tabPanel("View map",
                                         )
                                         ),
                          
-                         column(6,
+                         column(3,
                                 selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
                                                                                                         "Large circles"), selected = "Large circles")
                          )
-                                ),
+                ),
                  
                  fluidRow(column(12,
                                  br())
