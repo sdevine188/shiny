@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
         
         # clear markers every time data table updates
         observeEvent(input$table_rows_all, {
-                leafletProxy("map", data = datafile) %>%
+                leafletProxy("map") %>%
                         clearMarkers()
         })
         
@@ -326,6 +326,7 @@ shinyServer(function(input, output, session) {
                 selected_format <- selected_format()
                 
                 leafletProxy("map", data = data_table3_filtered) %>%
+                        clearMarkers() %>%
                         addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
                                          popup = default_popup,
                                          color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
