@@ -346,7 +346,7 @@ shinyServer(function(input, output, session) {
                         str_c("datafile_", date, ".csv") 
                 },
                 content = function(file) {
-                        write.csv(data_table3_filtered, file)
+                        write.csv(data_table3_filtered(), file)
                 }
         )
 }
