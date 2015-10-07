@@ -90,8 +90,7 @@ shinyServer(function(input, output, session) {
                 # assign previously created reactive variables to regular variables
                 state_data <- state_data()
                 counties <- counties()
-                #                 counties <- unique(state_data$Proj.County.Name)
-                
+
                 # create if statements to handle "All counties" option in dropdown menu
                 if("All counties" %in% input$counties){
                         data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
@@ -100,8 +99,6 @@ shinyServer(function(input, output, session) {
                 if(!("All counties" %in% input$counties)){
                         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
                 }
-                
-                #                 data_table1[ , c(1:3, 8:10, 18, 24, 26:28, 34:38)]  
                 data_table1
                 
         })
@@ -175,7 +172,7 @@ shinyServer(function(input, output, session) {
                         clearMarkers()
         })
         
-        # create fund_pal separately to avoid timeout/race conditions
+        # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({
                 data_table3_filtered <- data_table3_filtered()
                 
@@ -188,8 +185,6 @@ shinyServer(function(input, output, session) {
         
         # create reactive selected_pal
         selected_pal <- reactive({
-                data_table3_filtered <- data_table3_filtered()
-                        
                 fund_pal <- fund_pal()
                 
                 # select legend palette
