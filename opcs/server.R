@@ -18,8 +18,6 @@ default_columns <- c("Project.No.", "FY", "EDA_prog", "EDA.", "Appl.Short.Name",
                      "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
 
 # create program colors
-# program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-#                             "GCCMIF", "Research", "CTAA"))
 program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
                             "GCCMIF", "Research", "CTAA"))
 
@@ -113,16 +111,48 @@ shinyServer(function(input, output, session) {
         })
         
         # filter data based on year input
-        data_table <- reactive({
+        data_table3 <- reactive({
                 data_table2 <- data_table2()
                 range <- seq(input$years[1], input$years[2])
-                data_table <- filter(data_table2, FY %in% range)
-                data_table
+                data_table3 <- filter(data_table2, FY %in% range)
+                data_table3
         })
         
+        # run advanced query
+        data_table4 <- eventReactive(input$submit_query, {
+                data_table3 <- data_table3()
+                data_table4 <- data.frame()
+                
+                # create if statements to handle "All programs" option in dropdown menu
+                if("All programs" %in% input$program_input){
+                        data_table4 <- data_table3                       
+                }
+                if(!("All programs" %in% input$program_input)){
+                        data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)                        
+                }
+                data_table4
+        })
+        
+        # create reactive data_table with latest selected data
+        data_table <- reactive({
+                data_table <- data.frame()
+                
+                if(input$submit_query == 0){
+                        data_table <- data_table3()
+                        return(data_table)
+                }
+                if(input$submit_query > 0){
+                        data_table <- data_table4()
+                        return(data_table)
+                }
+        })
+        
+        
         output$table <- DT::renderDataTable({
-                data_table_output2 <- data.frame()
                 data_table_output <- data_table()
+#                 data_table_output <- data_table3()
+                data_table_output2 <- data.frame()
+                
                 
                 # set columns to be displayed based on column dropdown menu
                 if(is.null(input$column_input)){
@@ -155,14 +185,15 @@ shinyServer(function(input, output, session) {
         })
         
         # create reactive variable for filtered data
-        data_table3_filtered <- reactive({
-                data_table3 <- data_table()
-                if(nrow(data_table3) < 1){
+        data_table5_filtered <- reactive({
+                data_table5 <- data_table()
+#                 data_table3 <- data_table3()
+                if(nrow(data_table5) < 1){
                         no_projects <- data.frame("no projects")
                         return(no_projects)
                 }
-                if(nrow(data_table3) >= 1){
-                        data_table3[input$table_rows_all, ]
+                if(nrow(data_table5) >= 1){
+                        data_table5[input$table_rows_all, ]
                 }
         })
         
@@ -175,15 +206,15 @@ shinyServer(function(input, output, session) {
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 
                 # only run if at least one row of data is selected
-                if(data_table3_filtered[1,1] != "no projects"){
+                if(data_table5_filtered[1,1] != "no projects"){
                 
                         # create funds palette
                         colorNumeric(
                                 palette = "Blues",
-                                domain = data_table3_filtered$EDA.
+                                domain = data_table5_filtered$EDA.
                         )
                 }
         })
@@ -225,20 +256,20 @@ shinyServer(function(input, output, session) {
         # create reactive selected_values
         selected_values <- reactive({
                 # select legend values
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 
                 # only run if at least one row of data is selected
-                if(data_table3_filtered[1,1] != "no projects"){
+                if(data_table5_filtered[1,1] != "no projects"){
                 
-                        selected_values <- data_table3_filtered$EDA_prog
+                        selected_values <- data_table5_filtered$EDA_prog
                         if(input$marker_type == "By program type"){
-                                selected_values <- data_table3_filtered$EDA_prog
+                                selected_values <- data_table5_filtered$EDA_prog
                         }
                         if(input$marker_type == "By fiscal year awarded"){
-                                selected_values <- factor(data_table3_filtered$FY)
+                                selected_values <- factor(data_table5_filtered$FY)
                         }
                         if(input$marker_type == "By EDA funding level"){
-                                selected_values <- data_table3_filtered$EDA.
+                                selected_values <- data_table5_filtered$EDA.
                         }
                         selected_values
                 }
@@ -269,14 +300,14 @@ shinyServer(function(input, output, session) {
         
         # replace markers and legend whenever marker_type option is changed
         observeEvent(input$marker_type, {
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 
                 # only run if at least one row of data is selected
-                if(data_table3_filtered[1,1] != "no projects"){
+                if(data_table5_filtered[1,1] != "no projects"){
                 
-                        default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
-                                         str_c("FY", data_table3_filtered$FY, sep = " "),
-                                       data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
+                        default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                         str_c("FY", data_table5_filtered$FY, sep = " "),
+                                       data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
                                        sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -285,9 +316,9 @@ shinyServer(function(input, output, session) {
                         selected_size <- selected_size()
                         selected_format <- selected_format()
                         
-                        leafletProxy("map", data = data_table3_filtered) %>%
+                        leafletProxy("map", data = data_table5_filtered) %>%
                                 clearMarkers() %>%
-                                addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
+                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
                                 clearControls() %>%
@@ -298,14 +329,14 @@ shinyServer(function(input, output, session) {
         
         # replace markers whenever cicle_size option is changed
         observeEvent(input$circle_size, {
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 
                 # only run if at least one row of data is selected
-                if(data_table3_filtered[1,1] != "no projects"){
+                if(data_table5_filtered[1,1] != "no projects"){
                 
-                        default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
-                                               str_c("FY", data_table3_filtered$FY, sep = " "),
-                                               data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
+                        default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                               str_c("FY", data_table5_filtered$FY, sep = " "),
+                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -313,9 +344,9 @@ shinyServer(function(input, output, session) {
                         selected_values <- selected_values()
                         selected_size <- selected_size()
                         
-                        leafletProxy("map", data = data_table3_filtered) %>%
+                        leafletProxy("map", data = data_table5_filtered) %>%
                                 clearMarkers() %>%
-                                addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
+                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
                                                  popup = default_popup,
                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2)
@@ -324,14 +355,14 @@ shinyServer(function(input, output, session) {
         
         # replace map whenever navbar changes
         observeEvent(input$navbar, {
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 
                 # only run if at least one row of data is selected
-                if(data_table3_filtered[1,1] != "no projects"){
+                if(data_table5_filtered[1,1] != "no projects"){
                 
-                        default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
-                                               str_c("FY", data_table3_filtered$FY, sep = " "),
-                                               data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
+                        default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                               str_c("FY", data_table5_filtered$FY, sep = " "),
+                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -340,9 +371,9 @@ shinyServer(function(input, output, session) {
                         selected_size <- selected_size()
                         selected_format <- selected_format()
                         
-                        leafletProxy("map", data = data_table3_filtered) %>%
+                        leafletProxy("map", data = data_table5_filtered) %>%
                                 clearMarkers() %>%
-                                addCircleMarkers(data = data_table3_filtered, lng = ~lon, lat = ~lat, 
+                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
                                                  popup = default_popup,
                                                  color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
@@ -352,19 +383,18 @@ shinyServer(function(input, output, session) {
                 }
         }) 
         
-#         output$rows_all <- renderText({
-#                 input$column_input
-#                 input$download_columns
-#         })
+        output$rows_all <- renderText({
+                input$submit_query
+        })
         
         # create download file
         download_file <- reactive({
-                data_table3_filtered <- data_table3_filtered()
+                data_table5_filtered <- data_table5_filtered()
                 if(input$download_columns == TRUE){
-                        return(data_table3_filtered[ , input$column_input])
+                        return(data_table5_filtered[ , input$column_input])
                 }
                 if(input$download_columns == FALSE){
-                        return(data_table3_filtered)
+                        return(data_table5_filtered)
                 }
         })
         

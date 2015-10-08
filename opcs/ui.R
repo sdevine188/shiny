@@ -66,7 +66,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-#                                                 textOutput("rows_all"),   
+                                                textOutput("rows_all"),   
                                                 DT::dataTableOutput("table")
                                             )
                                     )
@@ -75,6 +75,23 @@ shinyUI(navbarPage("", id = "navbar",
 
 tabPanel("Advanced query",
          fluidPage( 
+               
+                 fluidRow(
+                         column(3,
+                                img(src = "eda_logo.jpg", height = 150, width = 150)
+                         ),
+                         
+                         column(3, 
+                                actionButton("submit_query", "Submit query")
+                         )
+                 ),
+                 
+                 fluidRow(
+                         column(12, 
+                                br()
+                         )
+                 ),
+                         
                  fluidRow(
                          column(6,
                                 wellPanel(
@@ -88,8 +105,8 @@ tabPanel("Advanced query",
                          column(6, 
                                 wellPanel(
                                 selectInput("program_input", "Select EDA programs to display", choices = 
-                                        c("All", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE)
+                                        c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs")
                                 )
                         )
                 )
