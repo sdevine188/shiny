@@ -118,20 +118,25 @@ shinyServer(function(input, output, session) {
                 data_table3
         })
         
-        # run advanced query
-        data_table4 <- eventReactive(input$submit_query, {
-                data_table3 <- data_table3()
-                data_table4 <- data.frame()
-                
-                # create if statements to handle "All programs" option in dropdown menu
-                if("All programs" %in% input$program_input){
-                        data_table4 <- data_table3                       
-                }
-                if(!("All programs" %in% input$program_input)){
-                        data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)                        
-                }
-                data_table4
+        # test data_table4
+        data_table4 <- reactive({
+                data_table3()
         })
+        
+        # run advanced query
+#         data_table4 <- eventReactive(input$submit_query, {
+#                 data_table3 <- data_table3()
+#                 data_table4 <- data.frame()
+#                 
+#                 # create if statements to handle "All programs" option in dropdown menu
+#                 if("All programs" %in% input$program_input){
+#                         data_table4 <- data_table3                       
+#                 }
+#                 if(!("All programs" %in% input$program_input)){
+#                         data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)                        
+#                 }
+#                 data_table4
+#         })
         
         # create reactive data_table with latest selected data
         data_table <- reactive({
