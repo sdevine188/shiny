@@ -14,14 +14,13 @@ file <- str_c("data/datafile_", date, ".csv")
 datafile <- read.csv(file, stringsAsFactors = FALSE)
 
 # create default columns to display
-default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Name", 
+default_columns <- c("Project.No.", "FY", "EDA_prog", "EDA.", "Appl.Short.Name", 
                      "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
 
-# create default marker popup info
-# default_popup <- str_c(data_table3_filtered$EDA.Program, data_table3_filtered$FY, data_table3_filtered$EDA.)
-
 # create program colors
-program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+# program_options <- factor(c("", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+#                             "GCCMIF", "Research", "CTAA"))
+program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
                             "GCCMIF", "Research", "CTAA"))
 
 year_options <- factor(seq(1995, 2016))
@@ -231,9 +230,9 @@ shinyServer(function(input, output, session) {
                 # only run if at least one row of data is selected
                 if(data_table3_filtered[1,1] != "no projects"){
                 
-                        selected_values <- data_table3_filtered$EDA.Program
+                        selected_values <- data_table3_filtered$EDA_prog
                         if(input$marker_type == "By program type"){
-                                selected_values <- data_table3_filtered$EDA.Program
+                                selected_values <- data_table3_filtered$EDA_prog
                         }
                         if(input$marker_type == "By fiscal year awarded"){
                                 selected_values <- factor(data_table3_filtered$FY)
@@ -277,7 +276,7 @@ shinyServer(function(input, output, session) {
                 
                         default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
                                          str_c("FY", data_table3_filtered$FY, sep = " "),
-                                       data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                                       data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
                                        sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -306,7 +305,7 @@ shinyServer(function(input, output, session) {
                 
                         default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
                                                str_c("FY", data_table3_filtered$FY, sep = " "),
-                                               data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                                               data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -332,7 +331,7 @@ shinyServer(function(input, output, session) {
                 
                         default_popup <- str_c(data_table3_filtered$Appl.Short.Name, data_table3_filtered$address,
                                                str_c("FY", data_table3_filtered$FY, sep = " "),
-                                               data_table3_filtered$EDA.Program, str_c("$", data_table3_filtered$EDA.), 
+                                               data_table3_filtered$EDA_prog, str_c("$", data_table3_filtered$EDA.), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()

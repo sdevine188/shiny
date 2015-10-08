@@ -8,10 +8,6 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
-# define default_columns for data table to display
-# default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Name", 
-#                      "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
-
 shinyUI(navbarPage("", id = "navbar",
 # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -87,8 +83,16 @@ tabPanel("Advanced query",
                                 actionButton("reset_columns", "Reset to default columns"),
                                 checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
                                 )
-                         )
-                 )
+                         ),
+                         
+                         column(6, 
+                                wellPanel(
+                                selectInput("program_input", "Select EDA programs to display", choices = 
+                                        c("All", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE)
+                                )
+                        )
+                )
          )
 ),
 
