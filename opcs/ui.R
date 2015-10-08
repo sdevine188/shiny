@@ -8,12 +8,6 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
-# # Read in data file
-# file <- str_c("data/datafile_", date, ".csv")
-# datafile <- read.csv(file, stringsAsFactors = FALSE)
-# datafile <- arrange(datafile, Proj.ST.Abbr)
-# state_choices <- c("All states", unique(datafile$Proj.ST.Abbr))
-
 shinyUI(navbarPage("", id = "navbar",
 # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -99,8 +93,7 @@ tabPanel("View map",
                          column(3,
                                 selectInput("marker_type", "Select color-coding of project icons:", 
                                             choices = c("By program type", "By fiscal year awarded", 
-                                                        "By EDA funding level"), selected = "By program type"),
-                                actionButton("refresh_map", "Refresh map")
+                                                        "By EDA funding level"), selected = "By program type")
                          ),
                          
                          column(3,
