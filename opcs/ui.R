@@ -8,6 +8,10 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
+# define default_columns for data table to display
+# default_columns <- c("Project.No.", "FY", "EDA.Program", "EDA.", "Appl.Short.Name", 
+#                      "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
+
 shinyUI(navbarPage("", id = "navbar",
 # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -76,8 +80,10 @@ shinyUI(navbarPage("", id = "navbar",
 tabPanel("Advanced query",
          fluidPage( 
                  fluidRow(
-                         column(12,
-                                uiOutput("all_columns")
+                         column(3,
+                                selectInput("column_input", label = "Select columns to display:", choices = "", 
+                                            multiple = TRUE),
+                                actionButton("reset_columns", "Reset to default columns")
                          )
                  )
          )

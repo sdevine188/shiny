@@ -30,17 +30,19 @@ program_pal <- colorFactor("Set1", domain = program_options)
 
 year_pal <- colorFactor("Set1", domain = year_options)
 
+# create columns names in proper display order
+# will need to specify columns to display once final dataset is arranged, since lat/lon etc aren't needed
+non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
+column_display <- c(default_columns, non_default_columns)
+
 # shiny server
 shinyServer(function(input, output, session) {
         
-        output$all_columns <- renderUI({
-                # create columns names in proper display order
-                # will need to specify columns to display once final dataset is arranged, since lat/lon etc aren't needed
-                non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
-                column_display <- c(default_columns, non_default_columns)
-                
-                selectInput("column_input", label = "Select columns to display:", choices = column_display, multiple = TRUE,
-                            selected = default_columns)
+        observe({
+                reset_columns <- input$reset_columns
+                updateSelectInput(session, "column_input",
+                                  choices = column_display,
+                                  selected = default_columns)
         })
         
         output$state <- renderUI({
