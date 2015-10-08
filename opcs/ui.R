@@ -97,9 +97,15 @@ tabPanel("View map",
                          ),
                          
                          column(3,
-                                selectInput("marker_type", "Select how to color-code project icons:", 
+                                selectInput("marker_type", "Select color-coding of project icons:", 
                                             choices = c("By program type", "By fiscal year awarded", 
                                                         "By EDA funding level"), selected = "By program type"),
+                                actionButton("refresh_map", "Refresh map")
+                         ),
+                         
+                         column(3,
+                                selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
+                                                "Large circles"), selected = "Large circles"),
                                 actionLink("icon_link", "Note on project mapping"),
                                 conditionalPanel(
                                         condition = "input.icon_link == true",
@@ -107,11 +113,6 @@ tabPanel("View map",
                                                  For an applicant with a P.O. Box address, the project will be mapped in the center of the 
                                                  applicant's zip code.")
                                         )
-                                        ),
-                         
-                         column(3,
-                                selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
-                                                                                                        "Large circles"), selected = "Large circles")
                          )
                 ),
                  
