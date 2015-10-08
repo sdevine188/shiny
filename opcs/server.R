@@ -354,21 +354,28 @@ shinyServer(function(input, output, session) {
         }) 
         
 #         output$rows_all <- renderText({
-#                 data_table3_filtered <- data_table3_filtered()
-#                 data_table <- data_table()
-#                 data_table3_filtered[1, 2]
-#                 dim(data_table3_filtered)
-#                 data_table3_filtered[1, 1]
-#                 str_c("filtered equals ", nrow(data_table3_filtered), "data_table equals ", nrow(data_table))
+#                 input$column_input
+#                 input$download_columns
 #         })
         
         # create download file
+        download_file <- reactive({
+                data_table3_filtered <- data_table3_filtered()
+                if(input$download_columns == TRUE){
+                        return(data_table3_filtered[ , input$column_input])
+                }
+                if(input$download_columns == FALSE){
+                        return(data_table3_filtered)
+                }
+        })
+        
+        # download file
         output$downloadData <- downloadHandler(
                 filename = function() {
                         str_c("datafile_", date, ".csv") 
                 },
                 content = function(file) {
-                        write.csv(data_table3_filtered(), file)
+                        write.csv(download_file(), file)
                 }
         )
 }

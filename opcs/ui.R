@@ -80,10 +80,13 @@ shinyUI(navbarPage("", id = "navbar",
 tabPanel("Advanced query",
          fluidPage( 
                  fluidRow(
-                         column(3,
+                         column(6,
+                                wellPanel(
                                 selectInput("column_input", label = "Select columns to display:", choices = "", 
                                             multiple = TRUE),
-                                actionButton("reset_columns", "Reset to default columns")
+                                actionButton("reset_columns", "Reset to default columns"),
+                                checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
+                                )
                          )
                  )
          )
