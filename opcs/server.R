@@ -118,9 +118,15 @@ shinyServer(function(input, output, session) {
                 data_table3
         })
         
-        # test data_table4
+        # back-up option that works
+#         data_table4 <- reactive({
+#                 data_table3()
+#         })
+        
         data_table4 <- reactive({
-                data_table3()
+                data_table3 <- data_table3()
+                submit_query <- input$submit_query
+                data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
         })
         
         # run advanced query
