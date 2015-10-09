@@ -8,6 +8,9 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
+# read in initatives data
+# initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
+
 shinyUI(navbarPage("", id = "navbar",
 # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -80,9 +83,11 @@ tabPanel("Advanced query",
                          column(3,
                                 img(src = "eda_logo.jpg", height = 150, width = 150)
                          ),
-                         
                          column(3, 
                                 actionButton("submit_query", "Submit query")
+                         ),
+                         column(3, 
+                                actionButton("reset_all", "Reset all options to defaults")
                          )
                  ),
                  
@@ -111,6 +116,16 @@ tabPanel("Advanced query",
                                 )
                         )
                 )
+                
+#                 fluidRow(
+#                         column(6,
+#                                wellPanel(
+#                                 selectInput("initiatives_input", "Select initiative codes that must be present", 
+#                                             choices = c("All initiatives", initiatives$code_description), multiple = TRUE, 
+#                                             selected = "All initiatives")
+#                                )
+#                         )
+#                 )
          )
 ),
 

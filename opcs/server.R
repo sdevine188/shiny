@@ -32,9 +32,13 @@ year_pal <- colorFactor("Set1", domain = year_options)
 non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
 column_display <- c(default_columns, non_default_columns)
 
+# read in initatives data
+# initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
+
 # shiny server
 shinyServer(function(input, output, session) {
         
+        # reset columns button
         observe({
                 reset_columns <- input$reset_columns
                 updateSelectInput(session, "column_input",
@@ -42,11 +46,23 @@ shinyServer(function(input, output, session) {
                                   selected = default_columns)
         })
         
+        # reset program button
         observe({
                 reset_programs <- input$reset_programs
                 updateSelectInput(session, "program_input",
                                   choices = c("All programs", as.character(program_options)),
                                   selected = "All programs")
+        })
+        
+        # reset all button
+        observe({
+                reset_all <- input$reset_all
+                updateSelectInput(session, "program_input",
+                                  choices = c("All programs", as.character(program_options)),
+                                  selected = "All programs")
+                updateSelectInput(session, "column_input",
+                                  choices = column_display,
+                                  selected = default_columns)
         })
         
         output$state <- renderUI({
