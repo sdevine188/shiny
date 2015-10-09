@@ -118,31 +118,21 @@ shinyServer(function(input, output, session) {
                 data_table3
         })
         
-        # back-up option that works
-#         data_table4 <- reactive({
-#                 data_table3()
-#         })
-        
         data_table4 <- reactive({
                 data_table3 <- data_table3()
+                data_table4 <- data.frame()
                 submit_query <- input$submit_query
-                data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
+                
+                # create if statements to handle "All programs" option in dropdown menu
+                if("All programs" %in% input$program_input){
+                        data_table4 <- data_table3
+                        return(data_table4)
+                }
+                if(!("All programs" %in% input$program_input)){
+                        data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
+                        return(data_table4)
+                }
         })
-        
-        # run advanced query
-#         data_table4 <- eventReactive(input$submit_query, {
-#                 data_table3 <- data_table3()
-#                 data_table4 <- data.frame()
-#                 
-#                 # create if statements to handle "All programs" option in dropdown menu
-#                 if("All programs" %in% input$program_input){
-#                         data_table4 <- data_table3                       
-#                 }
-#                 if(!("All programs" %in% input$program_input)){
-#                         data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)                        
-#                 }
-#                 data_table4
-#         })
         
         # create reactive data_table with latest selected data
         data_table <- reactive({
@@ -157,7 +147,6 @@ shinyServer(function(input, output, session) {
                         return(data_table)
                 }
         })
-        
         
         output$table <- DT::renderDataTable({
                 data_table_output <- data_table()
@@ -364,39 +353,41 @@ shinyServer(function(input, output, session) {
                 }
         })
         
-        # replace map whenever navbar changes
-        observeEvent(input$navbar, {
-                data_table5_filtered <- data_table5_filtered()
-                
-                # only run if at least one row of data is selected
-                if(data_table5_filtered[1,1] != "no projects"){
-                
-                        default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-                                               str_c("FY", data_table5_filtered$FY, sep = " "),
-                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
-                                               sep = "<br/>")
+        # replace map whenever View Map navbar is selected
+        observe({
+                if(input$navbar == "View map"){
+                        data_table5_filtered <- data_table5_filtered()
                         
-                        selected_pal <- selected_pal()
-                        selected_title <- selected_title()
-                        selected_values <- selected_values()
-                        selected_size <- selected_size()
-                        selected_format <- selected_format()
-                        
-                        leafletProxy("map", data = data_table5_filtered) %>%
-                                clearMarkers() %>%
-                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-                                                 popup = default_popup,
-                                                 color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                                 fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-                                clearControls() %>%
-                                addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                          title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        # only run if at least one row of data is selected
+                        if(data_table5_filtered[1,1] != "no projects"){
+                                
+                                default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                                       str_c("FY", data_table5_filtered$FY, sep = " "),
+                                                       data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                                       sep = "<br/>")
+                                
+                                selected_pal <- selected_pal()
+                                selected_title <- selected_title()
+                                selected_values <- selected_values()
+                                selected_size <- selected_size()
+                                selected_format <- selected_format()
+                                
+                                leafletProxy("map", data = data_table5_filtered) %>%
+                                        clearMarkers() %>%
+                                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
+                                                         popup = default_popup,
+                                                         color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                                        clearControls() %>%
+                                        addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        }
                 }
         }) 
         
-        output$rows_all <- renderText({
-                input$submit_query
-        })
+#         output$rows_all <- renderText({
+#                 str(input$program_input)
+#         })
         
         # create download file
         download_file <- reactive({
