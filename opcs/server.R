@@ -215,8 +215,13 @@ shinyServer(function(input, output, session) {
                         no_projects <- data.frame("no projects")
                         return(no_projects)
                 }
+#                 if(nrow(data_table5) >= 1){
+# #                         return(data_table5[input$table_rows_all, ])
+#                         return(data_table5)
+#                 }
                 if(nrow(data_table5) >= 1){
-                        return(data_table5[input$table_rows_all, ])
+                        #                         return(data_table5[input$table_rows_all, ])
+                        return(data_table5)
                 }
         })
         
@@ -377,8 +382,8 @@ shinyServer(function(input, output, session) {
         })
         
         # replace map whenever View Map navbar is selected
-        observe({
-                if(input$navbar == "View map"){
+        observeEvent(input$navbar, {
+#                 if(input$navbar == "View map"){
                         data_table5_filtered <- data_table5_filtered()
                         
                         # only run if at least one row of data is selected
@@ -405,12 +410,11 @@ shinyServer(function(input, output, session) {
                                         addLegend("bottomright", pal = selected_pal, values = selected_values,
                                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                         }
-                }
         })
         
-#         output$rows_all <- renderText({
-#                 str(input$program_input)
-#         })
+        output$rows_all <- renderText({
+                input$navbar == "View data"
+        })
         
         # create download file
         download_file <- reactive({
