@@ -106,7 +106,8 @@ tabPanel("Advanced query",
                                 wellPanel(
                                 selectInput("program_input", "Select EDA programs to display", choices = 
                                         c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs")
+                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
+                                actionButton("reset_programs", "Reset to default programs")
                                 )
                         )
                 )

@@ -42,6 +42,13 @@ shinyServer(function(input, output, session) {
                                   selected = default_columns)
         })
         
+        observe({
+                reset_programs <- input$reset_programs
+                updateSelectInput(session, "program_input",
+                                  choices = c("All programs", as.character(program_options)),
+                                  selected = "All programs")
+        })
+        
         output$state <- renderUI({
                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
                 state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
