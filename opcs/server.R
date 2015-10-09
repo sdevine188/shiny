@@ -216,7 +216,7 @@ shinyServer(function(input, output, session) {
                         return(no_projects)
                 }
                 if(nrow(data_table5) >= 1){
-                        data_table5[input$table_rows_all, ]
+                        return(data_table5[input$table_rows_all, ])
                 }
         })
         
@@ -408,55 +408,9 @@ shinyServer(function(input, output, session) {
                 }
         })
         
-        observeEvent(input$refresh_map, {
-                leafletProxy("map") %>%
-                        clearMarkers() %>%
-                        clearControls() %>%
-                        clearTiles() %>%
-                        addTiles() 
-#                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
-
-       
-#                 data_table5 <- data_table()
-#                 data_table5_filtered <- data_table5
-#                 
-#                 if(nrow(data_table5) < 1){
-#                         no_projects <- data.frame("no projects")
-#                         data_table5_filtered <- no_projects
-#                 }
-#                 if(nrow(data_table5) >= 1){
-#                         data_table5_filtered <- data_table5[input$table_rows_all, ]
-#                 }
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-#                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-#                                                data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
-#                                                sep = "<br/>")
-#                         
-#                         selected_pal <- selected_pal()
-#                         selected_title <- selected_title()
-#                         selected_values <- selected_values()
-#                         selected_size <- selected_size()
-#                         selected_format <- selected_format()
-#                         
-#                         leafletProxy("map", data = data_table5_filtered) %>%
-#                                 clearMarkers() %>%
-#                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-#                                                  popup = default_popup,
-#                                                  color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-#                                 clearControls() %>%
-#                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#                 }
-        })
-        
-        output$rows_all <- renderText({
-                str(input$program_input)
-        })
+#         output$rows_all <- renderText({
+#                 str(input$program_input)
+#         })
         
         # create download file
         download_file <- reactive({

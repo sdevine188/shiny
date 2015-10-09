@@ -152,11 +152,7 @@ tabPanel("View map",
                                                  For an applicant with a P.O. Box address, the project will be mapped in the center of the 
                                                  applicant's zip code.")
                                         )
-                         ),
-                         
-                         column(3, 
-                                actionButton("refresh_map", "Refresh map")
-                                )
+                         )
                 ),
                  
                  fluidRow(column(12,
