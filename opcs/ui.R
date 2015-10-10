@@ -69,7 +69,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                textOutput("rows_all"),   
+#                                                 textOutput("rows_all"),   
                                                 DT::dataTableOutput("table")
                                             )
                                     )
@@ -84,6 +84,7 @@ tabPanel("Advanced query",
                                 img(src = "eda_logo.jpg", height = 150, width = 150)
                          ),
                          column(3, 
+                                textOutput("rows_all"),
                                 actionButton("submit_query", "Submit query")
                          ),
                          column(3, 

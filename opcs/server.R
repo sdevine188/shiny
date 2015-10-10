@@ -192,11 +192,12 @@ shinyServer(function(input, output, session) {
                 # assign either the placeholder data or the user-selected data (if rows > 1) to be fed into datatable
                 if(nrow(data_table_output) < 1){
                         data_table_output2 <- no_projects2
-                        return(datatable(data_table_output2, filter = "none", rownames = FALSE))
+                        return(datatable(data_table_output2, filter = "none", rownames = FALSE, options = 
+                                                 list(pageLength = 5)))
                 }
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
-                        return(datatable(data_table_output2, filter = "top"))
+                        return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
                 server = TRUE
         })
@@ -413,7 +414,8 @@ shinyServer(function(input, output, session) {
         })
         
         output$rows_all <- renderText({
-                input$navbar == "View data"
+#                 input$table_search
+                input$table_search_columns
         })
         
         # create download file
