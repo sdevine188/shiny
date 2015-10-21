@@ -11,6 +11,7 @@ date <- "20150827"
 
 # Read in data file
 file <- str_c("data/datafile_", date, ".csv")
+# file <- str_c("data/small_datafile_", date, ".csv")
 datafile <- read.csv(file, stringsAsFactors = FALSE)
 
 # create default columns to display
@@ -89,11 +90,9 @@ shinyServer(function(input, output, session) {
                 if("All states" %in% input$state){
                         selected_states <- unique(datafile$Proj.ST.Abbr)
                 }
-                
                 if(!("All states" %in% input$state)){
                         selected_states <- input$state
                 }
-                
                 filter(datafile, Proj.ST.Abbr %in% selected_states)        
         })
         
@@ -135,11 +134,9 @@ shinyServer(function(input, output, session) {
                 if(input$JobsPIFlag == FALSE){
                         data_table2 <- select(data_table1, -Jobs.Created, -Jobs.Saved, -Priv.Investment)
                 }
-                
                 if(input$JobsPIFlag == TRUE){
                         data_table2 <- filter(data_table1, Cons.Non == "C" | Cons.Non == "B")
                 }      
-                
                 data_table2
         })
         
@@ -152,21 +149,6 @@ shinyServer(function(input, output, session) {
         })
         
         # filter data based on advanced query inputs
-#         data_table4 <- reactive({
-#                 data_table3 <- data_table3()
-#                 data_table4 <- data.frame()
-#                 submit_query <- input$submit_query
-#                 
-#                 # create if statements to handle "All programs" option in dropdown menu
-#                 if("All programs" %in% input$program_input){
-#                         data_table4 <- data_table3
-#                         return(data_table4)
-#                 }
-#                 if(!("All programs" %in% input$program_input)){
-#                         data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
-#                         return(data_table4)
-#                 }
-#         })
         data_table4 <- reactive({
                 data_table4 <- data.frame()
                 submit_query <- input$submit_query
@@ -190,20 +172,22 @@ shinyServer(function(input, output, session) {
         # create variable data_table with latest selected data
         data_table <- reactive({
                 data_table <- data.frame()
+                data_table3 <- data_table3()
+                data_table4 <- data_table4()
                 
+                # consider isolating this chunk?
                 if(input$submit_query == 0){
-                        data_table <- data_table3()
+                        data_table <- data_table3
                         return(data_table)
                 }
                 if(input$submit_query > 0){
-                        data_table <- data_table4()
+                        data_table <- data_table4
                         return(data_table)
                 }
         })
         
         output$table <- DT::renderDataTable({
                 data_table_output <- data_table()
-                #                 data_table_output <- data_table3()
                 data_table_output2 <- data.frame()
                 
                 
@@ -241,27 +225,38 @@ shinyServer(function(input, output, session) {
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
-                #                 data_table3 <- data_table3()
+                
+                isolate({
+                        search_input <- str_c(input$table_search, input$table_search_columns, collapse = "")
+                })
+                
                 if(nrow(data_table5) < 1){
                         no_projects <- data.frame("no projects")
                         return(no_projects)
                 }
-                #                 if(nrow(data_table5) >= 1){
-                # #                         return(data_table5[input$table_rows_all, ])
-                #                         return(data_table5)
-                #                 }
-                if(nrow(data_table5) >= 1){
+                if(nrow(data_table5) >= 1 && search_input == ""){
+                        return(data_table5)
+                }
+                if(nrow(data_table5) >= 1 && search_input != ""){
                         return(data_table5[input$table_rows_all, ])
-#                         return(data_table5)
                 }
         })
         
-        # clear markers every time data table updates
-        observeEvent(input$table_rows_all, {
-                leafletProxy("map") %>%
+        # clear markers every time data table filtered rows updates
+        observe({
+                table_rows_all <- input$table_rows_all
+                leafletProxy("map", data = datafile) %>%
                         clearMarkers() %>%
                         clearControls()
         })
+        
+        # clear markers and controls every time data_table() variable updates
+                observe({
+                        data_table <- data_table()
+                        leafletProxy("map", data = datafile) %>%
+                                clearMarkers() %>%
+                                clearControls()
+                })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({
@@ -444,8 +439,15 @@ shinyServer(function(input, output, session) {
         })
         
         output$rows_all <- renderText({
-                #                 input$table_search
-                input$table_search_columns
+                # input$table_search
+#                 input$table_search_columns
+#                 input$table_rows_all
+#                 is.null(input$table_search)
+               x <- str_c(input$table_search, input$table_search_columns, collapse = "")
+               # length(x)
+               x == ""
+               
+
         })
         
         # create download file
