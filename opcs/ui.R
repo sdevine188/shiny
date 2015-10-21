@@ -66,7 +66,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                    textOutput("rows_all"),   
+                                                    # textOutput("rows_all"),   
                                                    DT::dataTableOutput("table")
                                             )
                                     )
@@ -118,7 +118,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     fluidRow(
                                             column(6,
                                                    wellPanel(
-                                                   selectInput("initiatives_input", "Select initiative codes each project must contain", 
+                                                   selectInput("initiatives_input", "Select initiative codes to display", 
                                                                choices = "", multiple = TRUE),
                                                    actionButton("reset_initiatives", "Reset to all initiatives")
                                                    )

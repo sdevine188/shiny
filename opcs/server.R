@@ -181,7 +181,12 @@ shinyServer(function(input, output, session) {
                                 data_table4 <- data_table4
                         }
                         if(!(is.null(input$initiatives_input))){
-                                data_table4 <- filter(data_table4, Initiatives %in% input$initiatives_input)
+                                selected_initiatives_df <- filter(initiatives, code_description %in% 
+                                                                          input$initiatives_input)
+                                selected_initiative_codes <- selected_initiatives_df$code
+                                selected_codes_index <- grep(str_c(selected_initiative_codes, collapse = "|"), 
+                                                             data_table4$Initiatives, ignore.case = TRUE)
+                                data_table4 <- data_table4[selected_codes_index, ]
                         }
                         data_table4
                 })
@@ -456,9 +461,9 @@ shinyServer(function(input, output, session) {
                 }
         })
         
-        output$rows_all <- renderText({
-                # !(is.null(input$initiatives_input))
-        })
+#         output$rows_all <- renderText({
+#                 str(input$initiatives_input)
+#         })
         
         # create download file
         download_file <- reactive({
