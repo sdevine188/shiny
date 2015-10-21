@@ -12,9 +12,9 @@ as_of_date <- str_c("Data as of: ", date)
 # initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
 
 shinyUI(navbarPage("", id = "navbar",
-# shinyUI(navbarPage("",
+                   # shinyUI(navbarPage("",
                    tabPanel("View data",
-                
+                            
                             
                             fluidPage(
                                     
@@ -40,8 +40,8 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(3,                       
-                                                uiOutput("state"),
-                                                selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+                                                   uiOutput("state"),
+                                                   selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
                                             ),
                                             
                                             column(3, 
@@ -51,10 +51,10 @@ shinyUI(navbarPage("", id = "navbar",
                                             column(3, offset = 1, 
                                                    downloadButton('downloadData', 'Download Data')
                                             )
-                                        ),
+                                    ),
                                     
                                     fluidRow(
-                                           column(7,
+                                            column(7,
                                                    checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
                                                    conditionalPanel(
                                                            condition = "input.JobsPIFlag == true",
@@ -64,107 +64,107 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
                                                                     containing grantee estimates for jobs and private investment.")
                                                            )
+                                                           )
+                                                           ),
+                                    
+                                    fluidRow(
+                                            column(12,
+                                                   #                                                 textOutput("rows_all"),   
+                                                   DT::dataTableOutput("table")
+                                            )
+                                    )
+                                    )
+                            ),
+                   
+                   tabPanel("Advanced query",
+                            fluidPage( 
+                                    
+                                    fluidRow(
+                                            column(3,
+                                                   img(src = "eda_logo.jpg", height = 150, width = 150)
+                                            ),
+                                            column(3, 
+                                                   textOutput("rows_all"),
+                                                   actionButton("submit_query", "Submit query")
+                                            ),
+                                            column(3, 
+                                                   actionButton("reset_all", "Reset all options to defaults")
+                                            )
+                                    ),
+                                    
+                                    fluidRow(
+                                            column(12, 
+                                                   br()
+                                            )
+                                    ),
+                                    
+                                    fluidRow(
+                                            column(6,
+                                                   wellPanel(
+                                                           selectInput("column_input", label = "Select columns to display:", choices = "", 
+                                                                       multiple = TRUE),
+                                                           actionButton("reset_columns", "Reset to default columns"),
+                                                           checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
                                                    )
+                                            ),
+                                            
+                                            column(6, 
+                                                   wellPanel(
+                                                           selectInput("program_input", "Select EDA programs to display", choices = 
+                                                                               c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+                                                                                 "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
+                                                           actionButton("reset_programs", "Reset to default programs")
+                                                   )
+                                            )
+                                    )
+                                    
+                                    #                 fluidRow(
+                                    #                         column(6,
+                                    #                                wellPanel(
+                                    #                                 selectInput("initiatives_input", "Select initiative codes that must be present", 
+                                    #                                             choices = c("All initiatives", initiatives$code_description), multiple = TRUE, 
+                                    #                                             selected = "All initiatives")
+                                    #                                )
+                                    #                         )
+                                    #                 )
+                            )
+                   ),
+                   
+                   tabPanel("View map",
+                            fluidPage( 
+                                    fluidRow(
+                                            column(3,
+                                                   img(src = "eda_logo.jpg", height = 150, width = 150)
+                                            ),
+                                            
+                                            column(3,
+                                                   selectInput("marker_type", "Select color-coding of project icons:", 
+                                                               choices = c("By program type", "By fiscal year awarded", 
+                                                                           "By EDA funding level"), selected = "By program type")
+                                            ),
+                                            
+                                            column(3,
+                                                   selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
+                                                                                                                           "Large circles"), selected = "Large circles"),
+                                                   actionLink("icon_link", "Note on project mapping"),
+                                                   conditionalPanel(
+                                                           condition = "input.icon_link == true",
+                                                           helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
+                                                                    For an applicant with a P.O. Box address, the project will be mapped in the center of the 
+                                                                    applicant's zip code.")
+                                                           )
+                                                           )
+                                                   ),
+                                    
+                                    fluidRow(column(12,
+                                                    br())
                                     ),
                                     
                                     fluidRow(
                                             column(12,
-#                                                 textOutput("rows_all"),   
-                                                DT::dataTableOutput("table")
+                                                   leafletOutput("map")
                                             )
                                     )
+                                            )
                             )
-),
-
-tabPanel("Advanced query",
-         fluidPage( 
-               
-                 fluidRow(
-                         column(3,
-                                img(src = "eda_logo.jpg", height = 150, width = 150)
-                         ),
-                         column(3, 
-                                textOutput("rows_all"),
-                                actionButton("submit_query", "Submit query")
-                         ),
-                         column(3, 
-                                actionButton("reset_all", "Reset all options to defaults")
-                         )
-                 ),
-                 
-                 fluidRow(
-                         column(12, 
-                                br()
-                         )
-                 ),
-                         
-                 fluidRow(
-                         column(6,
-                                wellPanel(
-                                selectInput("column_input", label = "Select columns to display:", choices = "", 
-                                            multiple = TRUE),
-                                actionButton("reset_columns", "Reset to default columns"),
-                                checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
-                                )
-                         ),
-                         
-                         column(6, 
-                                wellPanel(
-                                selectInput("program_input", "Select EDA programs to display", choices = 
-                                        c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-                                        "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
-                                actionButton("reset_programs", "Reset to default programs")
-                                )
-                        )
-                )
-                
-#                 fluidRow(
-#                         column(6,
-#                                wellPanel(
-#                                 selectInput("initiatives_input", "Select initiative codes that must be present", 
-#                                             choices = c("All initiatives", initiatives$code_description), multiple = TRUE, 
-#                                             selected = "All initiatives")
-#                                )
-#                         )
-#                 )
-         )
-),
-
-tabPanel("View map",
-         fluidPage( 
-                 fluidRow(
-                         column(3,
-                                img(src = "eda_logo.jpg", height = 150, width = 150)
-                         ),
-                         
-                         column(3,
-                                selectInput("marker_type", "Select color-coding of project icons:", 
-                                            choices = c("By program type", "By fiscal year awarded", 
-                                                        "By EDA funding level"), selected = "By program type")
-                         ),
-                         
-                         column(3,
-                                selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
-                                                "Large circles"), selected = "Large circles"),
-                                actionLink("icon_link", "Note on project mapping"),
-                                conditionalPanel(
-                                        condition = "input.icon_link == true",
-                                        helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
-                                                 For an applicant with a P.O. Box address, the project will be mapped in the center of the 
-                                                 applicant's zip code.")
-                                        )
-                         )
-                ),
-                 
-                 fluidRow(column(12,
-                                 br())
-                 ),
-                 
-                 fluidRow(
-                         column(12,
-                                leafletOutput("map")
-                         )
-                 )
-                 )
-)
-))
+                   ))

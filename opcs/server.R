@@ -65,12 +65,22 @@ shinyServer(function(input, output, session) {
                                   selected = default_columns)
         })
         
+        # create reactive variable to update whenever any advanced query options are reset
+        reset_any <- reactive({
+                reset_columns <- input$reset_columns
+                reset_programs <- input$reset_programs
+                reset_all <- input$reset_all
+                str_c(reset_columns, reset_programs, reset_all)
+        })
+        
+        # create dropdown menu to select states
         output$state <- renderUI({
                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
                 state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
                 selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
         })
         
+        # create variable for selected_states
         state_data <- reactive({
                 # create placeholder selected_states variable to assign in if statements
                 selected_states <- c()
@@ -105,7 +115,7 @@ shinyServer(function(input, output, session) {
                 # assign previously created reactive variables to regular variables
                 state_data <- state_data()
                 counties <- counties()
-
+                
                 # create if statements to handle "All counties" option in dropdown menu
                 if("All counties" %in% input$counties){
                         data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
@@ -141,23 +151,43 @@ shinyServer(function(input, output, session) {
                 data_table3
         })
         
+        # filter data based on advanced query inputs
+#         data_table4 <- reactive({
+#                 data_table3 <- data_table3()
+#                 data_table4 <- data.frame()
+#                 submit_query <- input$submit_query
+#                 
+#                 # create if statements to handle "All programs" option in dropdown menu
+#                 if("All programs" %in% input$program_input){
+#                         data_table4 <- data_table3
+#                         return(data_table4)
+#                 }
+#                 if(!("All programs" %in% input$program_input)){
+#                         data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
+#                         return(data_table4)
+#                 }
+#         })
         data_table4 <- reactive({
-                data_table3 <- data_table3()
                 data_table4 <- data.frame()
                 submit_query <- input$submit_query
+                reset_any <- reset_any()
                 
-                # create if statements to handle "All programs" option in dropdown menu
-                if("All programs" %in% input$program_input){
-                        data_table4 <- data_table3
-                        return(data_table4)
-                }
-                if(!("All programs" %in% input$program_input)){
-                        data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
-                        return(data_table4)
-                }
+                isolate({
+                        data_table3 <- data_table3()
+                
+                        # create if statements to handle "All programs" option in dropdown menu
+                        if("All programs" %in% input$program_input){
+                                data_table4 <- data_table3
+                                return(data_table4)
+                        }
+                        if(!("All programs" %in% input$program_input)){
+                                data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
+                                return(data_table4)
+                        }
+                })
         })
         
-        # create reactive data_table with latest selected data
+        # create variable data_table with latest selected data
         data_table <- reactive({
                 data_table <- data.frame()
                 
@@ -173,7 +203,7 @@ shinyServer(function(input, output, session) {
         
         output$table <- DT::renderDataTable({
                 data_table_output <- data_table()
-#                 data_table_output <- data_table3()
+                #                 data_table_output <- data_table3()
                 data_table_output2 <- data.frame()
                 
                 
@@ -211,18 +241,18 @@ shinyServer(function(input, output, session) {
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
-#                 data_table3 <- data_table3()
+                #                 data_table3 <- data_table3()
                 if(nrow(data_table5) < 1){
                         no_projects <- data.frame("no projects")
                         return(no_projects)
                 }
-#                 if(nrow(data_table5) >= 1){
-# #                         return(data_table5[input$table_rows_all, ])
-#                         return(data_table5)
-#                 }
+                #                 if(nrow(data_table5) >= 1){
+                # #                         return(data_table5[input$table_rows_all, ])
+                #                         return(data_table5)
+                #                 }
                 if(nrow(data_table5) >= 1){
-                        #                         return(data_table5[input$table_rows_all, ])
-                        return(data_table5)
+                        return(data_table5[input$table_rows_all, ])
+#                         return(data_table5)
                 }
         })
         
@@ -239,7 +269,7 @@ shinyServer(function(input, output, session) {
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                
+                        
                         # create funds palette
                         colorNumeric(
                                 palette = "Blues",
@@ -289,7 +319,7 @@ shinyServer(function(input, output, session) {
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                
+                        
                         selected_values <- data_table5_filtered$EDA_prog
                         if(input$marker_type == "By program type"){
                                 selected_values <- data_table5_filtered$EDA_prog
@@ -333,11 +363,11 @@ shinyServer(function(input, output, session) {
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                
+                        
                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-                                         str_c("FY", data_table5_filtered$FY, sep = " "),
-                                       data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
-                                       sep = "<br/>")
+                                               str_c("FY", data_table5_filtered$FY, sep = " "),
+                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                               sep = "<br/>")
                         
                         selected_pal <- selected_pal()
                         selected_title <- selected_title()
@@ -362,7 +392,7 @@ shinyServer(function(input, output, session) {
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                
+                        
                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
                                                str_c("FY", data_table5_filtered$FY, sep = " "),
                                                data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
@@ -384,37 +414,37 @@ shinyServer(function(input, output, session) {
         
         # replace map whenever View Map navbar is selected
         observeEvent(input$navbar, {
-#                 if(input$navbar == "View map"){
-                        data_table5_filtered <- data_table5_filtered()
+                #                 if(input$navbar == "View map"){
+                data_table5_filtered <- data_table5_filtered()
+                
+                # only run if at least one row of data is selected
+                if(data_table5_filtered[1,1] != "no projects"){
                         
-                        # only run if at least one row of data is selected
-                        if(data_table5_filtered[1,1] != "no projects"){
-                                
-                                default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-                                                       str_c("FY", data_table5_filtered$FY, sep = " "),
-                                                       data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
-                                                       sep = "<br/>")
-                                
-                                selected_pal <- selected_pal()
-                                selected_title <- selected_title()
-                                selected_values <- selected_values()
-                                selected_size <- selected_size()
-                                selected_format <- selected_format()
-                                
-                                leafletProxy("map", data = data_table5_filtered) %>%
-                                        clearMarkers() %>%
-                                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-                                                         popup = default_popup,
-                                                         color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-                                        clearControls() %>%
-                                        addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-                        }
+                        default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                               str_c("FY", data_table5_filtered$FY, sep = " "),
+                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                               sep = "<br/>")
+                        
+                        selected_pal <- selected_pal()
+                        selected_title <- selected_title()
+                        selected_values <- selected_values()
+                        selected_size <- selected_size()
+                        selected_format <- selected_format()
+                        
+                        leafletProxy("map", data = data_table5_filtered) %>%
+                                clearMarkers() %>%
+                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
+                                                 popup = default_popup,
+                                                 color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                                 fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                                clearControls() %>%
+                                addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                          title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                }
         })
         
         output$rows_all <- renderText({
-#                 input$table_search
+                #                 input$table_search
                 input$table_search_columns
         })
         
