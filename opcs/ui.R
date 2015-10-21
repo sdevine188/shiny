@@ -8,9 +8,6 @@ library(DT)
 date <- "20150827"
 as_of_date <- str_c("Data as of: ", date)
 
-# read in initatives data
-# initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
-
 shinyUI(navbarPage("", id = "navbar",
                    # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -69,7 +66,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                   #                                                 textOutput("rows_all"),   
+                                                    textOutput("rows_all"),   
                                                    DT::dataTableOutput("table")
                                             )
                                     )
@@ -84,7 +81,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-                                                   textOutput("rows_all"),
+                                                   # textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 
@@ -113,20 +110,20 @@ shinyUI(navbarPage("", id = "navbar",
                                                            selectInput("program_input", "Select EDA programs to display", choices = 
                                                                                c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
                                                                                  "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
-                                                           actionButton("reset_programs", "Reset to default programs")
+                                                           actionButton("reset_programs", "Reset to all programs")
+                                                   )
+                                            )
+                                    ),
+                                    
+                                    fluidRow(
+                                            column(6,
+                                                   wellPanel(
+                                                   selectInput("initiatives_input", "Select initiative codes each project must contain", 
+                                                               choices = "", multiple = TRUE),
+                                                   actionButton("reset_initiatives", "Reset to all initiatives")
                                                    )
                                             )
                                     )
-                                    
-                                    #                 fluidRow(
-                                    #                         column(6,
-                                    #                                wellPanel(
-                                    #                                 selectInput("initiatives_input", "Select initiative codes that must be present", 
-                                    #                                             choices = c("All initiatives", initiatives$code_description), multiple = TRUE, 
-                                    #                                             selected = "All initiatives")
-                                    #                                )
-                                    #                         )
-                                    #                 )
                             )
                    ),
                    

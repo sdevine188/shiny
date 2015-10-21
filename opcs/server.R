@@ -34,10 +34,18 @@ non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)]
 column_display <- c(default_columns, non_default_columns)
 
 # read in initatives data
-# initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
+initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
+initiatives_display <- unique(initiatives$code_description)
 
 # shiny server
 shinyServer(function(input, output, session) {
+        
+        # reset initiatives button
+        observe({
+                reset_initiatives <- input$reset_initiatives
+                updateSelectInput(session, "initiatives_input",
+                                  choices = initiatives_display)
+        })
         
         # reset columns button
         observe({
@@ -64,14 +72,17 @@ shinyServer(function(input, output, session) {
                 updateSelectInput(session, "column_input",
                                   choices = column_display,
                                   selected = default_columns)
+                updateSelectInput(session, "initiatives_input",
+                                 choices = initiatives_display)
         })
         
         # create reactive variable to update whenever any advanced query options are reset
         reset_any <- reactive({
                 reset_columns <- input$reset_columns
                 reset_programs <- input$reset_programs
+                reset_initiatives <- input$reset_initiatives
                 reset_all <- input$reset_all
-                str_c(reset_columns, reset_programs, reset_all)
+                str_c(reset_columns, reset_programs, reset_initiatives, reset_all)
         })
         
         # create dropdown menu to select states
@@ -160,12 +171,19 @@ shinyServer(function(input, output, session) {
                         # create if statements to handle "All programs" option in dropdown menu
                         if("All programs" %in% input$program_input){
                                 data_table4 <- data_table3
-                                return(data_table4)
                         }
                         if(!("All programs" %in% input$program_input)){
                                 data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
-                                return(data_table4)
                         }
+                        
+                        # create if statements to handle initiatives dropdown menu
+                        if(is.null(input$initiatives_input)){
+                                data_table4 <- data_table4
+                        }
+                        if(!(is.null(input$initiatives_input))){
+                                data_table4 <- filter(data_table4, Initiatives %in% input$initiatives_input)
+                        }
+                        data_table4
                 })
         })
         
@@ -439,15 +457,7 @@ shinyServer(function(input, output, session) {
         })
         
         output$rows_all <- renderText({
-                # input$table_search
-#                 input$table_search_columns
-#                 input$table_rows_all
-#                 is.null(input$table_search)
-               x <- str_c(input$table_search, input$table_search_columns, collapse = "")
-               # length(x)
-               x == ""
-               
-
+                # !(is.null(input$initiatives_input))
         })
         
         # create download file
