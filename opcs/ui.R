@@ -4,10 +4,6 @@ library(stringr)
 library(leaflet)
 library(DT)
 
-# provide data "as of date"
-date <- "20150827"
-as_of_date <- str_c("Data as of: ", date)
-
 shinyUI(navbarPage("", id = "navbar",
                    # shinyUI(navbarPage("",
                    tabPanel("View data",
@@ -25,9 +21,7 @@ shinyUI(navbarPage("", id = "navbar",
                                             ),
                                             
                                             column(3,                       
-                                                   
-                                                   p(as_of_date)
-                                                   
+                                                   textOutput("as_of_date")
                                             )
                                     ),
                                     

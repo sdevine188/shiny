@@ -40,6 +40,11 @@ initiatives_display <- unique(initiatives$code_description)
 # shiny server
 shinyServer(function(input, output, session) {
         
+        # create as_of_date display
+        output$as_of_date <- renderText({
+                str_c("Data as of: ", date)
+        })
+        
         # reset initiatives button
         observe({
                 reset_initiatives <- input$reset_initiatives
@@ -138,7 +143,7 @@ shinyServer(function(input, output, session) {
                 
         })
         
-        # subset data to show/not show jobs or PI columns and show/not show Construction-only projects based on checkbox input
+        # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
         data_table2 <- reactive({
                 data_table1 <- data_table1()
                 
