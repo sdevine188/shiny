@@ -248,6 +248,7 @@ shinyServer(function(input, output, session) {
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
+                table_rows_all <- input$table_rows_all
                 
                 isolate({
                         search_input <- str_c(input$table_search, input$table_search_columns, collapse = "")
