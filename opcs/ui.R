@@ -122,9 +122,8 @@ shinyUI(navbarPage("", id = "navbar",
                                                            selectInput("text_var1_input", "Choose a text variable to query", 
                                                                        choices = "", multiple = TRUE),
                                                            textInput("text_term1_input", "Create a query term")
-                                                           # textOutput("query_term")
                                                         ),
-                                                        actionButton("submit_query_term", "Submit query term"),
+                                                        actionButton("enter_query_term", "Enter query term"),
                                                         br(),
                                                         br(),
                                                         actionButton("reset_text_query", "Clear text query")

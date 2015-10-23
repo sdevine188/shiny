@@ -45,18 +45,29 @@ shinyServer(function(input, output, session) {
                 str_c("Data as of: ", date)
         })
         
+        
         # create query_term output variable
-        output$query_term <- eventReactive(input$submit_query_term,{
-                var1 <- input$text_var1_input
-                term1 <- input$text_term1_input
-                str_c(var1, " contains (", term1, ")")
+        output$query_term <- reactive({
+                input$enter_query_term
+                input$reset_text_query
+                input$reset_all
+                isolate({
+                        if(!(is.null(input$text_var1_input))){
+                                var1 <- input$text_var1_input
+                                term1 <- input$text_term1_input
+                                str_c(var1, " contains (", term1, ")")
+                        } else {
+                                ""
+                        }
+                })
         })
         
         # reset text query button
         observe({
-                reset_initiatives <- input$reset_text_query
+                reset_text_query <- input$reset_text_query
                 updateSelectInput(session, "text_var1_input",
                                   choices = column_display)
+                updateTextInput(session, "text_term1_input", value = "")
         })
         
         # reset initiatives button
@@ -93,6 +104,9 @@ shinyServer(function(input, output, session) {
                                   selected = default_columns)
                 updateSelectInput(session, "initiatives_input",
                                  choices = initiatives_display)
+                updateSelectInput(session, "text_var1_input",
+                                  choices = column_display)
+                updateTextInput(session, "text_term1_input", value = "")
         })
         
         # create reactive variable to update whenever any advanced query options are reset
@@ -100,8 +114,9 @@ shinyServer(function(input, output, session) {
                 reset_columns <- input$reset_columns
                 reset_programs <- input$reset_programs
                 reset_initiatives <- input$reset_initiatives
+                reset_text_query <- input$reset_text_query
                 reset_all <- input$reset_all
-                str_c(reset_columns, reset_programs, reset_initiatives, reset_all)
+                str_c(reset_columns, reset_programs, reset_initiatives, reset_text_query, reset_all)
         })
         
         # create dropdown menu to select states
@@ -207,7 +222,12 @@ shinyServer(function(input, output, session) {
                                                              data_table4$Initiatives, ignore.case = TRUE)
                                 data_table4 <- data_table4[selected_codes_index, ]
                         }
-                        data_table4
+                        
+                        # create if statements to handle text query
+#                         if(is.null(input$))
+#                         var1 <- input$text_var1_input
+#                         term1 <- input$text_term1_input
+#                         data_table4
                 })
         })
         
