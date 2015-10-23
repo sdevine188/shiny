@@ -12,7 +12,7 @@ date <- "20150827"
 # Read in data file
 file <- str_c("data/datafile_", date, ".csv")
 # file <- str_c("data/small_datafile_", date, ".csv")
-datafile <- read.csv(file, stringsAsFactors = FALSE)
+datafile <- read.csv(file, stringsAsFactors = TRUE)
 
 # create default columns to display
 default_columns <- c("Project.No.", "FY", "EDA_prog", "EDA.", "Appl.Short.Name", 
@@ -228,7 +228,7 @@ shinyServer(function(input, output, session) {
                 
                 # create placeholder dataframe to use when user-selected data has zero rows 
                 # to avoid breaking datatable w/ filter
-                no_projects2 <- data.frame("No projects found based on search")
+                no_projects2 <- data.frame("No matching records found")
                 names(no_projects2)[1] <- ""
                 
                 # assign either the placeholder data or the user-selected data (if rows > 1) to be fed into datatable
