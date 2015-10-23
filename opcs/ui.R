@@ -5,21 +5,17 @@ library(leaflet)
 library(DT)
 
 shinyUI(navbarPage("", id = "navbar",
-                   # shinyUI(navbarPage("",
                    tabPanel("View data",
                             
                             
                             fluidPage(
-                                    
                                     fluidRow(
                                             column(3,
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
-                                            
                                             column(6, 
                                                    titlePanel("EDA Project Data")
                                             ),
-                                            
                                             column(3,                       
                                                    textOutput("as_of_date")
                                             )
@@ -34,11 +30,9 @@ shinyUI(navbarPage("", id = "navbar",
                                                    uiOutput("state"),
                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
                                             ),
-                                            
                                             column(3, 
                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
                                             ),
-                                            
                                             column(3, offset = 1, 
                                                    downloadButton('downloadData', 'Download Data')
                                             )
@@ -55,8 +49,8 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
                                                                     containing grantee estimates for jobs and private investment.")
                                                            )
-                                                           )
-                                                           ),
+                                                )
+                                        ),
                                     
                                     fluidRow(
                                             column(12,
@@ -64,8 +58,8 @@ shinyUI(navbarPage("", id = "navbar",
                                                    DT::dataTableOutput("table")
                                             )
                                     )
-                                    )
-                            ),
+                                )
+                        ),
                    
                    tabPanel("Advanced query",
                             fluidPage( 
@@ -75,7 +69,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-                                                   # textOutput("rows_all"),
+                                                   textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 
@@ -117,7 +111,31 @@ shinyUI(navbarPage("", id = "navbar",
                                                    actionButton("reset_initiatives", "Reset to all initiatives")
                                                    )
                                             )
-                                    )
+                                    ),
+                                    
+                                    fluidRow(
+                                        column(12,
+                                                fluidRow(
+                                                        column(6,
+                                                        wellPanel(
+                                                        flowLayout(
+                                                           selectInput("text_var1_input", "Choose a text variable to query", 
+                                                                       choices = "", multiple = TRUE),
+                                                           textInput("text_term1_input", "Create a query term")
+                                                           # textOutput("query_term")
+                                                        ),
+                                                        actionButton("submit_query_term", "Submit query term"),
+                                                        br(),
+                                                        br(),
+                                                        actionButton("reset_text_query", "Clear text query")
+                                                       )
+                                                        ),
+                                                       column(6,
+                                                              textOutput("query_term")
+                                                              )
+                                                        )
+                                                )
+                                        )
                             )
                    ),
                    

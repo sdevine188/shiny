@@ -45,6 +45,20 @@ shinyServer(function(input, output, session) {
                 str_c("Data as of: ", date)
         })
         
+        # create query_term output variable
+        output$query_term <- eventReactive(input$submit_query_term,{
+                var1 <- input$text_var1_input
+                term1 <- input$text_term1_input
+                str_c(var1, " contains (", term1, ")")
+        })
+        
+        # reset text query button
+        observe({
+                reset_initiatives <- input$reset_text_query
+                updateSelectInput(session, "text_var1_input",
+                                  choices = column_display)
+        })
+        
         # reset initiatives button
         observe({
                 reset_initiatives <- input$reset_initiatives
@@ -467,9 +481,9 @@ shinyServer(function(input, output, session) {
                 }
         })
         
-#         output$rows_all <- renderText({
-#                 str(input$initiatives_input)
-#         })
+        output$rows_all <- renderText({
+                input$test
+        })
         
         # create download file
         download_file <- reactive({
