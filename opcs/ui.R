@@ -49,17 +49,17 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
                                                                     containing grantee estimates for jobs and private investment.")
                                                            )
-                                                )
-                                        ),
+                                                           )
+                                                           ),
                                     
                                     fluidRow(
                                             column(12,
-                                                    # textOutput("rows_all"),   
+                                                   # textOutput("rows_all"),   
                                                    DT::dataTableOutput("table")
                                             )
                                     )
-                                )
-                        ),
+                                    )
+                            ),
                    
                    tabPanel("Advanced query",
                             fluidPage( 
@@ -106,35 +106,35 @@ shinyUI(navbarPage("", id = "navbar",
                                     fluidRow(
                                             column(6,
                                                    wellPanel(
-                                                   selectInput("initiatives_input", "Select initiative codes to display", 
-                                                               choices = "", multiple = TRUE),
-                                                   actionButton("reset_initiatives", "Reset to all initiatives")
+                                                           selectInput("initiatives_input", "Select initiative codes to display", 
+                                                                       choices = "", multiple = TRUE),
+                                                           actionButton("reset_initiatives", "Reset to all initiatives")
                                                    )
                                             )
                                     ),
                                     
                                     fluidRow(
-                                        column(12,
-                                                fluidRow(
-                                                        column(6,
-                                                        wellPanel(
-                                                        flowLayout(
-                                                           selectInput("text_var1_input", "Choose a text variable to query", 
-                                                                       choices = "", multiple = TRUE),
-                                                           textInput("text_term1_input", "Create a query term")
-                                                        ),
-                                                        actionButton("enter_query_term", "Enter query term"),
-                                                        br(),
-                                                        br(),
-                                                        actionButton("reset_text_query", "Clear text query")
-                                                       )
-                                                        ),
-                                                       column(6,
-                                                              textOutput("query_term")
-                                                              )
-                                                        )
-                                                )
-                                        )
+                                            column(12,
+                                                   fluidRow(
+                                                           column(6,
+                                                                  wellPanel(
+                                                                          flowLayout(
+                                                                                  selectInput("text_var1_input", "Choose a text variable to query", 
+                                                                                              choices = "", multiple = TRUE),
+                                                                                  textInput("text_term1_input", "Create a query term")
+                                                                          ),
+                                                                          actionButton("enter_query_term", "Enter query term"),
+                                                                          br(),
+                                                                          br(),
+                                                                          actionButton("reset_text_query", "Clear text query")
+                                                                  )
+                                                           ),
+                                                           column(6,
+                                                                  textOutput("query_term")
+                                                           )
+                                                   )
+                                            )
+                                    )
                             )
                    ),
                    
