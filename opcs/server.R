@@ -298,6 +298,8 @@ shinyServer(function(input, output, session) {
                 }
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
+                        data_table_output2$FY <- as.factor(as.character(data_table_output2$FY))
+                        data_table_output2$Project.No. <- as.factor(data_table_output2$Project.No.)
                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
                 server = TRUE
