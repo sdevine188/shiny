@@ -163,7 +163,7 @@ shinyServer(function(input, output, session) {
         # create dropdown menu to select states
         output$state <- renderUI({
                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
-                state_choices <- c("All states", unique(datafile2$Proj.ST.Abbr))
+                state_choices <- c("All states", unique(as.character(datafile2$Proj.ST.Abbr)))
                 selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
         })
         
@@ -191,7 +191,7 @@ shinyServer(function(input, output, session) {
         
         # observe is a reactive function that repopulates the county select input menu using the reactive variable county
         observe({
-                counties_all <- c("All counties", counties())
+                counties_all <- c("All counties", as.character(counties()))
                 updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
         })
         
