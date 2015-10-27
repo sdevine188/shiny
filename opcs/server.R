@@ -36,9 +36,6 @@ column_display <- c(default_columns, non_default_columns)
 initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
 initiatives_display <- unique(initiatives$code_description)
 
-# create placholder query_term
-# query_term_placeholder <- ""
-
 # shiny server
 shinyServer(function(input, output, session) {
         
@@ -47,13 +44,9 @@ shinyServer(function(input, output, session) {
                 str_c("Data as of: ", date)
         })
         
-        
         # create query_term output variable
-        # output$query_term <- reactive({
         query_term <- reactive({
                 input$enter_query_term
-#                 input$reset_text_query
-#                 input$reset_all
                 isolate({
                         if(!(is.null(input$text_var1_input)) && !(input$text_term1_input == "")){
                                 var1 <- input$text_var1_input
@@ -65,43 +58,34 @@ shinyServer(function(input, output, session) {
                 })
         })
         
-#          <- reactive({
-#                 
-#                 input$reset_text_query
-#                 # input$reset_all
-#                 ""
-#         })
-        
         output$query_term <- reactive({
                 query_term <- query_term()
                 query_term
         })
         
-#         query_term_current <- reactive({
-#                 query_term <- query_term()
-#                 query_term
-#         })
-        
         # create reactiveValues variable, which can be updated from observers
         query_term_placeholder <- reactiveValues(
-                value = NULL
+                value = ""
         )
+        
+        # create output version of query_term_placeholder
+        output$query_term_output <- reactive({
+                query_term_output <- query_term_placeholder$value
+                query_term_output
+        })
         
         # create observers to update query_term_placeholder
         observe({
                 query_term <- query_term()
                 isolate({
-                        query_term_placeholder$value <- str_c(query_term_placeholder$value, query_term)
+                        if(query_term_placeholder$value != ""){
+                                query_term_placeholder$value <- str_c(query_term_placeholder$value, " & ", query_term)
+                        }
+                        if(query_term_placeholder$value == ""){
+                                query_term_placeholder$value <- query_term
+                        }
                 })
         })
-        
-        # query_term_placeholder <- tryCatch(append(query_term_placeholder, query_term()), error = function(e) "placeholder")
-
-        
-#         query_term_full <- reactive({
-#                 query_term()
-#                 query_term_placeholder
-#         })
         
         # reset text query button
         observe({
@@ -543,8 +527,10 @@ shinyServer(function(input, output, session) {
         })
         
         output$rows_all <- renderText({
-                query_term_placeholder <- query_term_placeholder$value
-                query_term_placeholder
+#                 query_term_placeholder <- query_term_placeholder$value
+#                 query_term_placeholder
+                # is.null(query_term_placeholder$value)
+                query_term_placeholder$value 
         })
         
         # create download file

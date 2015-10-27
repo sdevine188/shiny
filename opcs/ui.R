@@ -119,8 +119,14 @@ shinyUI(navbarPage("", id = "navbar",
                                                            column(6,
                                                                   wellPanel(
                                                                           flowLayout(
-                                                                                  selectInput("text_var1_input", "Choose a text variable to query", 
-                                                                                              choices = "", multiple = TRUE),
+#                                                                                   selectInput("text_var1_input", "Choose a text variable to query", 
+#                                                                                               choices = ""),
+                                                                                  selectizeInput(
+                                                                                          'text_var1_input', 'Choose a text variable to query', choices = "",
+                                                                                          options = list(
+                                                                                                  onInitialize = I('function() { this.setValue(""); }')
+                                                                                          )
+                                                                                  ),
                                                                                   textInput("text_term1_input", "Create a query term")
                                                                           ),
                                                                           actionButton("enter_query_term", "Enter query term"),
@@ -130,7 +136,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                                   )
                                                            ),
                                                            column(6,
-                                                                  textOutput("query_term")
+                                                                  textOutput("query_term_output")
                                                            )
                                                    )
                                             )
