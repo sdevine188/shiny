@@ -51,16 +51,11 @@ shinyServer(function(input, output, session) {
                         if(!(is.null(input$text_var1_input)) && !(input$text_term1_input == "")){
                                 var1 <- input$text_var1_input
                                 term1 <- input$text_term1_input
-                                str_c(var1, " contains (", term1, ")")
+                                str_c(var1, " contains (\"", term1, "\")")
                         } else {
                                 ""
                         }
                 })
-        })
-        
-        output$query_term <- reactive({
-                query_term <- query_term()
-                query_term
         })
         
         # create reactiveValues variable, which can be updated from observers
@@ -93,6 +88,7 @@ shinyServer(function(input, output, session) {
                 updateSelectInput(session, "text_var1_input",
                                   choices = column_display)
                 updateTextInput(session, "text_term1_input", value = "")
+                query_term_placeholder$value <- ""
         })
         
         # reset initiatives button
@@ -132,6 +128,7 @@ shinyServer(function(input, output, session) {
                 updateSelectInput(session, "text_var1_input",
                                   choices = column_display)
                 updateTextInput(session, "text_term1_input", value = "")
+                query_term_placeholder$value <- ""
         })
         
         # create reactive variable to update whenever any advanced query options are reset
