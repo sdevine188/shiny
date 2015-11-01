@@ -45,15 +45,44 @@ shinyServer(function(input, output, session) {
         })
         
         # create query_term output variable
+#         query_term <- reactive({
+#                 input$enter_query_term
+#                 isolate({
+#                         if(!(is.null(input$text_var1_input)) && !(input$text_term1_input == "")){
+#                                 var1 <- input$text_var1_input
+#                                 term1 <- input$text_term1_input
+#                                 str_c(var1, " contains (\"", term1, "\")")
+#                         } else {
+#                                 ""
+#                         }
+#                 })
+#         })
+        
         query_term <- reactive({
                 input$enter_query_term
+                var1 <- ""
+                term1 <- ""
                 isolate({
                         if(!(is.null(input$text_var1_input)) && !(input$text_term1_input == "")){
                                 var1 <- input$text_var1_input
                                 term1 <- input$text_term1_input
-                                str_c(var1, " contains (\"", term1, "\")")
-                        } else {
-                                ""
+                                term_final <- NULL
+                                if(grepl("\\|", term1)){
+                                        term1_split <- str_split(term1, "\\|")
+                                        term_count <- length(term1_split[[1]])
+                                        for(i in 1:term_count){
+                                                term_piece <- term1_split[[1]][i]
+                                                term_piece <- str_c("'", term_piece, "' | ")
+                                                term_final <- append(term_final, term_piece)
+                                        }
+                                } else {
+                                        term_final <- str_c("'", term1, "'")
+                                }
+                                term_final <- str_c(term_final, collapse = "")
+                                if(str_sub(term_final, start = -2, end = -2) == "|"){
+                                        term_final <- str_sub(term_final, start = 1, end = nchar(term_final)-3)
+                                }
+                                str_c(var1, " contains (", term_final, ")")
                         }
                 })
         })
