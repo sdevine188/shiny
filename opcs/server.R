@@ -36,8 +36,12 @@ column_display <- c(default_columns, non_default_columns)
 initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
 initiatives_display <- unique(initiatives$code_description)
 
+# create is.even and is.odd functions
+is.even <- function(x) x %% 2 == 0
+is.odd <- function(x) x %% 2 != 0
+
 # shiny server
-shinyServer(function(input, output, session) {
+shinyServer(function(input, output, session){
         
         # create as_of_date display
         output$as_of_date <- renderText({
@@ -45,19 +49,6 @@ shinyServer(function(input, output, session) {
         })
         
         # create query_term output variable
-#         query_term <- reactive({
-#                 input$enter_query_term
-#                 isolate({
-#                         if(!(is.null(input$text_var1_input)) && !(input$text_term1_input == "")){
-#                                 var1 <- input$text_var1_input
-#                                 term1 <- input$text_term1_input
-#                                 str_c(var1, " contains (\"", term1, "\")")
-#                         } else {
-#                                 ""
-#                         }
-#                 })
-#         })
-        
         query_term <- reactive({
                 input$enter_query_term
                 var1 <- ""
@@ -274,11 +265,15 @@ shinyServer(function(input, output, session) {
                                 data_table4 <- data_table4[selected_codes_index, ]
                         }
                         
-                        # create if statements to handle text query
-                        #                         if(is.null(input$))
-                        #                         var1 <- input$text_var1_input
-                        #                         term1 <- input$text_term1_input
-                        #                         data_table4
+                        # create if statements to handle query term
+#                         if(query_term_placeholer$value == ""){
+#                                 data_table4 <- data_table4
+#                         }
+#                         if(query_term_placeholder$value != ""){
+#                                 term_pieces <- str_split(query_term_placeholder$value, "contains (")
+#                         }
+                        
+                     
                 })
         })
         
@@ -555,10 +550,39 @@ shinyServer(function(input, output, session) {
         })
         
         output$rows_all <- renderText({
-#                 query_term_placeholder <- query_term_placeholder$value
-#                 query_term_placeholder
-                # is.null(query_term_placeholder$value)
-                query_term_placeholder$value 
+                term_pieces <- NULL
+                term_value <- NULL
+                term_var <- NULL
+                
+                if(query_term_placeholder$value != ""){
+                        term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
+                        term_pieces <- unlist(term_pieces)
+                        term_pieces <- str_sub(term_pieces, start = 1, end = -2)
+                        term_pieces <- str_split(term_pieces, "\\) & ")
+                        term_pieces <- unlist(term_pieces)
+                        for(i in 1:length(term_pieces)){
+                                if(is.even(i)){
+                                        term_value <- append(term_value, term_pieces[i])
+                                }
+                                if(is.odd(i)){
+                                        term_var <- append(term_var, term_pieces[i])
+                                }
+                        }
+                }
+
+                # need to get rid of single quotes
+                for(i in 1:length(term_value)){
+                        if(!(grepl(" | ", term_value[i]))){
+                                term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
+                        }
+                        if(grepl(" | ", term_value[i])){
+                                new_value <- str_sub(term_value[i], start = 2, end = -2)
+                                new_value <- str_replace_all(new_value, "' \\| '", " | ")
+                                term_value[i] <- new_value
+                        }
+                }
+                term_value
+                # term_var
         })
         
         # create download file
