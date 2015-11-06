@@ -7,19 +7,25 @@ library(DT)
 
 # provide data "as of date"
 date <- "20150827"
+# date <- "20151106"
 
 # Read in data file
-file <- str_c("data/datafile_", date, ".csv")
+# file <- str_c("data/datafile_", date, ".csv")
 # file <- str_c("data/small_datafile_", date, ".csv")
-datafile <- read.csv(file, stringsAsFactors = TRUE)
+# file <- str_c("data/master_data_", date, ".csv")
+# datafile <- read.csv(file, stringsAsFactors = TRUE)
+# datafile <- readRDS("data/md.csv")
+datafile <- readRDS("data/md_small.csv")
+
 
 # create default columns to display
-default_columns <- c("Project.No.", "FY", "EDA_prog", "EDA.", "Appl.Short.Name", 
-                     "Project.Short.Descrip", "Project.Location", "Proj.ST.Abbr")
+default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
+                     "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
 
 # create program colors
-program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-                            "GCCMIF", "Research", "CTAA"))
+# program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+#                             "GCCMIF", "Research", "CTAA"))
+program_options <- unique(md_small$Appr.Desc)
 
 year_options <- factor(seq(1995, 2016))
 
@@ -187,7 +193,7 @@ shinyServer(function(input, output, session){
         counties <- reactive({
                 state_data <- state_data()
                 state_data <- arrange(state_data, Proj.ST.Abbr, Proj.County.Name)
-                unique(state_data$Proj.County.Name)                
+                unique(state_data$Proj.County.Name)  
         })
         
         # observe is a reactive function that repopulates the county select input menu using the reactive variable county
@@ -201,7 +207,7 @@ shinyServer(function(input, output, session){
                 # assign previously created reactive variables to regular variables
                 state_data <- state_data()
                 counties <- counties()
-                
+
                 # create if statements to handle "All counties" option in dropdown menu
                 if("All counties" %in% input$counties){
                         data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
@@ -219,7 +225,7 @@ shinyServer(function(input, output, session){
                 data_table1 <- data_table1()
                 
                 if(input$JobsPIFlag == FALSE){
-                        data_table2 <- select(data_table1, -Jobs.Created, -Jobs.Saved, -Priv.Investment)
+                        data_table2 <- select(data_table1, -Jobs.Created, -Jobs.Saved, -Private.Investment)
                 }
                 if(input$JobsPIFlag == TRUE){
                         data_table2 <- filter(data_table1, Cons.Non == "C" | Cons.Non == "B")
@@ -249,7 +255,7 @@ shinyServer(function(input, output, session){
                                 data_table4 <- data_table3
                         }
                         if(!("All programs" %in% input$program_input)){
-                                data_table4 <- filter(data_table3, EDA_prog %in% input$program_input)
+                                data_table4 <- filter(data_table3, Appr.Desc %in% input$program_input)
                         }
                         
                         # create if statements to handle initiatives dropdown menu
@@ -379,7 +385,7 @@ shinyServer(function(input, output, session){
                         # create funds palette
                         colorNumeric(
                                 palette = "Blues",
-                                domain = data_table5_filtered$EDA.
+                                domain = data_table5_filtered$Best.EDA..
                         )
                 }
         })
@@ -426,15 +432,15 @@ shinyServer(function(input, output, session){
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
                         
-                        selected_values <- data_table5_filtered$EDA_prog
+                        selected_values <- data_table5_filtered$Appr.Desc
                         if(input$marker_type == "By program type"){
-                                selected_values <- data_table5_filtered$EDA_prog
+                                selected_values <- data_table5_filtered$Appr.Desc
                         }
                         if(input$marker_type == "By fiscal year awarded"){
                                 selected_values <- factor(data_table5_filtered$FY)
                         }
                         if(input$marker_type == "By EDA funding level"){
-                                selected_values <- data_table5_filtered$EDA.
+                                selected_values <- data_table5_filtered$Best.EDA..
                         }
                         selected_values
                 }
@@ -472,7 +478,7 @@ shinyServer(function(input, output, session){
                         
                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                               data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -501,7 +507,7 @@ shinyServer(function(input, output, session){
                         
                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                               data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -528,7 +534,7 @@ shinyServer(function(input, output, session){
                         
                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-                                               data_table5_filtered$EDA_prog, str_c("$", data_table5_filtered$EDA.), 
+                                               data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
                                                sep = "<br/>")
                         
                         selected_pal <- selected_pal()
@@ -550,39 +556,39 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                term_pieces <- NULL
-                term_value <- NULL
-                term_var <- NULL
-                
-                if(query_term_placeholder$value != ""){
-                        term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
-                        term_pieces <- unlist(term_pieces)
-                        term_pieces <- str_sub(term_pieces, start = 1, end = -2)
-                        term_pieces <- str_split(term_pieces, "\\) & ")
-                        term_pieces <- unlist(term_pieces)
-                        for(i in 1:length(term_pieces)){
-                                if(is.even(i)){
-                                        term_value <- append(term_value, term_pieces[i])
-                                }
-                                if(is.odd(i)){
-                                        term_var <- append(term_var, term_pieces[i])
-                                }
-                        }
-                }
-
-                # need to get rid of single quotes
-                for(i in 1:length(term_value)){
-                        if(!(grepl(" | ", term_value[i]))){
-                                term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
-                        }
-                        if(grepl(" | ", term_value[i])){
-                                new_value <- str_sub(term_value[i], start = 2, end = -2)
-                                new_value <- str_replace_all(new_value, "' \\| '", " | ")
-                                term_value[i] <- new_value
-                        }
-                }
-                term_value
-                # term_var
+#                 term_pieces <- NULL
+#                 term_value <- NULL
+#                 term_var <- NULL
+#                 
+#                 if(query_term_placeholder$value != ""){
+#                         term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
+#                         term_pieces <- unlist(term_pieces)
+#                         term_pieces <- str_sub(term_pieces, start = 1, end = -2)
+#                         term_pieces <- str_split(term_pieces, "\\) & ")
+#                         term_pieces <- unlist(term_pieces)
+#                         for(i in 1:length(term_pieces)){
+#                                 if(is.even(i)){
+#                                         term_value <- append(term_value, term_pieces[i])
+#                                 }
+#                                 if(is.odd(i)){
+#                                         term_var <- append(term_var, term_pieces[i])
+#                                 }
+#                         }
+#                 }
+# 
+#                 # need to get rid of single quotes
+#                 for(i in 1:length(term_value)){
+#                         if(!(grepl(" | ", term_value[i]))){
+#                                 term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
+#                         }
+#                         if(grepl(" | ", term_value[i])){
+#                                 new_value <- str_sub(term_value[i], start = 2, end = -2)
+#                                 new_value <- str_replace_all(new_value, "' \\| '", " | ")
+#                                 term_value[i] <- new_value
+#                         }
+#                 }
+#                 term_value
+#                 # term_var
         })
         
         # create download file
