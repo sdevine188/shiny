@@ -26,19 +26,24 @@ shinyUI(navbarPage("", id = "navbar",
                                     ),
                                     
                                     fluidRow(
-                                            column(3,                       
-                                                   uiOutput("state"),
-                                                   selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
-                                            ),
+#                                             
+# #                                             column(3,                       
+# #                                                    uiOutput("state"),
+# #                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+# #                                             ),
                                             column(3, 
                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
                                             ),
-                                            column(3, offset = 1, 
+                                            column(12, offset = 1, 
                                                    downloadButton('downloadData', 'Download Data')
                                             )
                                     ),
                                     
                                     fluidRow(
+                                            column(3, 
+                                                   radioButtons("datafile_radio", "Select data", choices = c("FY 2012 to FY 2016",
+                                                                "FY 1995 to FY 2016"), selected = "FY 2012 to FY 2016")
+                                                   ),
                                             column(7,
                                                    checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
                                                    conditionalPanel(
@@ -49,8 +54,8 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
                                                                     containing grantee estimates for jobs and private investment.")
                                                            )
-                                                           )
-                                                           ),
+                                                )
+                                   ),
                                     
                                     fluidRow(
                                             column(12,
@@ -149,13 +154,13 @@ shinyUI(navbarPage("", id = "navbar",
                                     fluidRow(
                                             column(3,
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
-                                            ),
+                                                ),
                                             
                                             column(3,
                                                    selectInput("marker_type", "Select color-coding of project icons:", 
                                                                choices = c("By program type", "By fiscal year awarded", 
                                                                            "By EDA funding level"), selected = "By program type")
-                                            ),
+                                                ),
                                             
                                             column(3,
                                                    selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
@@ -167,8 +172,11 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     For an applicant with a P.O. Box address, the project will be mapped in the center of the 
                                                                     applicant's zip code.")
                                                            )
-                                                           )
                                                    ),
+                                            column(3,
+                                                   actionButton("refresh_map", "Refresh map")
+                                                   )
+                                           ),
                                     
                                     fluidRow(column(12,
                                                     br())
