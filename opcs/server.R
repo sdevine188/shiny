@@ -336,15 +336,6 @@ shinyServer(function(input, output, session){
                         fitBounds(-160.0583, 20.65798, -60.954694, 60.60825)
         })
         
-#         output$map <- eventReactive(input$refresh_map, {
-#                 renderLeaflet({
-#                 # data_table3 <- data_table3()
-#                 # data_table <- data_table()
-#                 leaflet(datafile) %>% addTiles() %>%
-#                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
-#                 })
-#         })
-        
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
@@ -366,22 +357,7 @@ shinyServer(function(input, output, session){
                 }
         })
         
-        # add markers to map when hitting refresh_map button
-        # this works, no clearMarkers errors found, even w datafile_full
-#         observeEvent(input$refresh_map, {
-#                 data_table5_filtered <- data_table5_filtered()
-#                 
-#                 data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, address, FY, Appr.Desc, Best.EDA.., lat, lon)
-#                 data_table5_filtered <- na.omit(data_table5_filtered)
-#                 
-#                 leafletProxy("map", data = data_table5_filtered) %>%
-#                         clearMarkers() %>%
-#                         addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
-#         })
-        
         # update map when hitting refresh_map button
-        # this works with full data and fy range data, when its the only map update code
-        # but it can still have an error and fail to clearMarkers
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
@@ -412,37 +388,6 @@ shinyServer(function(input, output, session){
                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                 }
         })
-        
-        
-        # clear markers everytime data_table5_filtered updates
-        # won't work consistently??
-        # observeEvent(input$navbar, {
-#         observe({
-#                 # data_table5_filtered <- data_table5_filtered()
-#                 navbar_input <- input$navbar
-#                 leafletProxy("map") %>%
-#                         clearMarkers()
-#         })
-        
-        # clear markers every time data table filtered rows updates
-        # also doesn't work consistently??
-#         observe({
-#                 table_rows_all <- input$table_rows_all
-#                 leafletProxy("map") %>%
-#                         clearMarkers() %>%
-#                         clearControls()
-#                 leafletProxy("map", data = datafile) %>%
-#                         clearMarkers() %>%
-#                         clearControls()
-        # })
-        
-        # clear markers and controls every time data_table() variable updates
-#         observe({
-#                 data_table <- data_table()
-#                 leafletProxy("map", data = datafile) %>%
-#                         clearMarkers() %>%
-#                         clearControls()
-#         })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({
@@ -537,123 +482,6 @@ shinyServer(function(input, output, session){
                 }
                 selected_format
         })
-        
-        # replace markers and legend whenever marker_type option is changed
-#         observeEvent(input$marker_type, {
-#                 data_table5_filtered <- data_table5_filtered()
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-#                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-#                                                data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
-#                                                sep = "<br/>")
-#                         
-#                         selected_pal <- selected_pal()
-#                         selected_title <- selected_title()
-#                         selected_values <- selected_values()
-#                         selected_size <- selected_size()
-#                         selected_format <- selected_format()
-#                         
-#                         leafletProxy("map", data = data_table5_filtered) %>%
-#                                 clearMarkers() %>%
-#                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
-#                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-#                                 clearControls() %>%
-#                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#                 }
-#         })
-        
-        # test
-#         observeEvent(input$marker_type, {
-# 
-#                 # only run if at least one row of data is selected
-#                 if(datafile_small[1,1] != "no projects"){
-#                         
-#                         default_popup <- str_c(datafile_small$Appl.Short.Name, datafile_small$address,
-#                                                str_c("FY", datafile_small$FY, sep = " "),
-#                                                datafile_small$Appr.Desc, str_c("$", datafile_small$Best.EDA..), 
-#                                                sep = "<br/>")
-#                         
-#                         selected_pal <- selected_pal()
-#                         selected_title <- selected_title()
-#                         selected_values <- selected_values()
-#                         selected_size <- selected_size()
-#                         selected_format <- selected_format()
-#                         
-#                         leafletProxy("map", data = datafile_small) %>%
-#                                 clearMarkers() %>%
-#                                 addCircleMarkers(data = datafile_small, lng = ~lon, lat = ~lat, popup = default_popup,
-#                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-#                                 clearControls() %>%
-#                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#                 }
-#         })
-        
-        # replace markers whenever cicle_size option is changed
-#         observeEvent(input$circle_size, {
-#                 data_table5_filtered <- data_table5_filtered()
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-#                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-#                                                data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
-#                                                sep = "<br/>")
-#                         
-#                         selected_pal <- selected_pal()
-#                         selected_title <- selected_title()
-#                         selected_values <- selected_values()
-#                         selected_size <- selected_size()
-#                         
-#                         leafletProxy("map", data = data_table5_filtered) %>%
-#                                 clearMarkers() %>%
-#                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-#                                                  popup = default_popup,
-#                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2)
-#                 }
-#         })
-        
-        # replace map whenever View Map navbar is selected
-#         observeEvent(input$navbar, {
-#                 #print input#navbar?
-#                 
-#                 
-#                 #                 if(input$navbar == "View map"){
-#                # data_table5_filtered <- data_table5_filtered()
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-#                                                str_c("FY", data_table5_filtered$FY, sep = " "),
-#                                                data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
-#                                                sep = "<br/>")
-#                         
-#                         selected_pal <- selected_pal()
-#                         selected_title <- selected_title()
-#                         selected_values <- selected_values()
-#                         selected_size <- selected_size()
-#                         selected_format <- selected_format()
-#                         
-#                         leafletProxy("map", data = data_table5_filtered) %>%
-#                                 clearMarkers() %>%
-#                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-#                                                  popup = default_popup,
-#                                                  color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-#                                 clearControls() %>%
-#                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#                 }
-#         })
         
         output$rows_all <- renderText({
                 input$navbar == "View map"  
