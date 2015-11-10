@@ -16,8 +16,10 @@ date <- "20151106"
  # datafile <- read.csv(file, stringsAsFactors = TRUE)
 datafile <- readRDS("data/datafile_smallRDS.rds") 
 
+# if smallRDS is loaded first, then radio button to load full data, it takes 45 sec to load full data, and map refreshes
+
 # datafile <- readRDS("data/datafile_fy2012_fy2016.rds")
-# datafile_full <- readRDS("data/md.rds")
+datafile_full <- readRDS("data/md.rds")
 
  # faster to load into console R, but slower to load in shiny for some reason??
  # datafile <- read.csv(file, stringsAsFactors = TRUE) # 1 min 34/42 sec to load full 25k records in shiny
@@ -27,7 +29,7 @@ datafile <- readRDS("data/datafile_smallRDS.rds")
 # speed tests loading into shiny
 # datafile <- read.csv("data/datafile_medium.csv", stringsAsFactors = FALSE)
 # datafile <- readRDS("data/datafile_mediumRDS.csv") # this is way slower than read.csv
-datafile_full <- readRDS("data/datafile_mediumRDS.rds") # this is also probably slower than read.csv
+# datafile_full <- readRDS("data/datafile_mediumRDS.rds") # this is also probably slower than read.csv
 
 # datafile <- read.csv("data/datafile_large.csv", stringsAsFactors = FALSE) # 20 seconds to load 10k records
 # datafile <- readRDS("data/datafile_largeRDS.rds") # 48 seconds to load 10 k records
@@ -264,12 +266,12 @@ shinyServer(function(input, output, session){
 #                 # datafile
 #         })
         
-        # speed test
+        # build data_table3 to start assembly line for data output
         data_table3 <- reactive({
 #                 range <- seq(input$years[1], input$years[2])
 #                 data_table3 <- filter(datafile_full, FY %in% range)
 #                 data_table3
-                # datafile
+#                 datafile
                 
                 
                 if(input$datafile_radio == "FY 2012 to FY 2016"){
@@ -280,9 +282,29 @@ shinyServer(function(input, output, session){
                 }
         })
         
+        # tried to build a submit button for radio button
+#         observe({
+#                 if(input$radio_submit == 0){
+#                         data_table_placeholder$df <- datafile
+#                 }
+#                 if(input$radio_submit != 0){
+#                         if(input$datafile_radio == "FY 2012 to FY 2016"){
+#                                 data_table_placeholder$df <- datafile
+#                         }
+#                         if(input$datafile_radio == "FY 1995 to FY 2016"){
+#                                 data_table_placeholder$df <- datafile_full
+#                         }
+#                 }  
+#         })
+        
+#         data_table3 <- reactive({
+#                 data_table_placeholder$df
+#         })
+        
         # filter data based on advanced query inputs
         data_table4 <- reactive({
                 data_table3 <- data_table3()
+                # data_table3 <- data_table_placeholder$df
                 data_table4 <- data.frame()
                 submit_query <- input$submit_query
                 reset_any <- reset_any()
@@ -329,8 +351,7 @@ shinyServer(function(input, output, session){
         data_table <- reactive({
                 data_table <- data.frame()
                 data_table3 <- data_table3()
-                # data_tablex <- datafile
-                #data_tablex <- data_tablex()
+                # data_table3 <- data_table_placeholder$df
                 data_table4 <- data_table4()
                 
                 # consider isolating this chunk?
@@ -382,49 +403,45 @@ shinyServer(function(input, output, session){
 #         })
         
         output$map <- renderLeaflet({
-                data_table3 <- data_table3()
+                # data_table3 <- data_table3()
+                # data_table <- data_table()
                 leaflet(datafile) %>% addTiles() %>%
                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
         })
         
         observeEvent(input$refresh_map, {
-                data_table3 <- data_table3()
-                leafletProxy("map", data = data_table3) %>%
+                # data_table3 <- data_table3()
+                # data_table <- data_table()
+                data_table5_filtered <- data_table5_filtered()
+#                 leafletProxy("map", data = data_table3) %>%
+#                         clearMarkers() %>%
+#                         addCircleMarkers(data = data_table3, lng = ~lon, lat = ~lat)
+                leafletProxy("map", data = data_table5_filtered) %>%
                         clearMarkers() %>%
-                        addCircleMarkers(data = data_table3, lng = ~lon, lat = ~lat)
+                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
         })
         
-        # leafletProxy("map", data = data_table5_filtered) %>%
-#                                                 clearMarkers() %>%
-#                                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, 
-#                                                                  popup = default_popup,
-#                                                                  color  = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-#                                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-#                                                 clearControls() %>%
-#                                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#         
         # create reactive variable for filtered data
-#         data_table5_filtered <- reactive({
-#                 data_table5 <- data_table()
-#                 # data_table5 <- datafile
-#                 table_rows_all <- input$table_rows_all
-#                 
-#                 isolate({
-#                         search_input <- str_c(input$table_search, input$table_search_columns, collapse = "")
-#                 })
-#                 
-#                 if(nrow(data_table5) < 1){
-#                         no_projects <- data.frame("no projects")
-#                         return(no_projects)
-#                 }
-#                 if(nrow(data_table5) >= 1 && search_input == ""){
-#                         return(data_table5)
-#                 }
-#                 if(nrow(data_table5) >= 1 && search_input != ""){
-#                         return(data_table5[input$table_rows_all, ])
-#                 }
-#         })
+        data_table5_filtered <- reactive({
+                data_table5 <- data_table()
+                # data_table5 <- datafile
+                table_rows_all <- input$table_rows_all
+                
+                isolate({
+                        search_input <- str_c(input$table_search, input$table_search_columns, collapse = "")
+                })
+                
+                if(nrow(data_table5) < 1){
+                        no_projects <- data.frame("no projects")
+                        return(no_projects)
+                }
+                if(nrow(data_table5) >= 1 && search_input == ""){
+                        return(data_table5)
+                }
+                if(nrow(data_table5) >= 1 && search_input != ""){
+                        return(data_table5[input$table_rows_all, ])
+                }
+        })
         
         # clear markers every time data table filtered rows updates
 #         observe({
@@ -626,7 +643,7 @@ shinyServer(function(input, output, session){
 #         })
         
         output$rows_all <- renderText({
-                # input$table_search_columns               
+                # dim(test$df)            
 #                 term_pieces <- NULL
 #                 term_value <- NULL
 #                 term_var <- NULL

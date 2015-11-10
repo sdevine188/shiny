@@ -31,9 +31,9 @@ shinyUI(navbarPage("", id = "navbar",
 # #                                                    uiOutput("state"),
 # #                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
 # #                                             ),
-                                            column(3, 
-                                                   sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
-                                            ),
+#                                             column(3, 
+#                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
+#                                             ),
                                             column(12, offset = 1, 
                                                    downloadButton('downloadData', 'Download Data')
                                             )
@@ -44,7 +44,10 @@ shinyUI(navbarPage("", id = "navbar",
                                                    radioButtons("datafile_radio", "Select data", choices = c("FY 2012 to FY 2016",
                                                                 "FY 1995 to FY 2016"), selected = "FY 2012 to FY 2016")
                                                    ),
-                                            column(7,
+#                                             column(3,
+#                                                    actionButton("radio_submit", "Load data")
+#                                                    ),
+                                            column(6,
                                                    checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
                                                    conditionalPanel(
                                                            condition = "input.JobsPIFlag == true",
