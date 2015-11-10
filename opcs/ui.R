@@ -14,7 +14,8 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(6, 
-                                                   titlePanel("EDA Project Data")
+                                                   h2("EDA Performance and National Programs", align = "center"),
+                                                   h2("Data Viewer", align = "center")
                                             ),
                                             column(3,                       
                                                    textOutput("as_of_date")
@@ -25,24 +26,24 @@ shinyUI(navbarPage("", id = "navbar",
                                                     br())
                                     ),
                                     
-                                    fluidRow(
-#                                             
-# #                                             column(3,                       
-# #                                                    uiOutput("state"),
-# #                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+#                                     fluidRow(
+# #                                             
+# # #                                             column(3,                       
+# # #                                                    uiOutput("state"),
+# # #                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+# # #                                             ),
+# #                                             column(3, 
+# #                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
 # #                                             ),
-#                                             column(3, 
-#                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
-#                                             ),
-                                            column(12, offset = 1, 
-                                                   downloadButton('downloadData', 'Download Data')
-                                            )
-                                    ),
+#                                             column(12, offset = 1, 
+#                                                    downloadButton('downloadData', 'Download Data')
+#                                             )
+#                                     ),
                                     
                                     fluidRow(
                                             column(3, 
-                                                   radioButtons("datafile_radio", "Select data", choices = c("FY 2012 to FY 2016",
-                                                                "FY 1995 to FY 2016"), selected = "FY 2012 to FY 2016")
+                                                   radioButtons("datafile_radio", "Select data", choices = c("FY 2014 to FY 2016",
+                                                                "FY 1995 to FY 2016"), selected = "FY 2014 to FY 2016")
                                                    ),
 #                                             column(3,
 #                                                    actionButton("radio_submit", "Load data")
@@ -57,6 +58,9 @@ shinyUI(navbarPage("", id = "navbar",
                                                                     the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
                                                                     containing grantee estimates for jobs and private investment.")
                                                            )
+                                                ),
+                                                column(3,
+                                                       downloadButton('downloadData', 'Download Data')
                                                 )
                                    ),
                                     

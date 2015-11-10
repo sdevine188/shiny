@@ -14,12 +14,14 @@ date <- "20151106"
  # file <- str_c("data/small_datafile_", date, ".csv")
  # file <- str_c("data/master_data_", date, ".csv")
  # datafile <- read.csv(file, stringsAsFactors = TRUE)
-datafile <- readRDS("data/datafile_smallRDS.rds") 
+datafile_small <- readRDS("data/datafile_smallRDS.rds") 
+# datafile <- readRDS("data/datafile_mediumRDS.rds")
 
 # if smallRDS is loaded first, then radio button to load full data, it takes 45 sec to load full data, and map refreshes
 
 # datafile <- readRDS("data/datafile_fy2012_fy2016.rds")
-datafile_full <- readRDS("data/md.rds")
+datafile <- readRDS("data/datafile_fy2014_fy2016.rds") # 8.5 sec to load intiially
+datafile_full <- readRDS("data/md.rds") # 45 sec to load second
 
  # faster to load into console R, but slower to load in shiny for some reason??
  # datafile <- read.csv(file, stringsAsFactors = TRUE) # 1 min 34/42 sec to load full 25k records in shiny
@@ -274,7 +276,7 @@ shinyServer(function(input, output, session){
 #                 datafile
                 
                 
-                if(input$datafile_radio == "FY 2012 to FY 2016"){
+                if(input$datafile_radio == "FY 2014 to FY 2016"){
                         return(datafile)
                 }
                 if(input$datafile_radio == "FY 1995 to FY 2016"){
@@ -397,29 +399,34 @@ shinyServer(function(input, output, session){
                 server = TRUE
         })
         
-        # create output for map
+        # create output for map - old
 #         output$map <- renderLeaflet({
 #                 leaflet(datafile) %>% addTiles() %>% addCircleMarkers(lng = ~lon, lat = ~lat)
+#         })
+        
+        # create output for map
+#         output$map <- renderLeaflet({
+#                 # data_table3 <- data_table3()
+#                 # data_table <- data_table()
+#                 leaflet(datafile) %>% addTiles() %>%
+#                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
 #         })
         
         output$map <- renderLeaflet({
                 # data_table3 <- data_table3()
                 # data_table <- data_table()
-                leaflet(datafile) %>% addTiles() %>%
-                        fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
+                leaflet(datafile_small) %>% addTiles() %>%
+                        fitBounds(-160.0583, 20.65798, -60.954694, 60.60825)
         })
         
-        observeEvent(input$refresh_map, {
-                # data_table3 <- data_table3()
-                # data_table <- data_table()
-                data_table5_filtered <- data_table5_filtered()
-#                 leafletProxy("map", data = data_table3) %>%
-#                         clearMarkers() %>%
-#                         addCircleMarkers(data = data_table3, lng = ~lon, lat = ~lat)
-                leafletProxy("map", data = data_table5_filtered) %>%
-                        clearMarkers() %>%
-                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
-        })
+#         output$map <- eventReactive(input$refresh_map, {
+#                 renderLeaflet({
+#                 # data_table3 <- data_table3()
+#                 # data_table <- data_table()
+#                 leaflet(datafile) %>% addTiles() %>%
+#                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
+#                 })
+#         })
         
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
@@ -441,6 +448,18 @@ shinyServer(function(input, output, session){
                 if(nrow(data_table5) >= 1 && search_input != ""){
                         return(data_table5[input$table_rows_all, ])
                 }
+        })
+        
+        observeEvent(input$refresh_map, {
+                # data_table3 <- data_table3()
+                # data_table <- data_table()
+                data_table5_filtered <- data_table5_filtered()
+#                 leafletProxy("map", data = data_table3) %>%
+#                         clearMarkers() %>%
+#                         addCircleMarkers(data = data_table3, lng = ~lon, lat = ~lat)
+                leafletProxy("map", data = data_table5_filtered) %>%
+                        clearMarkers() %>%
+                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
         })
         
         # clear markers every time data table filtered rows updates
