@@ -14,7 +14,8 @@ date <- "20151106"
  # file <- str_c("data/small_datafile_", date, ".csv")
  # file <- str_c("data/master_data_", date, ".csv")
  # datafile <- read.csv(file, stringsAsFactors = TRUE)
-datafile_small <- readRDS("data/datafile_smallRDS.rds") 
+datafile_small <- readRDS("data/datafile_smallRDS.rds")
+# datafile <- readRDS("data/datafile_smallRDS.rds") 
 # datafile <- readRDS("data/datafile_mediumRDS.rds")
 
 # if smallRDS is loaded first, then radio button to load full data, it takes 45 sec to load full data, and map refreshes
@@ -188,88 +189,8 @@ shinyServer(function(input, output, session){
                 str_c(reset_columns, reset_programs, reset_initiatives, reset_text_query, reset_all)
         })
         
-        # create dropdown menu to select states
-#         output$state <- renderUI({
-#                 datafile2 <- arrange(datafile, Proj.ST.Abbr)
-#                 state_choices <- c("All states", unique(as.character(datafile2$Proj.ST.Abbr)))
-#                 selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
-#         })
-        
-        # create variable for selected_states
-#         state_data <- reactive({
-#                 # create placeholder selected_states variable to assign in if statements
-#                 selected_states <- c()
-#                 
-#                 # if statements to handle "All states" input to state dropdown menu
-#                 if("All states" %in% input$state){
-#                         selected_states <- unique(datafile$Proj.ST.Abbr)
-#                 }
-#                 if(!("All states" %in% input$state)){
-#                         selected_states <- input$state
-#                 }
-#                 filter(datafile, Proj.ST.Abbr %in% selected_states)        
-#         })
-        
-        # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
-#         counties <- reactive({
-#                 state_data <- state_data()
-#                 state_data <- arrange(state_data, Proj.ST.Abbr, Proj.County.Name)
-#                 unique(state_data$Proj.County.Name)  
-#         })
-        
-        # observe is a reactive function that repopulates the county select input menu using the reactive variable county
-#         observe({
-#                 counties_all <- c("All counties", as.character(counties()))
-#                 updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
-#         })
-        
-        # filter data to only those states/counties selected
-#         data_table1 <- reactive({
-#                 # assign previously created reactive variables to regular variables
-#                 state_data <- state_data()
-#                 counties <- counties()
-# 
-#                 # create if statements to handle "All counties" option in dropdown menu
-#                 if("All counties" %in% input$counties){
-#                         data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
-#                 }
-#                 
-#                 if(!("All counties" %in% input$counties)){
-#                         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
-#                 }
-#                 data_table1
-#                 
-#         })
-        
-        # speed test
-#         data_table1 <- reactive({
-#                 datafile
-#         })
-        
-        # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
-#         data_table2 <- reactive({
-#                 data_table1 <- data_table1()
-#                 
-#                 if(input$JobsPIFlag == FALSE){
-#                         data_table2 <- select(data_table1, -Jobs.Created, -Jobs.Saved, -Private.Investment)
-#                 }
-#                 if(input$JobsPIFlag == TRUE){
-#                         data_table2 <- filter(data_table1, Cons.Non == "C" | Cons.Non == "B")
-#                 }      
-#                 data_table2
-#         })
-        
-        # filter data based on year input
-#         data_table3 <- reactive({
-#                 data_table2 <- data_table2()
-#                 range <- seq(input$years[1], input$years[2])
-#                 data_table3 <- filter(data_table2, FY %in% range)
-#                 data_table3
-#                 # datafile
-#         })
-        
         # build data_table3 to start assembly line for data output
-        data_table3 <- reactive({
+        data_table2 <- reactive({
 #                 range <- seq(input$years[1], input$years[2])
 #                 data_table3 <- filter(datafile_full, FY %in% range)
 #                 data_table3
@@ -282,6 +203,19 @@ shinyServer(function(input, output, session){
                 if(input$datafile_radio == "FY 1995 to FY 2016"){
                         return(datafile_full)
                 }
+        })
+        
+        # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
+        data_table3 <- reactive({
+                data_table2 <- data_table2()
+                
+                if(input$JobsPIFlag == FALSE){
+                        data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
+                }
+                if(input$JobsPIFlag == TRUE){
+                        data_table3 <- filter(data_table2, Cons.Non == "C" | Cons.Non == "B")
+                }      
+                data_table3
         })
         
         # tried to build a submit button for radio button
@@ -312,9 +246,6 @@ shinyServer(function(input, output, session){
                 reset_any <- reset_any()
                 
                 isolate({
-                        # data_table3 <- data_table3()
-                         # data_table3 <- datafile
-
                         # create if statements to handle "All programs" option in dropdown menu
                         if("All programs" %in% input$program_input){
                                 data_table4 <- data_table3
@@ -349,7 +280,7 @@ shinyServer(function(input, output, session){
                 })
         })
         
-        # create variable data_table with latest selected data
+        # create variable data_table with latest selected data from advanced query, if necessary
         data_table <- reactive({
                 data_table <- data.frame()
                 data_table3 <- data_table3()
@@ -367,6 +298,7 @@ shinyServer(function(input, output, session){
                 }
         })
         
+        # create table output
         output$table <- DT::renderDataTable({
                 data_table_output <- data_table()
                 data_table_output2 <- data.frame()
@@ -399,22 +331,7 @@ shinyServer(function(input, output, session){
                 server = TRUE
         })
         
-        # create output for map - old
-#         output$map <- renderLeaflet({
-#                 leaflet(datafile) %>% addTiles() %>% addCircleMarkers(lng = ~lon, lat = ~lat)
-#         })
-        
-        # create output for map
-#         output$map <- renderLeaflet({
-#                 # data_table3 <- data_table3()
-#                 # data_table <- data_table()
-#                 leaflet(datafile) %>% addTiles() %>%
-#                         fitBounds(~min(lon), ~min(lat), ~max(lon), ~max(lat))
-#         })
-        
         output$map <- renderLeaflet({
-                # data_table3 <- data_table3()
-                # data_table <- data_table()
                 leaflet(datafile_small) %>% addTiles() %>%
                         fitBounds(-160.0583, 20.65798, -60.954694, 60.60825)
         })
@@ -431,7 +348,6 @@ shinyServer(function(input, output, session){
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
-                # data_table5 <- datafile
                 table_rows_all <- input$table_rows_all
                 
                 isolate({
@@ -450,25 +366,75 @@ shinyServer(function(input, output, session){
                 }
         })
         
-        observeEvent(input$refresh_map, {
-                # data_table3 <- data_table3()
-                # data_table <- data_table()
-                data_table5_filtered <- data_table5_filtered()
-#                 leafletProxy("map", data = data_table3) %>%
+        # add markers to map when hitting refresh_map button
+        # this works, no clearMarkers errors found, even w datafile_full
+#         observeEvent(input$refresh_map, {
+#                 data_table5_filtered <- data_table5_filtered()
+#                 
+#                 data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, address, FY, Appr.Desc, Best.EDA.., lat, lon)
+#                 data_table5_filtered <- na.omit(data_table5_filtered)
+#                 
+#                 leafletProxy("map", data = data_table5_filtered) %>%
 #                         clearMarkers() %>%
-#                         addCircleMarkers(data = data_table3, lng = ~lon, lat = ~lat)
+#                         addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
+#         })
+        
+        # update map when hitting refresh_map button
+        # this works with full data and fy range data, when its the only map update code
+        # but it can still have an error and fail to clearMarkers
+        observeEvent(input$refresh_map, {
+                data_table5_filtered <- data_table5_filtered()
+                
+                data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, address, FY, Appr.Desc, Best.EDA.., lat, lon)
+                data_table5_filtered <- na.omit(data_table5_filtered)
+                
+                # only run if at least one row of data is selected
+                if(data_table5_filtered[1,1] != "no projects"){
+                
+                default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
+                                       str_c("FY", data_table5_filtered$FY, sep = " "),
+                                       data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
+                                       sep = "<br/>")
+                
+                selected_pal <- selected_pal()
+                selected_title <- selected_title()
+                selected_values <- selected_values()
+                selected_size <- selected_size()
+                selected_format <- selected_format()
+                
                 leafletProxy("map", data = data_table5_filtered) %>%
                         clearMarkers() %>%
-                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat)    
+                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
+                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                        clearControls() %>%
+                        addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                }
         })
         
+        
+        # clear markers everytime data_table5_filtered updates
+        # won't work consistently??
+        # observeEvent(input$navbar, {
+#         observe({
+#                 # data_table5_filtered <- data_table5_filtered()
+#                 navbar_input <- input$navbar
+#                 leafletProxy("map") %>%
+#                         clearMarkers()
+#         })
+        
         # clear markers every time data table filtered rows updates
+        # also doesn't work consistently??
 #         observe({
 #                 table_rows_all <- input$table_rows_all
+#                 leafletProxy("map") %>%
+#                         clearMarkers() %>%
+#                         clearControls()
 #                 leafletProxy("map", data = datafile) %>%
 #                         clearMarkers() %>%
 #                         clearControls()
-#         })
+        # })
         
         # clear markers and controls every time data_table() variable updates
 #         observe({
@@ -479,98 +445,98 @@ shinyServer(function(input, output, session){
 #         })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
-#         fund_pal <- reactive({
-#                 data_table5_filtered <- data_table5_filtered()
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         # create funds palette
-#                         colorNumeric(
-#                                 palette = "Blues",
-#                                 domain = data_table5_filtered$Best.EDA..
-#                         )
-#                 }
-#         })
+        fund_pal <- reactive({
+                data_table5_filtered <- data_table5_filtered()
+                
+                # only run if at least one row of data is selected
+                if(data_table5_filtered[1,1] != "no projects"){
+                        
+                        # create funds palette
+                        colorNumeric(
+                                palette = "Blues",
+                                domain = data_table5_filtered$Best.EDA..
+                        )
+                }
+        })
         
         # create reactive selected_pal
-#         selected_pal <- reactive({
-#                 fund_pal <- fund_pal()
-#                 
-#                 # select legend palette
-#                 selected_pal <- program_pal
-#                 if(input$marker_type == "By program type"){
-#                         selected_pal <- program_pal
-#                 }
-#                 if(input$marker_type == "By fiscal year awarded"){
-#                         selected_pal <- year_pal
-#                 }
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_pal <- fund_pal
-#                 }
-#                 selected_pal
-#         })
+        selected_pal <- reactive({
+                fund_pal <- fund_pal()
+                
+                # select legend palette
+                selected_pal <- program_pal
+                if(input$marker_type == "By program type"){
+                        selected_pal <- program_pal
+                }
+                if(input$marker_type == "By fiscal year awarded"){
+                        selected_pal <- year_pal
+                }
+                if(input$marker_type == "By EDA funding level"){
+                        selected_pal <- fund_pal
+                }
+                selected_pal
+        })
         
         # create reactive selected_title
-#         selected_title <- reactive({
-#                 # select legend title
-#                 selected_title <- "EDA Program"
-#                 if(input$marker_type == "By program type"){
-#                         selected_title <- "EDA Program"
-#                 }
-#                 if(input$marker_type == "By fiscal year awarded"){
-#                         selected_title <- "Fiscal Year Awarded"
-#                 }
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_title <- "EDA Funding Level"
-#                 }
-#                 selected_title
-#         })
+        selected_title <- reactive({
+                # select legend title
+                selected_title <- "EDA Program"
+                if(input$marker_type == "By program type"){
+                        selected_title <- "EDA Program"
+                }
+                if(input$marker_type == "By fiscal year awarded"){
+                        selected_title <- "Fiscal Year Awarded"
+                }
+                if(input$marker_type == "By EDA funding level"){
+                        selected_title <- "EDA Funding Level"
+                }
+                selected_title
+        })
         
         # create reactive selected_values
-#         selected_values <- reactive({
-#                 # select legend values
-#                 data_table5_filtered <- data_table5_filtered()
-#                 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-#                         
-#                         selected_values <- data_table5_filtered$Appr.Desc
-#                         if(input$marker_type == "By program type"){
-#                                 selected_values <- data_table5_filtered$Appr.Desc
-#                         }
-#                         if(input$marker_type == "By fiscal year awarded"){
-#                                 selected_values <- factor(data_table5_filtered$FY)
-#                         }
-#                         if(input$marker_type == "By EDA funding level"){
-#                                 selected_values <- data_table5_filtered$Best.EDA..
-#                         }
-#                         selected_values
-#                 }
-#         })
+        selected_values <- reactive({
+                # select legend values
+                data_table5_filtered <- data_table5_filtered()
+                
+                # only run if at least one row of data is selected
+                if(data_table5_filtered[1,1] != "no projects"){
+                        
+                        selected_values <- data_table5_filtered$Appr.Desc
+                        if(input$marker_type == "By program type"){
+                                selected_values <- data_table5_filtered$Appr.Desc
+                        }
+                        if(input$marker_type == "By fiscal year awarded"){
+                                selected_values <- factor(data_table5_filtered$FY)
+                        }
+                        if(input$marker_type == "By EDA funding level"){
+                                selected_values <- data_table5_filtered$Best.EDA..
+                        }
+                        selected_values
+                }
+        })
         
         # create reactive selected_size
-#         selected_size <- reactive({
-#                 # select circle size
-#                 selected_size <- 7
-#                 if(input$circle_size == "Small circles"){
-#                         selected_size <- 1
-#                 }
-#                 if(input$circle_size == "Large circles"){
-#                         selected_size <- 7
-#                 }
-#                 selected_size
-#         })
+        selected_size <- reactive({
+                # select circle size
+                selected_size <- 7
+                if(input$circle_size == "Small circles"){
+                        selected_size <- 1
+                }
+                if(input$circle_size == "Large circles"){
+                        selected_size <- 7
+                }
+                selected_size
+        })
         
         # create label format for eda funds $
-#         selected_format <- reactive({
-#                 # select circle size
-#                 selected_format <- ""
-#                 if(input$marker_type == "By EDA funding level"){
-#                         selected_format <- "$"
-#                 }
-#                 selected_format
-#         })
+        selected_format <- reactive({
+                # select circle size
+                selected_format <- ""
+                if(input$marker_type == "By EDA funding level"){
+                        selected_format <- "$"
+                }
+                selected_format
+        })
         
         # replace markers and legend whenever marker_type option is changed
 #         observeEvent(input$marker_type, {
@@ -593,6 +559,34 @@ shinyServer(function(input, output, session){
 #                         leafletProxy("map", data = data_table5_filtered) %>%
 #                                 clearMarkers() %>%
 #                                 addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
+#                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+#                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+#                                 clearControls() %>%
+#                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
+#                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+#                 }
+#         })
+        
+        # test
+#         observeEvent(input$marker_type, {
+# 
+#                 # only run if at least one row of data is selected
+#                 if(datafile_small[1,1] != "no projects"){
+#                         
+#                         default_popup <- str_c(datafile_small$Appl.Short.Name, datafile_small$address,
+#                                                str_c("FY", datafile_small$FY, sep = " "),
+#                                                datafile_small$Appr.Desc, str_c("$", datafile_small$Best.EDA..), 
+#                                                sep = "<br/>")
+#                         
+#                         selected_pal <- selected_pal()
+#                         selected_title <- selected_title()
+#                         selected_values <- selected_values()
+#                         selected_size <- selected_size()
+#                         selected_format <- selected_format()
+#                         
+#                         leafletProxy("map", data = datafile_small) %>%
+#                                 clearMarkers() %>%
+#                                 addCircleMarkers(data = datafile_small, lng = ~lon, lat = ~lat, popup = default_popup,
 #                                                  color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
 #                                                  fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
 #                                 clearControls() %>%
@@ -662,7 +656,7 @@ shinyServer(function(input, output, session){
 #         })
         
         output$rows_all <- renderText({
-                # dim(test$df)            
+                input$navbar == "View map"  
 #                 term_pieces <- NULL
 #                 term_value <- NULL
 #                 term_var <- NULL
