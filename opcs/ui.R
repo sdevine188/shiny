@@ -191,7 +191,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                   textOutput("rows_all"),
+                                                   # textOutput("rows_all"),
                                                    leafletOutput("map")
                                             )
                                     )

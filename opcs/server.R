@@ -14,15 +14,24 @@ date <- "20151106"
  # file <- str_c("data/small_datafile_", date, ".csv")
  # file <- str_c("data/master_data_", date, ".csv")
  # datafile <- read.csv(file, stringsAsFactors = TRUE)
-datafile_small <- readRDS("data/datafile_smallRDS.rds")
+# datafile_small <- readRDS("data/datafile_smallRDS.rds")
+datafile_small <- read.csv("data/datafile_small_utf8.csv", stringsAsFactors = FALSE)
 # datafile <- readRDS("data/datafile_smallRDS.rds") 
 # datafile <- readRDS("data/datafile_mediumRDS.rds")
 
 # if smallRDS is loaded first, then radio button to load full data, it takes 45 sec to load full data, and map refreshes
 
 # datafile <- readRDS("data/datafile_fy2012_fy2016.rds")
-datafile <- readRDS("data/datafile_fy2014_fy2016.rds") # 8.5 sec to load intiially
-datafile_full <- readRDS("data/md.rds") # 45 sec to load second
+# datafile <- readRDS("data/datafile_fy2014_fy2016.rds") # 8.5 sec to load intiially
+datafile <- read.csv("data/datafile_fy2014_fy2016_utf8.csv", stringsAsFactors = FALSE) # stringsAsFactors = TRUE makes it much much slower
+# datafile_full <- readRDS("data/md.rds") # 45 sec to load second
+# datafile_full <- read.table("data/master_data_20151106.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1', header = TRUE)
+# datafile_full <- read.csv("data/datafile_medium.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1')
+# datafile_full <- read.csv("data/dactafile_medium.csv") # this worked in cloud
+# datafile_full <- readRDS("data/datafile_minusfy.rds") # this is medium data without 1999-2001
+# datafile_full <- readRDS("data/datafile_full_minusfy.rds") # this is full data without 1999-2001 - still get multibyte error
+datafile_full <- read.csv("data/datafile_full_test_utf8.csv", stringsAsFactors = FALSE) # used write.csv w encoding = "UTF-8" - loads 18 sec
+# datafile_full <- readRDS("data/datafile_full_test.rds") # saved with utf8, loads in about 21 sec
 
  # faster to load into console R, but slower to load in shiny for some reason??
  # datafile <- read.csv(file, stringsAsFactors = TRUE) # 1 min 34/42 sec to load full 25k records in shiny
