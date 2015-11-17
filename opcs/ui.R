@@ -26,25 +26,25 @@ shinyUI(navbarPage("", id = "navbar",
                                                     br())
                                     ),
                                     
-#                                     fluidRow(
-# #                                             
-# # #                                             column(3,                       
-# # #                                                    uiOutput("state"),
-# # #                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
-# # #                                             ),
-# #                                             column(3, 
-# #                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
-# #                                             ),
+                                    fluidRow(
+                                            column(3,                       
+                                                   # uiOutput("state"),
+                                                   selectInput("state", "Select a state", choices = "", multiple = TRUE),
+                                                   selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+                                            ),
+                                            column(3, 
+                                                   sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
+                                            )
 #                                             column(12, offset = 1, 
 #                                                    downloadButton('downloadData', 'Download Data')
 #                                             )
-#                                     ),
+                                    ),
                                     
                                     fluidRow(
-                                            column(3, 
-                                                   radioButtons("datafile_radio", "Select data", choices = c("FY 2014 to FY 2016",
-                                                                "FY 1995 to FY 2016"), selected = "FY 2014 to FY 2016")
-                                                   ),
+#                                             column(3, 
+#                                                    radioButtons("datafile_radio", "Select data", choices = c("FY 2014 to FY 2016",
+#                                                                 "FY 1995 to FY 2016"), selected = "FY 2014 to FY 2016")
+#                                                    ),
 #                                             column(3,
 #                                                    actionButton("radio_submit", "Load data")
 #                                                    ),

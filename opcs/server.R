@@ -23,14 +23,14 @@ datafile_small <- read.csv("data/datafile_small_utf8.csv", stringsAsFactors = FA
 
 # datafile <- readRDS("data/datafile_fy2012_fy2016.rds")
 # datafile <- readRDS("data/datafile_fy2014_fy2016.rds") # 8.5 sec to load intiially
-datafile <- read.csv("data/datafile_fy2014_fy2016_utf8.csv", stringsAsFactors = FALSE) # stringsAsFactors = TRUE makes it much much slower
+# datafile <- read.csv("data/datafile_fy2014_fy2016_utf8.csv", stringsAsFactors = FALSE) # stringsAsFactors = TRUE makes it much much slower
 # datafile_full <- readRDS("data/md.rds") # 45 sec to load second
 # datafile_full <- read.table("data/master_data_20151106.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1', header = TRUE)
 # datafile_full <- read.csv("data/datafile_medium.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1')
 # datafile_full <- read.csv("data/dactafile_medium.csv") # this worked in cloud
 # datafile_full <- readRDS("data/datafile_minusfy.rds") # this is medium data without 1999-2001
 # datafile_full <- readRDS("data/datafile_full_minusfy.rds") # this is full data without 1999-2001 - still get multibyte error
-datafile_full <- read.csv("data/datafile_full_test_utf8.csv", stringsAsFactors = FALSE) # used write.csv w encoding = "UTF-8" - loads 18 sec
+datafile <- read.csv("data/datafile_full_test_utf8.csv", stringsAsFactors = FALSE) # used write.csv w encoding = "UTF-8" - loads 18 sec
 # datafile_full <- readRDS("data/datafile_full_test.rds") # saved with utf8, loads in about 21 sec
 
  # faster to load into console R, but slower to load in shiny for some reason??
@@ -76,6 +76,13 @@ is.odd <- function(x) x %% 2 != 0
 
 # display trace logs
 # options(shiny.trace=TRUE)
+
+# create state list for select state input
+# note there are six records of 25k master data with "" for appl state, 
+# these will only show when all states is selected bc we drop them so there is no "" showing in select state menu
+state_arr <- arrange(datafile, Appl.State.Abbr)
+state_list <- unique(state_arr$Appl.State.Abbr)
+state_list <- state_list[-1]
 
 # shiny server
 shinyServer(function(input, output, session){
@@ -198,26 +205,94 @@ shinyServer(function(input, output, session){
                 str_c(reset_columns, reset_programs, reset_initiatives, reset_text_query, reset_all)
         })
         
+        # create dropdown menu to select states
+        output$state <- renderUI({
+                datafile2 <- arrange(datafile, Proj.ST.Abbr)
+                state_choices <- c("All states", unique(as.character(datafile2$Proj.ST.Abbr)))
+                selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
+        })
+        
+        # create variable for selected_states
+        state_data <- reactive({
+                # create placeholder selected_states variable to assign in if statements
+                selected_states <- c()
+                
+                # if statements to handle "All states" input to state dropdown menu
+                if("All states" %in% input$state){
+                        selected_states <- unique(datafile$Proj.ST.Abbr)
+                }
+                if(!("All states" %in% input$state)){
+                        selected_states <- input$state
+                }
+                filter(datafile, Proj.ST.Abbr %in% selected_states)        
+        })
+        
+        # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
+        counties <- reactive({
+                state_data <- state_data()
+                state_data <- arrange(state_data, Proj.ST.Abbr, Proj.County.Name)
+                unique(state_data$Proj.County.Name)  
+        })
+        
+        # test of select state on client side
+        observe({
+                states_all <- c("All states", state_list)
+                updateSelectInput(session, "state", choices = states_all, selected = states_all[1])
+        })
+        
+        # observe is a reactive function that repopulates the county select input menu using the reactive variable county
+        observe({
+                counties_all <- c("All counties", as.character(counties()))
+                updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
+        })
+        
+        # filter data to only those states/counties selected
+        data_table1 <- reactive({
+                # assign previously created reactive variables to regular variables
+                state_data <- state_data()
+                counties <- counties()
+                
+                # create if statements to handle "All counties" option in dropdown menu
+                if("All counties" %in% input$counties){
+                        data_table1 <- filter(state_data, Proj.County.Name %in% counties)                        
+                }
+                
+                if(!("All counties" %in% input$counties)){
+                        data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
+                }
+                data_table1
+                
+        })
+        
         # build data_table3 to start assembly line for data output
+#         data_table2 <- reactive({
+# #                 range <- seq(input$years[1], input$years[2])
+# #                 data_table3 <- filter(datafile_full, FY %in% range)
+# #                 data_table3
+# #                 datafile
+#                 datafile_full
+#                 
+#                 
+# #                 if(input$datafile_radio == "FY 2014 to FY 2016"){
+# #                         return(datafile)
+# #                 }
+# #                 if(input$datafile_radio == "FY 1995 to FY 2016"){
+# #                         return(datafile_full)
+# #                 }
+#         })
+        
+        # filter data based on year input
         data_table2 <- reactive({
-#                 range <- seq(input$years[1], input$years[2])
-#                 data_table3 <- filter(datafile_full, FY %in% range)
-#                 data_table3
-#                 datafile
-                
-                
-                if(input$datafile_radio == "FY 2014 to FY 2016"){
-                        return(datafile)
-                }
-                if(input$datafile_radio == "FY 1995 to FY 2016"){
-                        return(datafile_full)
-                }
+                data_table1 <- data_table1()
+                range <- seq(input$years[1], input$years[2])
+                data_table2 <- filter(data_table1, FY %in% range)
+                data_table2
         })
         
         # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
         data_table3 <- reactive({
                 data_table2 <- data_table2()
-                
+
                 if(input$JobsPIFlag == FALSE){
                         data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
                 }
@@ -226,6 +301,8 @@ shinyServer(function(input, output, session){
                 }      
                 data_table3
         })
+        
+      
         
         # tried to build a submit button for radio button
 #         observe({
@@ -242,9 +319,7 @@ shinyServer(function(input, output, session){
 #                 }  
 #         })
         
-#         data_table3 <- reactive({
-#                 data_table_placeholder$df
-#         })
+
         
         # filter data based on advanced query inputs
         data_table4 <- reactive({
