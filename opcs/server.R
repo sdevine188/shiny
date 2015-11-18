@@ -6,53 +6,18 @@ library(stringr)
 library(DT)
 
 # provide data "as of date"
-# date <- "20150827"
 date <- "20151106"
 
 # Read in data file
-# file <- str_c("data/datafile_", date, ".csv")
- # file <- str_c("data/small_datafile_", date, ".csv")
- # file <- str_c("data/master_data_", date, ".csv")
- # datafile <- read.csv(file, stringsAsFactors = TRUE)
-# datafile_small <- readRDS("data/datafile_smallRDS.rds")
+# read small data to start map without delay
 datafile_small <- read.csv("data/datafile_small_utf8.csv", stringsAsFactors = FALSE)
-# datafile <- readRDS("data/datafile_smallRDS.rds") 
-# datafile <- readRDS("data/datafile_mediumRDS.rds")
-
-# if smallRDS is loaded first, then radio button to load full data, it takes 45 sec to load full data, and map refreshes
-
-# datafile <- readRDS("data/datafile_fy2012_fy2016.rds")
-# datafile <- readRDS("data/datafile_fy2014_fy2016.rds") # 8.5 sec to load intiially
-# datafile <- read.csv("data/datafile_fy2014_fy2016_utf8.csv", stringsAsFactors = FALSE) # stringsAsFactors = TRUE makes it much much slower
-# datafile_full <- readRDS("data/md.rds") # 45 sec to load second
-# datafile_full <- read.table("data/master_data_20151106.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1', header = TRUE)
-# datafile_full <- read.csv("data/datafile_medium.csv", encoding = 'UTF-8', fileEncoding = 'ISO8859-1')
-# datafile_full <- read.csv("data/dactafile_medium.csv") # this worked in cloud
-# datafile_full <- readRDS("data/datafile_minusfy.rds") # this is medium data without 1999-2001
-# datafile_full <- readRDS("data/datafile_full_minusfy.rds") # this is full data without 1999-2001 - still get multibyte error
-datafile <- read.csv("data/datafile_full_test_utf8.csv", stringsAsFactors = FALSE) # used write.csv w encoding = "UTF-8" - loads 18 sec
-# datafile_full <- readRDS("data/datafile_full_test.rds") # saved with utf8, loads in about 21 sec
-
- # faster to load into console R, but slower to load in shiny for some reason??
- # datafile <- read.csv(file, stringsAsFactors = TRUE) # 1 min 34/42 sec to load full 25k records in shiny
- # datafile <- readRDS("data/md.csv") # 1 min 24 sec to load full 25 k
- # datafile <- readRDS("data/md.rds") # 1 min 22 sec to load full 25k
-
-# speed tests loading into shiny
-# datafile <- read.csv("data/datafile_medium.csv", stringsAsFactors = FALSE)
-# datafile <- readRDS("data/datafile_mediumRDS.csv") # this is way slower than read.csv
-# datafile_full <- readRDS("data/datafile_mediumRDS.rds") # this is also probably slower than read.csv
-
-# datafile <- read.csv("data/datafile_large.csv", stringsAsFactors = FALSE) # 20 seconds to load 10k records
-# datafile <- readRDS("data/datafile_largeRDS.rds") # 48 seconds to load 10 k records
+datafile <- read.csv("data/datafile_full_utf8.csv", stringsAsFactors = FALSE) 
 
 # create default columns to display
 default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
                      "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
 
 # create program colors
-# program_options <- factor(c("Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-#                             "GCCMIF", "Research", "CTAA"))
 program_options <- unique(datafile$Appr.Desc)
 
 year_options <- factor(seq(1995, 2016))
@@ -234,13 +199,13 @@ shinyServer(function(input, output, session){
                 unique(state_data$Proj.County.Name)  
         })
         
-        # test of select state on client side
+        # populate the select state input menu
         observe({
                 states_all <- c("All states", state_list)
                 updateSelectInput(session, "state", choices = states_all, selected = states_all[1])
         })
         
-        # observe is a reactive function that repopulates the county select input menu using the reactive variable county
+        # populate the select county input menu
         observe({
                 counties_all <- c("All counties", as.character(counties()))
                 updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
@@ -264,23 +229,6 @@ shinyServer(function(input, output, session){
                 
         })
         
-        # build data_table3 to start assembly line for data output
-#         data_table2 <- reactive({
-# #                 range <- seq(input$years[1], input$years[2])
-# #                 data_table3 <- filter(datafile_full, FY %in% range)
-# #                 data_table3
-# #                 datafile
-#                 datafile_full
-#                 
-#                 
-# #                 if(input$datafile_radio == "FY 2014 to FY 2016"){
-# #                         return(datafile)
-# #                 }
-# #                 if(input$datafile_radio == "FY 1995 to FY 2016"){
-# #                         return(datafile_full)
-# #                 }
-#         })
-        
         # filter data based on year input
         data_table2 <- reactive({
                 data_table1 <- data_table1()
@@ -301,25 +249,6 @@ shinyServer(function(input, output, session){
                 }      
                 data_table3
         })
-        
-      
-        
-        # tried to build a submit button for radio button
-#         observe({
-#                 if(input$radio_submit == 0){
-#                         data_table_placeholder$df <- datafile
-#                 }
-#                 if(input$radio_submit != 0){
-#                         if(input$datafile_radio == "FY 2012 to FY 2016"){
-#                                 data_table_placeholder$df <- datafile
-#                         }
-#                         if(input$datafile_radio == "FY 1995 to FY 2016"){
-#                                 data_table_placeholder$df <- datafile_full
-#                         }
-#                 }  
-#         })
-        
-
         
         # filter data based on advanced query inputs
         data_table4 <- reactive({
@@ -408,8 +337,6 @@ shinyServer(function(input, output, session){
                 }
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
-                        # data_table_output2$FY <- as.factor(as.character(data_table_output2$FY))
-                        # data_table_output2$Project.No. <- as.factor(data_table_output2$Project.No.)
                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
                 server = TRUE
