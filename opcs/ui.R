@@ -41,13 +41,6 @@ shinyUI(navbarPage("", id = "navbar",
                                     ),
                                     
                                     fluidRow(
-#                                             column(3, 
-#                                                    radioButtons("datafile_radio", "Select data", choices = c("FY 2014 to FY 2016",
-#                                                                 "FY 1995 to FY 2016"), selected = "FY 2014 to FY 2016")
-#                                                    ),
-#                                             column(3,
-#                                                    actionButton("radio_submit", "Load data")
-#                                                    ),
                                             column(6,
                                                    checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
                                                    conditionalPanel(
@@ -81,7 +74,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-                                                   # textOutput("rows_all"),
+                                                   textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 
