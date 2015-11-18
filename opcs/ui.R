@@ -74,7 +74,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-                                                   textOutput("rows_all"),
+                                                   # textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 

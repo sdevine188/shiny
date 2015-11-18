@@ -111,61 +111,6 @@ shinyServer(function(input, output, session){
                 })
         })
         
-        ########################################################
-#         term_value <- reactiveValues(
-#                 value = NULL
-#         )
-#         
-#         term_var <- reactiveValues(
-#                 value = NULL
-#         )
-        
-#         term_pieces <- NULL
-#         term_value <- NULL
-#         term_var <- NULL
-        
-#         observeEvent(query_term_placeholder(),{
-#                 data_table_placeholder <- data_table4        
-#                 if(query_term_placeholder$value != ""){
-#                         term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
-#                         term_pieces <- unlist(term_pieces)
-#                         term_pieces <- str_sub(term_pieces, start = 1, end = -2)
-#                         term_pieces <- str_split(term_pieces, "\\) & ")
-#                         term_pieces <- unlist(term_pieces)
-#                         for(i in 1:length(term_pieces)){
-#                                 if(is.even(i)){
-#                                         term_value <- append(term_value, term_pieces[i])
-#                                 }
-#                                 if(is.odd(i)){
-#                                         term_var <- append(term_var, term_pieces[i])
-#                                 }
-#                         }
-#                 }
-#                 
-#                 # need to get rid of single quotes
-#                 for(i in 1:length(term_value)){
-#                         if(!(grepl(" | ", term_value[i]))){
-#                                 term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
-#                         }
-#                         if(grepl(" | ", term_value[i])){
-#                                 new_value <- str_sub(term_value[i], start = 2, end = -2)
-#                                 new_value <- str_replace_all(new_value, "' \\| '", " | ")
-#                                 term_value[i] <- new_value
-#                         }
-#                 }
-#                 
-#                 # filter datatable based on query term
-#                 for(i in 1:length(term_value)){
-#                         data_table_placeholder <- filter(data_table_placeholder, 
-#                                 grepl(term_value1, data_table_placeholder[ , term_var[i]]))
-#                 }
-#                 data_table4 <- data_table_placeholder
-#                 data_table4
-#         })
-
-        
-        #########################################
-        
         # reset text query button
         observe({
                 reset_text_query <- input$reset_text_query
@@ -334,47 +279,50 @@ shinyServer(function(input, output, session){
                                 data_table4 <- data_table4[selected_codes_index, ]
                         }
 
-#                         # create if statements to handle query term
-#                         if(query_term_placeholder$value == ""){
-#                                 data_table4 <- data_table4
-#                         }
-#                         if(query_term_placeholder$value != ""){
-#                                 data_table_placeholder <- data_table4        
-#                                 if(query_term_placeholder$value != ""){
-#                                         term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
-#                                         term_pieces <- unlist(term_pieces)
-#                                         term_pieces <- str_sub(term_pieces, start = 1, end = -2)
-#                                         term_pieces <- str_split(term_pieces, "\\) & ")
-#                                         term_pieces <- unlist(term_pieces)
-#                                         for(i in 1:length(term_pieces)){
-#                                                 if(is.even(i)){
-#                                                         term_value <- append(term_value, term_pieces[i])
-#                                                 }
-#                                                 if(is.odd(i)){
-#                                                         term_var <- append(term_var, term_pieces[i])
-#                                                 }
-#                                         }
-#                                 }
-#                                 
-#                                 # need to get rid of single quotes
-#                                 for(i in 1:length(term_value)){
-#                                         if(!(grepl(" | ", term_value[i]))){
-#                                                 term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
-#                                         }
-#                                         if(grepl(" | ", term_value[i])){
-#                                                 new_value <- str_sub(term_value[i], start = 2, end = -2)
-#                                                 new_value <- str_replace_all(new_value, "' \\| '", " | ")
-#                                                 term_value[i] <- new_value
-#                                         }
-#                                 }
-#                                 
-#                                 # filter datatable based on query term
-#                                 for(i in 1:length(term_value)){
-#                                         data_table_placeholder <- filter(data_table_placeholder, 
-#                                                                          grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
-#                                 }
-#                                 data_table4 <- data_table_placeholder
-#                         }
+                        # create if statements to handle query term
+                        if(query_term_placeholder$value == ""){
+                                data_table4 <- data_table4
+                        }
+                        if(query_term_placeholder$value != ""){
+                                data_table_placeholder <- data_table4        
+                                term_value <- NULL
+                                term_var <- NULL
+                                term_pieces <- NULL
+                                if(query_term_placeholder$value != ""){
+                                        term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
+                                        term_pieces <- unlist(term_pieces)
+                                        term_pieces <- str_sub(term_pieces, start = 1, end = -2)
+                                        term_pieces <- str_split(term_pieces, "\\) & ")
+                                        term_pieces <- unlist(term_pieces)
+                                        for(i in 1:length(term_pieces)){
+                                                if(is.even(i)){
+                                                        term_value <- append(term_value, term_pieces[i])
+                                                }
+                                                if(is.odd(i)){
+                                                        term_var <- append(term_var, term_pieces[i])
+                                                }
+                                        }
+                                }
+                                
+                                # need to get rid of single quotes
+                                for(i in 1:length(term_value)){
+                                        if(!(grepl(" | ", term_value[i]))){
+                                                term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
+                                        }
+                                        if(grepl(" | ", term_value[i])){
+                                                new_value <- str_sub(term_value[i], start = 2, end = -2)
+                                                new_value <- str_replace_all(new_value, "' \\| '", " | ")
+                                                term_value[i] <- new_value
+                                        }
+                                }
+                                
+                                # filter datatable based on query term
+                                for(i in 1:length(term_value)){
+                                        data_table_placeholder <- filter(data_table_placeholder, 
+                                                                         grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
+                                }
+                                data_table4 <- data_table_placeholder
+                        }
                         data_table4
                 })
         })
@@ -580,49 +528,9 @@ shinyServer(function(input, output, session){
                 selected_format
         })
         
-        output$rows_all <- renderText({
-                data_table_placeholder <- datafile
-                
-                term_pieces <- NULL
-                term_value <- NULL
-                term_var <- NULL
-                
-                if(query_term_placeholder$value != ""){
-                        term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
-                        term_pieces <- unlist(term_pieces)
-                        term_pieces <- str_sub(term_pieces, start = 1, end = -2)
-                        term_pieces <- str_split(term_pieces, "\\) & ")
-                        term_pieces <- unlist(term_pieces)
-                        for(i in 1:length(term_pieces)){
-                                if(is.even(i)){
-                                        term_value <- append(term_value, term_pieces[i])
-                                }
-                                if(is.odd(i)){
-                                        term_var <- append(term_var, term_pieces[i])
-                                }
-                        }
-                }
-
-                # need to get rid of single quotes
-                for(i in 1:length(term_value)){
-                        if(!(grepl(" | ", term_value[i]))){
-                                term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
-                        }
-                        if(grepl(" | ", term_value[i])){
-                                new_value <- str_sub(term_value[i], start = 2, end = -2)
-                                new_value <- str_replace_all(new_value, "' \\| '", " | ")
-                                term_value[i] <- new_value
-                        }
-                }
-                
-                # for loop to filter datatable
-                for(i in 1:length(term_value)){
-                        data_table_placeholder <- filter(data_table_placeholder, 
-                                                         grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
-                }
-                
-                dim(data_table_placeholder)
-        })
+#         output$rows_all <- renderText({
+# 
+#         })
         
         # create download file
         download_file <- reactive({
