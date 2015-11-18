@@ -4,6 +4,8 @@ library(datasets)
 library(leaflet)
 library(stringr)
 library(DT)
+library(rjson)
+
 
 # provide data "as of date"
 date <- "20151106"
@@ -327,6 +329,16 @@ shinyServer(function(input, output, session){
                 })
         })
         
+        # create variable storing the full query term submitted so it can be downloaded
+        saved_query <- reactive({
+             program_input <- input$program_input
+             initiatives_input <- input$initiatives_input
+             query_term <- query_term_placeholder$value
+             saved_query_list <- list(program_input, initiatives_input, query_term)
+             saved_query_list_json <- toJSON(saved_query_list)
+             saved_query_list_json
+        })
+        
         # create variable data_table with latest selected data from advanced query, if necessary
         data_table <- reactive({
                 data_table <- data.frame()
@@ -528,9 +540,10 @@ shinyServer(function(input, output, session){
                 selected_format
         })
         
-#         output$rows_all <- renderText({
-# 
-#         })
+        output$rows_all <- renderText({
+                saved_query <- saved_query() 
+                saved_query
+        })
         
         # create download file
         download_file <- reactive({
@@ -543,13 +556,23 @@ shinyServer(function(input, output, session){
                 }
         })
         
-        # download file
+        # download data
         output$downloadData <- downloadHandler(
                 filename = function() {
                         str_c("datafile_", date, ".csv") 
                 },
                 content = function(file) {
                         write.csv(download_file(), file)
+                }
+        )
+        
+        # download saved query
+        output$download_query <- downloadHandler(
+                filename = function() {
+                        str_c("query_", date) 
+                },
+                content = function(file) {
+                        write(saved_query(), file)
                 }
         )
 }

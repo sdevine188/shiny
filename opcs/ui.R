@@ -53,7 +53,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                            )
                                                 ),
                                                 column(3,
-                                                       downloadButton('downloadData', 'Download Data')
+                                                       downloadButton("downloadData", "Download Data")
                                                 )
                                    ),
                                     
@@ -74,12 +74,22 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-                                                   # textOutput("rows_all"),
+                                                   textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 
                                                    actionButton("reset_all", "Reset all options to defaults")
                                             )
+                                    ),
+                                    
+                                    fluidRow(
+                                            column(3, offset = 3,
+                                                  downloadButton('download_query', 'Save query')
+                                                  ),
+                                           column(3,
+                                                  fileInput("file_input", "Load saved query",
+                                                            accept=c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
+                                           )
                                     ),
                                     
                                     fluidRow(
