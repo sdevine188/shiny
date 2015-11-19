@@ -327,8 +327,15 @@ shinyServer(function(input, output, session){
              program_input <- input$program_input
              initiatives_input <- input$initiatives_input
              query_term <- query_term_placeholder$value
-             saved_query_list <- list(program_input, initiatives_input, query_term)
-             names(saved_query_list) <- c("program_input", "initiatives_input", "query_term")
+             column_input <- input$column_input
+             download_columns <- input$download_columns
+             counties <- input$counties
+             state <- input$state
+             years <- input$years
+             saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, counties, 
+                                      state, years)
+             names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
+                                          "counties", "state", "years")
              saved_query_list_json <- toJSON(saved_query_list)
              saved_query_list_json
         })
@@ -350,15 +357,18 @@ shinyServer(function(input, output, session){
                                 updateSelectInput(session, "program_input",
                                                   choices = c("All programs", as.character(program_options)),
                                                   selected = uploaded_query$program_input)
-#                                 updateSelectInput(session, "column_input",
-#                                                   choices = column_display,
-#                                                   selected = default_columns)
+                                updateSelectInput(session, "column_input",
+                                                  choices = column_display,
+                                                  selected = uploaded_query$column_input)
                                 updateSelectInput(session, "initiatives_input",
                                                   choices = initiatives_display, selected = uploaded_query$initiatives_input)
-#                                 updateSelectInput(session, "text_var1_input",
-#                                                   choices = column_display)
-#                                 updateTextInput(session, "text_term1_input", value = "")
-                                query_term_placeholder$value <- uploaded_query$query_term 
+                                query_term_placeholder$value <- uploaded_query$query_term
+                                updateCheckboxInput(session, "download_columns", value = uploaded_query$download_columns)
+                                counties_all <- c("All counties", as.character(counties()))
+                                updateSelectInput(session, "counties", choices = counties_all, selected = uploaded_query$counties)
+                                states_all <- c("All states", state_list)
+                                updateSelectInput(session, "state", choices = states_all, selected = uploaded_query$state)
+                                updateSliderInput(session, "years", value = c(uploaded_query$years[1], uploaded_query$years[2]))
                         }
                 })
         })
@@ -368,7 +378,6 @@ shinyServer(function(input, output, session){
         data_table <- reactive({
                 data_table <- data.frame()
                 data_table3 <- data_table3()
-                # data_table3 <- data_table_placeholder$df
                 data_table4 <- data_table4()
                 
                 # consider isolating this chunk?
@@ -566,7 +575,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-
+                # input$years        
         })
         
         # create download file
@@ -586,7 +595,7 @@ shinyServer(function(input, output, session){
                         str_c("datafile_", date, ".csv") 
                 },
                 content = function(file) {
-                        write.csv(download_file(), file)
+                        write.csv(download_file(), file, row.names = FALSE)
                 }
         )
         

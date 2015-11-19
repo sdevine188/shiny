@@ -35,9 +35,6 @@ shinyUI(navbarPage("", id = "navbar",
                                             column(3, 
                                                    sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
                                             )
-#                                             column(12, offset = 1, 
-#                                                    downloadButton('downloadData', 'Download Data')
-#                                             )
                                     ),
                                     
                                     fluidRow(
@@ -142,7 +139,7 @@ shinyUI(navbarPage("", id = "navbar",
 #                                                                                   selectInput("text_var1_input", "Choose a text variable to query", 
 #                                                                                               choices = ""),
                                                                                   selectizeInput(
-                                                                                          'text_var1_input', 'Choose a text variable to query', choices = "",
+                                                                                          'text_var1_input', 'Choose a variable to query', choices = "",
                                                                                           options = list(
                                                                                                   onInitialize = I('function() { this.setValue(""); }')
                                                                                           )
