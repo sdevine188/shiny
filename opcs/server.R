@@ -482,8 +482,32 @@ shinyServer(function(input, output, session){
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        
                 }
         })
+        
+        # checkbox to display legend or not
+        observeEvent(input$display_legend, {
+                selected_pal <- selected_pal()
+                selected_title <- selected_title()
+                selected_values <- selected_values()
+                selected_size <- selected_size()
+                selected_format <- selected_format()
+                if(input$display_legend == TRUE){
+                        leafletProxy("map") %>%
+                                addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                          title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                }
+                if(input$display_legend == FALSE){
+                        leafletProxy("map") %>%
+                                clearControls()
+                }
+        })
+        
+#         if(input$display_legend == TRUE){
+#                 addLegend("bottomright", pal = selected_pal, values = selected_values,
+#                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+#         }
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({

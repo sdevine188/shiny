@@ -171,7 +171,8 @@ shinyUI(navbarPage("", id = "navbar",
                                             column(3,
                                                    selectInput("marker_type", "Select color-coding of project icons:", 
                                                                choices = c("By program type", "By fiscal year awarded", 
-                                                                           "By EDA funding level"), selected = "By program type")
+                                                                           "By EDA funding level"), selected = "By program type"),
+                                                   checkboxInput("display_legend", "Display map legend", value = TRUE)
                                                 ),
                                             
                                             column(3,
