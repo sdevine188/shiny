@@ -16,7 +16,9 @@ datafile_small <- read.csv("data/datafile_small_utf8.csv", stringsAsFactors = FA
 datafile <- read.csv("data/datafile_full_utf8.csv", stringsAsFactors = FALSE) 
 
 # create default columns to display
-default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
+# default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
+#                      "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
+default_columns <- c("Control.", "Status", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
                      "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
 
 # create program colors
@@ -458,9 +460,12 @@ shinyServer(function(input, output, session){
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
                 
-                default_popup <- str_c(data_table5_filtered$Appl.Short.Name, data_table5_filtered$address,
-                                       str_c("FY", data_table5_filtered$FY, sep = " "),
-                                       data_table5_filtered$Appr.Desc, str_c("$", data_table5_filtered$Best.EDA..), 
+                default_popup <- str_c(str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
+                                       str_c("Applicant address:", data_table5_filtered$address, sep = " "),
+                                       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                                       str_c("Appropriation:", data_table5_filtered$Appr.Desc, sep = " "), 
+                                       str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
+                                                                       scientific = FALSE),  sep = ""), 
                                        sep = "<br/>")
                 
                 selected_pal <- selected_pal()
