@@ -87,9 +87,14 @@ shinyUI(navbarPage("", id = "navbar",
                                                   downloadButton('download_query', 'Save query')
                                                   ),
                                            column(3,
-                                                  fileInput("file_input", "Load saved query",
-                                                            accept=c("text/csv", "text/comma-separated-values,text/plain", ".csv"))
-                                           )
+                                                  fileInput("file_input", "Upload saved query",
+                                                            accept=c("text/csv", "text/comma-separated-values,text/plain", ".csv", 
+                                                                     ".json"))
+                                           ),
+                                           column(3,
+                                                  radioButtons("saved_query_radio", label = NULL,
+                                                               choices = c("Apply uploaded query", "Do not apply uploaded query"),
+                                                               selected = "Do not apply uploaded query"))
                                     ),
                                     
                                     fluidRow(

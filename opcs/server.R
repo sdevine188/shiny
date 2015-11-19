@@ -172,13 +172,6 @@ shinyServer(function(input, output, session){
                 str_c(reset_columns, reset_programs, reset_initiatives, reset_text_query, reset_all)
         })
         
-        # create dropdown menu to select states
-        output$state <- renderUI({
-                datafile2 <- arrange(datafile, Proj.ST.Abbr)
-                state_choices <- c("All states", unique(as.character(datafile2$Proj.ST.Abbr)))
-                selectInput("state", "Select states:", choices = state_choices, multiple = TRUE, selected = state_choices[1])
-        })
-        
         # create variable for selected_states
         state_data <- reactive({
                 # create placeholder selected_states variable to assign in if statements
@@ -313,7 +306,7 @@ shinyServer(function(input, output, session){
                                         }
                                         if(grepl(" | ", term_value[i])){
                                                 new_value <- str_sub(term_value[i], start = 2, end = -2)
-                                                new_value <- str_replace_all(new_value, "' \\| '", " | ")
+                                                new_value <- str_replace_all(new_value, "' \\| '", "|")
                                                 term_value[i] <- new_value
                                         }
                                 }
@@ -335,9 +328,41 @@ shinyServer(function(input, output, session){
              initiatives_input <- input$initiatives_input
              query_term <- query_term_placeholder$value
              saved_query_list <- list(program_input, initiatives_input, query_term)
+             names(saved_query_list) <- c("program_input", "initiatives_input", "query_term")
              saved_query_list_json <- toJSON(saved_query_list)
              saved_query_list_json
         })
+        
+        # process an uploaded saved query
+        uploaded_query <- reactive({
+                uploaded_file <- input$file_input
+                if(!(is.null(uploaded_file))){
+                        fromJSON(file = uploaded_file$datapath)
+                }
+        })
+        
+        # apply an uploaded query
+        observe({
+                input$saved_query_radio
+                isolate({
+                        uploaded_query <- uploaded_query()
+                        if(input$saved_query_radio == "Apply uploaded query"  && !(is.null(uploaded_query))){
+                                updateSelectInput(session, "program_input",
+                                                  choices = c("All programs", as.character(program_options)),
+                                                  selected = uploaded_query$program_input)
+#                                 updateSelectInput(session, "column_input",
+#                                                   choices = column_display,
+#                                                   selected = default_columns)
+                                updateSelectInput(session, "initiatives_input",
+                                                  choices = initiatives_display, selected = uploaded_query$initiatives_input)
+#                                 updateSelectInput(session, "text_var1_input",
+#                                                   choices = column_display)
+#                                 updateTextInput(session, "text_term1_input", value = "")
+                                query_term_placeholder$value <- uploaded_query$query_term 
+                        }
+                })
+        })
+        
         
         # create variable data_table with latest selected data from advanced query, if necessary
         data_table <- reactive({
@@ -541,8 +566,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                saved_query <- saved_query() 
-                saved_query
+
         })
         
         # create download file
