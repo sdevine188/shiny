@@ -15,7 +15,7 @@ shinyUI(navbarPage("", id = "navbar",
                                             ),
                                             column(6, 
                                                    h2("EDA Performance and National Programs", align = "center"),
-                                                   h2("Data Viewer", align = "center")
+                                                   h2("Grants Viewer", align = "center")
                                             ),
                                             column(3,                       
                                                    textOutput("as_of_date")
