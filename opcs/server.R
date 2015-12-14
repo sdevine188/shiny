@@ -12,8 +12,10 @@ date <- "20151113"
 
 # Read in data file
 # read small data to start map without delay
-datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
-datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
+# datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
+datafile_small <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
+# datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
+datafile <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
 
 # create default columns to display
 # default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 

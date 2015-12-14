@@ -10,11 +10,11 @@ shinyUI(navbarPage("", id = "navbar",
                             
                             fluidPage(
                                     fluidRow(
-                                            column(3,
-                                                   img(src = "eda_logo.jpg", height = 150, width = 150)
-                                            ),
+#                                             column(3,
+#                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
+#                                             ),
                                             column(6, 
-                                                   h2("EDA Performance and National Programs", align = "center"),
+                                                   # h2("EDA Performance and National Programs", align = "center"),
                                                    h2("Grants Viewer", align = "center")
                                             ),
                                             column(3,                       
@@ -33,7 +33,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
                                             ),
                                             column(3, 
-                                                   sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2015, value = c(2014, 2015), sep = "")                     
+                                                   sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2016, value = c(1990, 2016), sep = "")                     
                                             )
                                     ),
                                     
@@ -67,9 +67,9 @@ shinyUI(navbarPage("", id = "navbar",
                             fluidPage( 
                                     
                                     fluidRow(
-                                            column(3,
-                                                   img(src = "eda_logo.jpg", height = 150, width = 150)
-                                            ),
+#                                             column(3,
+#                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
+#                                             ),
                                             column(3, 
                                                    textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
@@ -164,9 +164,9 @@ shinyUI(navbarPage("", id = "navbar",
                    tabPanel("View map",
                             fluidPage( 
                                     fluidRow(
-                                            column(3,
-                                                   img(src = "eda_logo.jpg", height = 150, width = 150)
-                                                ),
+#                                             column(3,
+#                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
+#                                                 ),
                                             
                                             column(3,
                                                    selectInput("marker_type", "Select color-coding of project icons:", 
