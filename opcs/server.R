@@ -12,24 +12,22 @@ date <- "20151113"
 
 # Read in data file
 # read small data to start map without delay
-# datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
-datafile_small <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
-# datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
-datafile <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
+datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
+# datafile_small <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
+datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
+# datafile <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
 
 # create default columns to display
-# default_columns <- c("Project.No.", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
-#                      "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
 default_columns <- c("Control.", "Status", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
                      "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
 
-# create program colors
+# create map color palettes
 program_options <- unique(datafile$Appr.Desc)
-
+appropriation_options <- unique(datafile$Appropriation)
 year_options <- factor(seq(1995, 2016))
 
 program_pal <- colorFactor("Set1", domain = program_options)
-
+appropriation_pal <- colorFactor("Set1", domain = appropriation_options)
 year_pal <- colorFactor("Set1", domain = year_options)
 
 # create columns names in proper display order
@@ -239,7 +237,7 @@ shinyServer(function(input, output, session){
         # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
         data_table3 <- reactive({
                 data_table2 <- data_table2()
-
+                
                 if(input$JobsPIFlag == FALSE){
                         data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
                 }
@@ -277,7 +275,7 @@ shinyServer(function(input, output, session){
                                                              data_table4$Initiatives, ignore.case = TRUE)
                                 data_table4 <- data_table4[selected_codes_index, ]
                         }
-
+                        
                         # create if statements to handle query term
                         if(query_term_placeholder$value == ""){
                                 data_table4 <- data_table4
@@ -328,20 +326,20 @@ shinyServer(function(input, output, session){
         
         # create variable storing the full query term submitted so it can be downloaded
         saved_query <- reactive({
-             program_input <- input$program_input
-             initiatives_input <- input$initiatives_input
-             query_term <- query_term_placeholder$value
-             column_input <- input$column_input
-             download_columns <- input$download_columns
-             counties <- input$counties
-             state <- input$state
-             years <- input$years
-             saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, counties, 
-                                      state, years)
-             names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
-                                          "counties", "state", "years")
-             saved_query_list_json <- toJSON(saved_query_list)
-             saved_query_list_json
+                program_input <- input$program_input
+                initiatives_input <- input$initiatives_input
+                query_term <- query_term_placeholder$value
+                column_input <- input$column_input
+                download_columns <- input$download_columns
+                counties <- input$counties
+                state <- input$state
+                years <- input$years
+                saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, counties, 
+                                         state, years)
+                names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
+                                             "counties", "state", "years")
+                saved_query_list_json <- toJSON(saved_query_list)
+                saved_query_list_json
         })
         
         # process an uploaded saved query
@@ -416,15 +414,17 @@ shinyServer(function(input, output, session){
                 # assign either the placeholder data or the user-selected data (if rows > 1) to be fed into datatable
                 if(nrow(data_table_output) < 1){
                         data_table_output2 <- no_projects2
-                        return(datatable(data_table_output2, filter = "none", rownames = FALSE, options = 
-                                                 list(pageLength = 5)))
+                        #                         return(datatable(data_table_output2, filter = "none", rownames = FALSE, options = list(pageLength = 5)))
+                        return(DT::datatable(data_table_output2, filter = "none", rownames = FALSE, options = list(pageLength = 5)))
                 }
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
-                        return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
+                        #                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
+                        return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
-                server = TRUE
-        })
+        },
+        server = TRUE
+        )
         
         output$map <- renderLeaflet({
                 leaflet(datafile_small) %>% addTiles() %>%
@@ -456,34 +456,35 @@ shinyServer(function(input, output, session){
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
-                data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, address, FY, Appr.Desc, Best.EDA.., lat, lon)
+                data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, address, FY, Appr.Desc, Appropriation, Best.EDA.., lat, lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                
-                default_popup <- str_c(str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
-                                       str_c("Applicant address:", data_table5_filtered$address, sep = " "),
-                                       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                                       str_c("Appropriation:", data_table5_filtered$Appr.Desc, sep = " "), 
-                                       str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
-                                                                       scientific = FALSE),  sep = ""), 
-                                       sep = "<br/>")
-                
-                selected_pal <- selected_pal()
-                selected_title <- selected_title()
-                selected_values <- selected_values()
-                selected_size <- selected_size()
-                selected_format <- selected_format()
-                
-                leafletProxy("map", data = data_table5_filtered) %>%
-                        clearMarkers() %>%
-                        addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
-                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
-                        clearControls() %>%
-                        addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        
+                        default_popup <- str_c(str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
+                                               str_c("Applicant address:", data_table5_filtered$address, sep = " "),
+                                               str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                                               str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "), 
+                                               str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
+                                               str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
+                                                                               scientific = FALSE),  sep = ""), 
+                                               sep = "<br/>")
+                        
+                        selected_pal <- selected_pal()
+                        selected_title <- selected_title()
+                        selected_values <- selected_values()
+                        selected_size <- selected_size()
+                        selected_format <- selected_format()
+                        
+                        leafletProxy("map", data = data_table5_filtered) %>%
+                                clearMarkers() %>%
+                                addCircleMarkers(data = data_table5_filtered, lng = ~lon, lat = ~lat, popup = default_popup,
+                                                 color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                                 fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                                clearControls() %>%
+                                addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                          title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                         
                 }
         })
@@ -506,11 +507,6 @@ shinyServer(function(input, output, session){
                 }
         })
         
-#         if(input$display_legend == TRUE){
-#                 addLegend("bottomright", pal = selected_pal, values = selected_values,
-#                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-#         }
-        
         # create reactive fund_pal seperately to avoid timeout/race conditions
         fund_pal <- reactive({
                 data_table5_filtered <- data_table5_filtered()
@@ -532,7 +528,10 @@ shinyServer(function(input, output, session){
                 
                 # select legend palette
                 selected_pal <- program_pal
-                if(input$marker_type == "By program type"){
+                if(input$marker_type == "By appropriation"){
+                        selected_pal <- appropriation_pal
+                }
+                if(input$marker_type == "By program"){
                         selected_pal <- program_pal
                 }
                 if(input$marker_type == "By fiscal year awarded"){
@@ -548,7 +547,10 @@ shinyServer(function(input, output, session){
         selected_title <- reactive({
                 # select legend title
                 selected_title <- "EDA Program"
-                if(input$marker_type == "By program type"){
+                if(input$marker_type == "By appropriation"){
+                        selected_title <- "EDA Appropriation"
+                }
+                if(input$marker_type == "By program"){
                         selected_title <- "EDA Program"
                 }
                 if(input$marker_type == "By fiscal year awarded"){
@@ -568,9 +570,13 @@ shinyServer(function(input, output, session){
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
                         
+                        #                         selected_values <- data_table5_filtered$Appropriation                        
                         selected_values <- data_table5_filtered$Appr.Desc
-                        if(input$marker_type == "By program type"){
+                        if(input$marker_type == "By program"){
                                 selected_values <- data_table5_filtered$Appr.Desc
+                        }
+                        if(input$marker_type == "By appropriation"){
+                                selected_values <- data_table5_filtered$Appropriation
                         }
                         if(input$marker_type == "By fiscal year awarded"){
                                 selected_values <- factor(data_table5_filtered$FY)
@@ -606,7 +612,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                # input$years        
+                #                 input$table_rows_all
         })
         
         # create download file
