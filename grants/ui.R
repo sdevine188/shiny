@@ -4,6 +4,8 @@ library(stringr)
 library(leaflet)
 library(DT)
 
+date <- "20160209"
+
 shinyUI(navbarPage("", id = "navbar",
                    tabPanel("View data",
                             
@@ -60,7 +62,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(12,
-                                                   textOutput("rows_all"),   
+                                                   # textOutput("rows_all"),   
                                                    DT::dataTableOutput("table")
                                             )
                                     )
@@ -75,7 +77,7 @@ shinyUI(navbarPage("", id = "navbar",
                                                    img(src = "eda_logo.jpg", height = 150, width = 150)
                                             ),
                                             column(3, 
-#                                                    textOutput("rows_all"),
+                                                   textOutput("rows_all"),
                                                    actionButton("submit_query", "Submit query")
                                             ),
                                             column(3, 
@@ -85,7 +87,7 @@ shinyUI(navbarPage("", id = "navbar",
                                     
                                     fluidRow(
                                             column(3, offset = 3,
-                                                   # textInput("download_query_title", "Query Title", value = str_c("query_", date)),
+                                                  textInput("download_query_title", "Query Title", value = str_c("query_", date)),
                                                   downloadButton('download_query', 'Save query')
                                                   ),
                                            column(3,
@@ -156,7 +158,9 @@ shinyUI(navbarPage("", id = "navbar",
                                                                   )
                                                            ),
                                                            column(6,
-                                                                  textOutput("query_term_output")
+                                                                  wellPanel(
+                                                                        textOutput("query_term_output")
+                                                                  )
                                                            )
                                                    )
                                             )

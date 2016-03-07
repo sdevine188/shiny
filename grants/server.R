@@ -15,8 +15,14 @@ date <- "20160209"
 # datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
 # datafile_small <- read_csv("data/small_data_utf8.csv")
 # datafile_small <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
-datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
-datafile <- read_csv("data/shiny_app_data_20160209.csv")
+# datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
+# datafile_small <- data.frame(datafile_small)
+datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
+
+# datafile <- read_csv("data/shiny_app_data_20160209.csv")
+# datafile <- data.frame(datafile)
+datafile <- read.csv("data/shiny_app_data_20160209.csv", stringsAsFactors = FALSE)
+
 # datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
 # datafile <- read_csv("data/shiny_data_20151123.csv") 
 # datafile <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
@@ -326,7 +332,7 @@ shinyServer(function(input, output, session){
                                                              data_table4$Initiatives, ignore.case = TRUE)
                                 data_table4 <- data_table4[selected_codes_index, ]
                         }
-
+                        
                         # create if statements to handle query term
                         if(query_term_placeholder$value == ""){
                                 data_table4 <- data_table4
@@ -374,6 +380,86 @@ shinyServer(function(input, output, session){
                         data_table4
                 })
         })
+        
+        # # inspect query term as used in filter
+        # # create if statements to handle query term
+        # query_term_test <- reactive({ 
+        #         data_table3 <- data_table3()
+        #         data_table4 <- data.frame()
+        #         submit_query <- input$submit_query
+        #         reset_any <- reset_any()
+        #         
+        #         isolate({
+        #                 # create if statements to handle "All programs" option in dropdown menu
+        #                 if("All programs" %in% input$program_input){
+        #                         data_table4 <- data_table3
+        #                 }
+        #                 if(!("All programs" %in% input$program_input)){
+        #                         data_table4 <- filter(data_table3, Appr.Desc %in% input$program_input)
+        #                 }
+        #                 
+        #                 # create if statements to handle initiatives dropdown menu
+        #                 if(is.null(input$initiatives_input)){
+        #                         data_table4 <- data_table4
+        #                 }
+        #                 if(!(is.null(input$initiatives_input))){
+        #                         selected_initiatives_df <- filter(initiatives, code_description %in% 
+        #                                                                   input$initiatives_input)
+        #                         selected_initiative_codes <- selected_initiatives_df$code
+        #                         selected_codes_index <- grep(str_c(selected_initiative_codes, collapse = "|"), 
+        #                                                      data_table4$Initiatives, ignore.case = TRUE)
+        #                         data_table4 <- data_table4[selected_codes_index, ]
+        #                 }
+        #                 
+        #                 # create if statements to handle query term
+        #                 if(query_term_placeholder$value == ""){
+        #                         data_table4 <- data_table4
+        #                 }
+        #                 if(query_term_placeholder$value != ""){
+        #                         data_table_placeholder <- data_table4        
+        #                         term_value <- NULL
+        #                         term_var <- NULL
+        #                         term_pieces <- NULL
+        #                         if(query_term_placeholder$value != ""){
+        #                                 term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
+        #                                 term_pieces <- unlist(term_pieces)
+        #                                 term_pieces <- str_sub(term_pieces, start = 1, end = -2)
+        #                                 term_pieces <- str_split(term_pieces, "\\) & ")
+        #                                 term_pieces <- unlist(term_pieces)
+        #                                 for(i in 1:length(term_pieces)){
+        #                                         if(is.even(i)){
+        #                                                 term_value <- append(term_value, term_pieces[i])
+        #                                         }
+        #                                         if(is.odd(i)){
+        #                                                 term_var <- append(term_var, term_pieces[i])
+        #                                         }
+        #                                 }
+        #                         }
+        #                         
+        #                         # need to get rid of single quotes
+        #                         for(i in 1:length(term_value)){
+        #                                 if(!(grepl(" | ", term_value[i]))){
+        #                                         term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
+        #                                 }
+        #                                 if(grepl(" | ", term_value[i])){
+        #                                         new_value <- str_sub(term_value[i], start = 2, end = -2)
+        #                                         new_value <- str_replace_all(new_value, "' \\| '", "|")
+        #                                         term_value[i] <- new_value
+        #                                 }
+        #                         }
+        #                         
+        #                         
+        #                 #         # filter datatable based on query term
+        #                 #         for(i in 1:length(term_value)){
+        #                 #                 data_table_placeholder <- filter(data_table_placeholder, 
+        #                 #                                                  grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
+        #                 #         }
+        #                 #         data_table4 <- data_table_placeholder
+        #                 }
+        #                 # data_table4
+        #                 term_value
+        #         })
+        # })
         
         # create variable storing the full query term submitted so it can be downloaded
         saved_query <- reactive({
@@ -663,8 +749,12 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                state_data <- state_data()
-                dim(state_data)
+               data_table4 <- data_table4()
+               # query_term_output <- query_term_placeholder$value
+               # str_c(query_term_placeholder$value, dim(data_table4)[1])
+                # query_term_test <- query_term_test()
+                # query_term_test
+                dim(data_table4)
         })
         
         # create download file
@@ -688,10 +778,21 @@ shinyServer(function(input, output, session){
                 }
         )
         
+        # create title for saved query download
+        download_query_title <- reactiveValues(
+                value = str_c("query_", date)
+        )
+        
+        # create observer to update title for saved query download
+        observe({
+                download_query_title$value <- input$download_query_title
+        })
+        
         # download saved query
         output$download_query <- downloadHandler(
+                # download_query_title <- input$download_query_title,
                 filename = function() {
-                        str_c("query_", date) 
+                        str_c(download_query_title$value) 
                 },
                 content = function(file) {
                         write(saved_query(), file)
