@@ -10,22 +10,14 @@ library(readr)
 # provide data "as of date"
 date <- "20160209"
 
-# Read in data file
+# Read in data
+# find current shiny data filename
+shiny_data_filename <- list.files(str_c(getwd(), "/data"))[str_detect(list.files(str_c(getwd(), "/data")), "shiny_app_data_20")]
+shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read small data to start map without delay
-# datafile_small <- read.csv("data/small_data_utf8.csv", stringsAsFactors = FALSE)
-# datafile_small <- read_csv("data/small_data_utf8.csv")
-# datafile_small <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
-# datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
-# datafile_small <- data.frame(datafile_small)
 datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
-
-# datafile <- read_csv("data/shiny_app_data_20160209.csv")
-# datafile <- data.frame(datafile)
-datafile <- read.csv("data/shiny_app_data_20160209.csv", stringsAsFactors = FALSE)
-
-# datafile <- read.csv("data/shiny_data_20151123.csv", stringsAsFactors = FALSE) 
-# datafile <- read_csv("data/shiny_data_20151123.csv") 
-# datafile <- read.csv("data/shiny_data_fake.csv", stringsAsFactors = FALSE)
+# read main data file
+datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE)
 
 # convert Control. to a character, so it can be searched with table filter, instead of numeric slider
 # can place this code in clean_shiny_data script later
