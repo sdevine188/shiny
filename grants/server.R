@@ -572,12 +572,12 @@ shinyServer(function(input, output, session){
                 selected_values <- selected_values_placeholder$value
                 selected_size <- selected_size()
                 selected_format <- selected_format()
-                if(input$display_legend == TRUE){
+                if(input$display_legend == TRUE && input$refresh_map > 0){
                         leafletProxy("map") %>%
                                 addLegend("bottomright", pal = selected_pal, values = selected_values,
                                           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                 }
-                if(input$display_legend == FALSE){
+                if(input$display_legend == FALSE && input$refresh_map > 0){
                         leafletProxy("map") %>%
                                 clearControls()
                 }
@@ -664,7 +664,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                input$display_legend
+                input$refresh_map
         })
         
         # create download file
