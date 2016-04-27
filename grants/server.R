@@ -523,7 +523,8 @@ shinyServer(function(input, output, session){
                 
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
-                # selected_values <- selected_values()
+                selected_size <- selected_size()
+                selected_format <- selected_format()
                 selected_values <- if(data_table5_filtered[1,1] != "no projects"){
                         
                         selected_values <- data_table5_filtered$Appr.Desc
@@ -542,31 +543,17 @@ shinyServer(function(input, output, session){
                         }
                         selected_values
                 }
-                selected_size <- selected_size()
-                selected_format <- selected_format()
-                
+               
                 selected_values_placeholder$value <- selected_values
-                
-                # selected_pal <- year_pal
-                # selected_title <- "Fiscal Year Awarded"
-                # selected_size <- 7
-                # selected_format <- ""
                 
                 leafletProxy("map", data = data_table5_filtered) %>%
                         clearMarkers() %>%
                         addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
                                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
                                          fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
-                        # not actually broke when using selected_values
-                        # addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
-                        #                  color = ~selected_pal(FY), opacity = 1, radius = selected_size,
-                        #                  fillColor = ~selected_pal(FY), fillOpacity = 0) %>%
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-                        # addLegend("bottomright", pal = selected_pal, values = ~FY,
-                        #           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-                        
                 }
         })
         
@@ -652,33 +639,6 @@ shinyServer(function(input, output, session){
                 }
                 selected_title
         })
-        
-        # create reactive selected_values
-#         selected_values <- reactive({
-#                 # select legend values
-#                 data_table5_filtered <- data_table5_filtered()
-# 
-#                 # only run if at least one row of data is selected
-#                 if(data_table5_filtered[1,1] != "no projects"){
-# 
-# #                         selected_values <- data_table5_filtered$Appropriation
-#                         selected_values <- data_table5_filtered$Appr.Desc
-#                         if(input$marker_type == "By program"){
-#                                 selected_values <- data_table5_filtered$Appr.Desc
-#                         }
-#                         if(input$marker_type == "By appropriation"){
-#                                 selected_values <- data_table5_filtered$Appropriation
-#                         }
-#                         if(input$marker_type == "By fiscal year awarded"){
-#                                 # selected_values <- factor(data_table5_filtered$FY)
-#                                 selected_values <- data_table5_filtered$FY
-#                         }
-#                         if(input$marker_type == "By EDA funding level"){
-#                                 selected_values <- data_table5_filtered$Best.EDA..
-#                         }
-#                         selected_values
-#                 }
-#         })
         
         # create reactive selected_size
         selected_size <- reactive({
