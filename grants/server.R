@@ -365,93 +365,14 @@ shinyServer(function(input, output, session){
                                 # filter datatable based on query term
                                 for(i in 1:length(term_value)){
                                         data_table_placeholder <- filter(data_table_placeholder, 
-                                                                         grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
+                                                                         grepl(term_value[i], data_table_placeholder[ , term_var[i]], 
+                                                                               ignore.case = TRUE))
                                 }
                                 data_table4 <- data_table_placeholder
                         }
                         data_table4
                 })
         })
-        
-        # # inspect query term as used in filter
-        # # create if statements to handle query term
-        # query_term_test <- reactive({ 
-        #         data_table3 <- data_table3()
-        #         data_table4 <- data.frame()
-        #         submit_query <- input$submit_query
-        #         reset_any <- reset_any()
-        #         
-        #         isolate({
-        #                 # create if statements to handle "All programs" option in dropdown menu
-        #                 if("All programs" %in% input$program_input){
-        #                         data_table4 <- data_table3
-        #                 }
-        #                 if(!("All programs" %in% input$program_input)){
-        #                         data_table4 <- filter(data_table3, Appr.Desc %in% input$program_input)
-        #                 }
-        #                 
-        #                 # create if statements to handle initiatives dropdown menu
-        #                 if(is.null(input$initiatives_input)){
-        #                         data_table4 <- data_table4
-        #                 }
-        #                 if(!(is.null(input$initiatives_input))){
-        #                         selected_initiatives_df <- filter(initiatives, code_description %in% 
-        #                                                                   input$initiatives_input)
-        #                         selected_initiative_codes <- selected_initiatives_df$code
-        #                         selected_codes_index <- grep(str_c(selected_initiative_codes, collapse = "|"), 
-        #                                                      data_table4$Initiatives, ignore.case = TRUE)
-        #                         data_table4 <- data_table4[selected_codes_index, ]
-        #                 }
-        #                 
-        #                 # create if statements to handle query term
-        #                 if(query_term_placeholder$value == ""){
-        #                         data_table4 <- data_table4
-        #                 }
-        #                 if(query_term_placeholder$value != ""){
-        #                         data_table_placeholder <- data_table4        
-        #                         term_value <- NULL
-        #                         term_var <- NULL
-        #                         term_pieces <- NULL
-        #                         if(query_term_placeholder$value != ""){
-        #                                 term_pieces <- str_split(query_term_placeholder$value, "contains \\(")
-        #                                 term_pieces <- unlist(term_pieces)
-        #                                 term_pieces <- str_sub(term_pieces, start = 1, end = -2)
-        #                                 term_pieces <- str_split(term_pieces, "\\) & ")
-        #                                 term_pieces <- unlist(term_pieces)
-        #                                 for(i in 1:length(term_pieces)){
-        #                                         if(is.even(i)){
-        #                                                 term_value <- append(term_value, term_pieces[i])
-        #                                         }
-        #                                         if(is.odd(i)){
-        #                                                 term_var <- append(term_var, term_pieces[i])
-        #                                         }
-        #                                 }
-        #                         }
-        #                         
-        #                         # need to get rid of single quotes
-        #                         for(i in 1:length(term_value)){
-        #                                 if(!(grepl(" | ", term_value[i]))){
-        #                                         term_value[i] <- str_sub(term_value[i], start = 2, end = -2)
-        #                                 }
-        #                                 if(grepl(" | ", term_value[i])){
-        #                                         new_value <- str_sub(term_value[i], start = 2, end = -2)
-        #                                         new_value <- str_replace_all(new_value, "' \\| '", "|")
-        #                                         term_value[i] <- new_value
-        #                                 }
-        #                         }
-        #                         
-        #                         
-        #                 #         # filter datatable based on query term
-        #                 #         for(i in 1:length(term_value)){
-        #                 #                 data_table_placeholder <- filter(data_table_placeholder, 
-        #                 #                                                  grepl(term_value[i], data_table_placeholder[ , term_var[i]]))
-        #                 #         }
-        #                 #         data_table4 <- data_table_placeholder
-        #                 }
-        #                 # data_table4
-        #                 term_value
-        #         })
-        # })
         
         # create variable storing the full query term submitted so it can be downloaded
         saved_query <- reactive({
@@ -598,31 +519,70 @@ shinyServer(function(input, output, session){
                                        str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
                                        str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
                                                                        scientific = FALSE),  sep = ""), 
-                                       sep = "<br/>")
+                                                                        sep = "<br/>")
                 
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
-                selected_values <- selected_values()
+                # selected_values <- selected_values()
+                selected_values <- if(data_table5_filtered[1,1] != "no projects"){
+                        
+                        selected_values <- data_table5_filtered$Appr.Desc
+                        if(input$marker_type == "By program"){
+                                selected_values <- data_table5_filtered$Appr.Desc
+                        }
+                        if(input$marker_type == "By appropriation"){
+                                selected_values <- data_table5_filtered$Appropriation
+                        }
+                        if(input$marker_type == "By fiscal year awarded"){
+                                # selected_values <- factor(data_table5_filtered$FY)
+                                selected_values <- data_table5_filtered$FY
+                        }
+                        if(input$marker_type == "By EDA funding level"){
+                                selected_values <- data_table5_filtered$Best.EDA..
+                        }
+                        selected_values
+                }
                 selected_size <- selected_size()
                 selected_format <- selected_format()
+                
+                selected_values_placeholder$value <- selected_values
+                
+                # selected_pal <- year_pal
+                # selected_title <- "Fiscal Year Awarded"
+                # selected_size <- 7
+                # selected_format <- ""
                 
                 leafletProxy("map", data = data_table5_filtered) %>%
                         clearMarkers() %>%
                         addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
                                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                         fillColor = ~selected_pal(selected_values), fillOpacity = .2) %>%
+                                         fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
+                        # not actually broke when using selected_values
+                        # addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
+                        #                  color = ~selected_pal(FY), opacity = 1, radius = selected_size,
+                        #                  fillColor = ~selected_pal(FY), fillOpacity = 0) %>%
                         clearControls() %>%
                         addLegend("bottomright", pal = selected_pal, values = selected_values,
                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        # addLegend("bottomright", pal = selected_pal, values = ~FY,
+                        #           title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                         
                 }
         })
+        
+        # create reactiveValues variable, which can be updated from observers
+        # this is placeholder for selected_values() 
+        # this prevents error, since observeEvent for display legend needs it, but its not defined until map refresh button is hit
+        selected_values_placeholder <- reactiveValues(
+                value = datafile$Appr.Desc
+        )
         
         # checkbox to display legend or not
         observeEvent(input$display_legend, {
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
-                selected_values <- selected_values()
+                # selected_values <- selected_values()
+                selected_values <- selected_values_placeholder$value
                 selected_size <- selected_size()
                 selected_format <- selected_format()
                 if(input$display_legend == TRUE){
@@ -637,12 +597,13 @@ shinyServer(function(input, output, session){
         })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
+        # this palette colors map icons by funding level
         fund_pal <- reactive({
                 data_table5_filtered <- data_table5_filtered()
-                
+
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
-                        
+
                         # create funds palette
                         colorNumeric(
                                 palette = "Blues",
@@ -652,9 +613,10 @@ shinyServer(function(input, output, session){
         })
         
         # create reactive selected_pal
+        # this variable holds the palette for the user-selected feature by which to color map icons
         selected_pal <- reactive({
                 fund_pal <- fund_pal()
-                
+
                 # select legend palette
                 selected_pal <- program_pal
                 if(input$marker_type == "By appropriation"){
@@ -692,30 +654,31 @@ shinyServer(function(input, output, session){
         })
         
         # create reactive selected_values
-        selected_values <- reactive({
-                # select legend values
-                data_table5_filtered <- data_table5_filtered()
-                
-                # only run if at least one row of data is selected
-                if(data_table5_filtered[1,1] != "no projects"){
-                        
-#                         selected_values <- data_table5_filtered$Appropriation                        
-                        selected_values <- data_table5_filtered$Appr.Desc
-                        if(input$marker_type == "By program"){
-                                selected_values <- data_table5_filtered$Appr.Desc
-                        }
-                        if(input$marker_type == "By appropriation"){
-                                selected_values <- data_table5_filtered$Appropriation
-                        }
-                        if(input$marker_type == "By fiscal year awarded"){
-                                selected_values <- factor(data_table5_filtered$FY)
-                        }
-                        if(input$marker_type == "By EDA funding level"){
-                                selected_values <- data_table5_filtered$Best.EDA..
-                        }
-                        selected_values
-                }
-        })
+#         selected_values <- reactive({
+#                 # select legend values
+#                 data_table5_filtered <- data_table5_filtered()
+# 
+#                 # only run if at least one row of data is selected
+#                 if(data_table5_filtered[1,1] != "no projects"){
+# 
+# #                         selected_values <- data_table5_filtered$Appropriation
+#                         selected_values <- data_table5_filtered$Appr.Desc
+#                         if(input$marker_type == "By program"){
+#                                 selected_values <- data_table5_filtered$Appr.Desc
+#                         }
+#                         if(input$marker_type == "By appropriation"){
+#                                 selected_values <- data_table5_filtered$Appropriation
+#                         }
+#                         if(input$marker_type == "By fiscal year awarded"){
+#                                 # selected_values <- factor(data_table5_filtered$FY)
+#                                 selected_values <- data_table5_filtered$FY
+#                         }
+#                         if(input$marker_type == "By EDA funding level"){
+#                                 selected_values <- data_table5_filtered$Best.EDA..
+#                         }
+#                         selected_values
+#                 }
+#         })
         
         # create reactive selected_size
         selected_size <- reactive({
@@ -741,12 +704,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-               data_table4 <- data_table4()
-               # query_term_output <- query_term_placeholder$value
-               # str_c(query_term_placeholder$value, dim(data_table4)[1])
-                # query_term_test <- query_term_test()
-                # query_term_test
-                dim(data_table4)
+                input$display_legend
         })
         
         # create download file
