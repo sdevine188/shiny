@@ -189,7 +189,7 @@ shinyUI(
                             ),
                             fluidRow(
                                     column(12, align = "center",
-                                           textOutput("rows_all"),
+                                           # textOutput("rows_all"),
                                            leafletOutput("map", width = 1200, height = 700)
                                     )
                             ),
