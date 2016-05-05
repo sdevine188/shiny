@@ -509,27 +509,30 @@ shinyServer(function(input, output, session){
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
-                data_table5_filtered <- select(data_table5_filtered, Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
+                data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
                 
                 # only run if at least one row of data is selected
                 if(data_table5_filtered[1,1] != "no projects"){
+                        
+                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
+                #                 str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "),
+                #                 str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
+                #                 str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                #                 str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
+                #                 str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "),
+                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",",
+                #                                                scientific = FALSE),  sep = ""),
+                #                                                 sep = "<br/>")
                 
-                default_popup <- str_c(str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
-                                       str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                                       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                                       str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "), 
-                                       str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
-                                       str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
-                                                                       scientific = FALSE),  sep = ""), 
-                                                                        sep = "<br/>")
-                
+                default_popup <- default_popup()
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
                 selected_size <- selected_size()
                 selected_format <- selected_format()
+                # selected_values <- selected_values()
                 selected_values <- if(data_table5_filtered[1,1] != "no projects"){
-                        
+
                         selected_values <- data_table5_filtered$Appr.Desc
                         if(input$marker_type == "By program"){
                                 selected_values <- data_table5_filtered$Appr.Desc
@@ -584,6 +587,49 @@ shinyServer(function(input, output, session){
                         leafletProxy("map") %>%
                                 clearControls()
                 }
+        })
+        
+        # reactive for selected_values
+        # selected_values <- reactive({
+        #         data_table5_filtered <- data_table5_filtered()
+        #         data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
+        #         data_table5_filtered <- na.omit(data_table5_filtered)
+        # 
+        #         if(data_table5_filtered[1,1] != "no projects"){
+        # 
+        #                 selected_values <- data_table5_filtered$Appr.Desc
+        #                 if(input$marker_type == "By program"){
+        #                         selected_values <- data_table5_filtered$Appr.Desc
+        #                 }
+        #                 if(input$marker_type == "By appropriation"){
+        #                         selected_values <- data_table5_filtered$Appropriation
+        #                 }
+        #                 if(input$marker_type == "By fiscal year awarded"){
+        #                         # selected_values <- factor(data_table5_filtered$FY)
+        #                         selected_values <- data_table5_filtered$FY
+        #                 }
+        #                 if(input$marker_type == "By EDA funding level"){
+        #                         selected_values <- data_table5_filtered$Best.EDA..
+        #                 }
+        #                 selected_values
+        #         }
+        # })
+        
+        # reactive to create default map popups
+        default_popup <- reactive({
+                data_table5_filtered <- data_table5_filtered()
+                data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
+                data_table5_filtered <- na.omit(data_table5_filtered)
+                
+                str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
+                       str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
+                       str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
+                       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                       str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
+                       str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
+                       str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
+                                                       scientific = FALSE),  sep = ""), 
+                       sep = "<br/>")
         })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
@@ -667,7 +713,8 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                input$refresh_map
+                data_table5_filtered <- data_table5_filtered()
+                data_table5_filtered$Control.[1]
         })
         
         # create download file
