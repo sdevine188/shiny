@@ -43,20 +43,25 @@ shinyUI(
                                     )
                             ),
                             fluidRow(
-                                    column(6,
-                                           checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
-                                           conditionalPanel(
-                                                   condition = "input.JobsPIFlag == true",
-                                                   helpText("Please note that checking the box to request projects containing grantee estimates for jobs and private investment 
-                                                            will cause the dataset to be truncated."), 
-                                                   helpText("The truncated dataset will only include construction-related projects made under 
-                                                            the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
-                                                            containing grantee estimates for jobs and private investment.")
-                                                   )
-                                        ),
+                                    # column(6,
+                                    #        checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
+                                    #        conditionalPanel(
+                                    #                condition = "input.JobsPIFlag == true",
+                                    #                helpText("Please note that checking the box to request projects containing grantee estimates for jobs and private investment 
+                                    #                         will cause the dataset to be truncated."), 
+                                    #                helpText("The truncated dataset will only include construction-related projects made under 
+                                    #                         the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
+                                    #                         containing grantee estimates for jobs and private investment.")
+                                    #                )
+                                    #     ),
                                         column(3,
                                                downloadButton("downloadData", "Download Data")
                                         )
+                           ),
+                           fluidRow(
+                                   column(12, 
+                                          br()
+                                   )
                            ),
                             fluidRow(
                                     column(12,

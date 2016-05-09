@@ -292,21 +292,22 @@ shinyServer(function(input, output, session){
         })
         
         # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
-        data_table3 <- reactive({
-                data_table2 <- data_table2()
-
-                if(input$JobsPIFlag == FALSE){
-                        data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
-                }
-                if(input$JobsPIFlag == TRUE){
-                        data_table3 <- filter(data_table2, Cons.Non == "C" | Cons.Non == "B")
-                }      
-                data_table3
-        })
+        # data_table3 <- reactive({
+        #         data_table2 <- data_table2()
+        # 
+        #         if(input$JobsPIFlag == FALSE){
+        #                 data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
+        #         }
+        #         if(input$JobsPIFlag == TRUE){
+        #                 data_table3 <- filter(data_table2, Cons.Non == "C" | Cons.Non == "B")
+        #         }      
+        #         data_table3
+        # })
         
         # filter data based on advanced query inputs
         data_table4 <- reactive({
-                data_table3 <- data_table3()
+                # data_table3 <- data_table3()
+                data_table3 <- data_table2()
                 data_table4 <- data.frame()
                 submit_query <- input$submit_query
                 reset_any <- reset_any()
@@ -437,7 +438,8 @@ shinyServer(function(input, output, session){
         # create variable data_table with latest selected data from advanced query, if necessary
         data_table <- reactive({
                 data_table <- data.frame()
-                data_table3 <- data_table3()
+                # data_table3 <- data_table3()
+                data_table3 <- data_table2()
                 data_table4 <- data_table4()
                 
                 # consider isolating this chunk?
