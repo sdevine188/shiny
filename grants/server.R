@@ -15,7 +15,15 @@ shiny_data_filename <- list.files(str_c(getwd(), "/data"))[str_detect(list.files
 shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read main data file
 # datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE)
+#datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE, colClasses = c("Status" = "factor",
+#                "Appl.Short.Name" = "factor", "Appr.Desc" = "factor"))
+#save(datafile, file = "C:/Users/SDevine/Documents/datafile.RData")
+# load("C:/Users/SDevine/Documents/datafile.RData")
 datafile <- read_csv(shiny_data_filename)
+# datafile <- read_csv(shiny_data_filename, col_types = list(Status = col_factor()))
+
+
+
 datafile <- data.frame(datafile)
 # read small data to start map without delay
 # datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
@@ -69,7 +77,7 @@ state_list <- state_list[-1]
 
 # shiny server
 shinyServer(function(input, output, session){
-        
+
         # create as_of_date display
         output$as_of_date <- renderText({
                 str_c("Data as of: ", date)
@@ -479,6 +487,10 @@ shinyServer(function(input, output, session){
                 }
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
+                        data_table_output2$Status <- factor(data_table_output2$Status)
+                        data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
+                        # data_table_output2$Proj.ST.Abbr <- factor(data_table_output2$Proj.ST.Abbr)
+                        # data_table_output2$Appl.City.Name <- factor(data_table_output2$Appl.City.Name)
 #                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                         return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
