@@ -7,8 +7,7 @@ library(DT)
 library(rjson)
 library(readr)
 
-# provide data "as of date"
-date <- "20160209"
+
 
 # Read in data
 # find current shiny data filename
@@ -17,10 +16,16 @@ shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read main data file
 # datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE)
 datafile <- read_csv(shiny_data_filename)
+datafile <- data.frame(datafile)
 # read small data to start map without delay
 # datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
 
+# provide data "as of date"
+# date <- "20160209"
+date <- str_sub(shiny_data_filename, str_locate(shiny_data_filename, "20")[1], 
+                str_locate(shiny_data_filename, ".csv")[1] - 1)
+date <- str_replace(ymd(date), " UTC", "")
 
 # convert Control. to a character, so it can be searched with table filter, instead of numeric slider
 # can place this code in clean_shiny_data script later

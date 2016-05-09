@@ -3,20 +3,23 @@ library(dplyr)
 library(stringr)
 library(leaflet)
 library(DT)
-
-date <- "20160209"
+library(shinythemes)
 
 shinyUI(
         navbarPage("", id = "navbar",
            tabPanel("View data",
-                    fluidPage(
+                    fluidPage(theme = shinytheme("cerulean"),
                             fluidRow(
                                     column(3,
                                            img(src = "eda_logo.jpg", height = 150, width = 150)
                                     ),
                                     column(6, 
-                                           h2("EDA Performance and National Programs", align = "center"),
-                                           h2("Grants Viewer", align = "center")
+                                           h2(strong("Grants Viewer"), align = "center", style = "font-size:30pt"),
+                                           h2("EDA Performance and National Programs", align = "center",
+                                              style = "font-size:20pt")
+                                           # h2("EDA Performance and National Programs", align = "center",
+                                           #    style = "font-family: 'Open Sans', sans-serif"),
+                                           # h2("EDA Performance and National Programs", align = "center"),
                                     ),
                                     column(3,                       
                                            textOutput("as_of_date")
@@ -80,7 +83,7 @@ shinyUI(
                             ),
                             fluidRow(
                                     column(3, offset = 3,
-                                          textInput("download_query_title", "Query Title", value = str_c("query_", date)),
+                                          textInput("download_query_title", "Query Title", value = "query_title"),
                                           downloadButton('download_query', 'Save query')
                                           ),
                                    column(3,
