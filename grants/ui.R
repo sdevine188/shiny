@@ -30,8 +30,8 @@ shinyUI(
                             ),
                             fluidRow(
                                     column(3,                       
-                                           selectInput("state", "Select a state", choices = "", multiple = TRUE),
-                                           selectInput("counties", "Select a county:", choices = "", multiple = TRUE)                    
+                                           selectInput("state", "Select states", choices = "", multiple = TRUE),
+                                           selectInput("counties", "Select counties:", choices = "", multiple = TRUE)                    
                                     ),
                                     column(3, 
                                            radioButtons("project_applicant_radio", "Select state/county based on:",
@@ -39,7 +39,7 @@ shinyUI(
                                                         selected = "Project state/county")
                                     ),
                                     column(3, 
-                                           sliderInput("years", label = "Select fiscal year(s)", min = 1990, max = 2016, value = c(1990, 2016), sep = "")                     
+                                           sliderInput("years", label = "Select fiscal years", min = 1990, max = 2016, value = c(1990, 2016), sep = "")                     
                                     )
                             ),
                             fluidRow(

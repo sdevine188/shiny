@@ -6,6 +6,7 @@ library(stringr)
 library(DT)
 library(rjson)
 library(readr)
+library(lubridate)
 
 
 
@@ -39,10 +40,6 @@ date <- str_replace(ymd(date), " UTC", "")
 # can place this code in clean_shiny_data script later
 datafile$Control. <- as.character(datafile$Control.)
 
-# create default columns to display
-default_columns <- c("Control.", "Status", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
-                     "Project.Short.Descrip", "Appl.City.Name", "Proj.ST.Abbr")
-
 # create map color palettes
 program_options <- unique(datafile$Appr.Desc)
 appropriation_options <- unique(datafile$Appropriation)
@@ -51,6 +48,11 @@ year_options <- factor(seq(1995, 2016))
 program_pal <- colorFactor("Set1", domain = program_options)
 appropriation_pal <- colorFactor("Set1", domain = appropriation_options)
 year_pal <- colorFactor("Set1", domain = year_options)
+
+# create default columns to display
+default_columns <- c("Control.", "Status", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
+                     "Project.Short.Descrip", "Initiatives", "Proj.ST.Abbr", "RO..")
+
 
 # create columns names in proper display order
 # will need to specify columns to display once final dataset is arranged, since lat/lon etc aren't needed
@@ -489,6 +491,8 @@ shinyServer(function(input, output, session){
                         data_table_output2 <- data_table_output
                         data_table_output2$Status <- factor(data_table_output2$Status)
                         data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
+                        data_table_output2$RO.. <- factor(data_table_output2$RO..)
+                        
                         # data_table_output2$Proj.ST.Abbr <- factor(data_table_output2$Proj.ST.Abbr)
                         # data_table_output2$Appl.City.Name <- factor(data_table_output2$Appl.City.Name)
 #                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
