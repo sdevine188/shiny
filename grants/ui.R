@@ -172,33 +172,35 @@ shinyUI(
                                            img(src = "eda_logo.jpg", height = 150, width = 150)
                                         ),
                                     column(3,
-                                           selectInput("marker_type", "Select color-coding of award icons:", 
-                                                       choices = c("By appropriation", "By program", "By fiscal year awarded", 
-                                                                   "By EDA funding level"), selected = "By appropriation"),
-                                           checkboxInput("display_legend", "Display map legend", value = TRUE)
-                                        ),
-                                    column(3,
-                                           selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
-                                                                                "Large circles"), selected = "Large circles"),
-                                           
                                            radioButtons("map_radio", "Select type of map to display:",
                                                         choices = c("Map with award icons", "Map with geographic boundaries"),
                                                         selected = "Map with award icons")
-                                           # actionLink("icon_link", "Note on project mapping"),
-                                           # conditionalPanel(
-                                           #         condition = "input.icon_link == true",
-                                           #         helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
-                                           #                  For an applicant with a P.O. Box address, the project will be mapped in the center of the 
-                                           #                  applicant's zip code.")
-                                           #         )
-                                           ),
+                                        ),
                                     column(3,
                                            actionButton("refresh_map", "Refresh map")
+                                    ),
+                                    column(3,
+                                           checkboxInput("display_legend", "Display map legend", value = TRUE)
                                            )
                                    ),
                             fluidRow(column(12,
                                             br())
                             ),
+                            fluidRow(column(12,
+                                    conditionalPanel(
+                                            condition = "input.map_radio == 'Map with award icons'",
+                                            
+                                            column(3, offset = 3, 
+                                                  selectInput("marker_type", "Select color-coding of award icons:", 
+                                                                choices = c("By appropriation", "By program", "By fiscal year awarded", 
+                                                              "By EDA funding level"), selected = "By appropriation")
+                                                ),
+                                            column(3, 
+                                                   selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
+                                                                                        "Large circles"), selected = "Large circles")
+                                                   )
+                                        )
+                                )),
                             fluidRow(
                                     column(12, align = "center",
                                            # textOutput("rows_all"),
