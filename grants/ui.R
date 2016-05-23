@@ -172,13 +172,13 @@ shinyUI(
                                            img(src = "eda_logo.jpg", height = 150, width = 150)
                                         ),
                                     column(3,
-                                           selectInput("marker_type", "Select color-coding of project icons:", 
+                                           selectInput("marker_type", "Select color-coding of award icons:", 
                                                        choices = c("By appropriation", "By program", "By fiscal year awarded", 
                                                                    "By EDA funding level"), selected = "By appropriation"),
                                            checkboxInput("display_legend", "Display map legend", value = TRUE)
                                         ),
                                     column(3,
-                                           selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
+                                           selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
                                                                                 "Large circles"), selected = "Large circles"),
                                            
                                            radioButtons("map_radio", "Select type of map to display:",
