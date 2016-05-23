@@ -179,14 +179,18 @@ shinyUI(
                                         ),
                                     column(3,
                                            selectInput("circle_size", "Select size of project icons:", choices = c("Small circles", 
-                                                                                                                   "Large circles"), selected = "Large circles"),
-                                           actionLink("icon_link", "Note on project mapping"),
-                                           conditionalPanel(
-                                                   condition = "input.icon_link == true",
-                                                   helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
-                                                            For an applicant with a P.O. Box address, the project will be mapped in the center of the 
-                                                            applicant's zip code.")
-                                                   )
+                                                                                "Large circles"), selected = "Large circles"),
+                                           
+                                           radioButtons("map_radio", "Select type of map to display:",
+                                                        choices = c("Map with award icons", "Map with geographic boundaries"),
+                                                        selected = "Map with award icons")
+                                           # actionLink("icon_link", "Note on project mapping"),
+                                           # conditionalPanel(
+                                           #         condition = "input.icon_link == true",
+                                           #         helpText("Please note that projects are mapped using the lead applicant's address that is entered into OPCS.
+                                           #                  For an applicant with a P.O. Box address, the project will be mapped in the center of the 
+                                           #                  applicant's zip code.")
+                                           #         )
                                            ),
                                     column(3,
                                            actionButton("refresh_map", "Refresh map")
