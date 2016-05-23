@@ -612,27 +612,26 @@ shinyServer(function(input, output, session){
                                 state_boundaries2 <- subset(state_boundaries, state_boundaries$STATEFP %in% unique(map_data$state_fips))
                                 state_boundaries2$funding <- map_data$funding
                                 
+                                funding_values <- map_data$funding
+                                
                                 map_boundaries_fund_pal <- colorNumeric(
                                         palette = "Blues",
                                         domain = state_boundaries2$funding
                                 )
                                 
+                                default_popup <- str_c(str_c("State: ", state_boundaries2$NAME),
+                                                str_c("EDA funds: $", prettyNum(state_boundaries2$funding, big.mark = ",", scientific = FALSE),  sep = ""),
+                                                sep = "<br/>")
+                                
                                 leafletProxy("map_boundaries", data = state_boundaries2) %>% addTiles() %>%
+                                        clearShapes() %>%
                                         addPolygons(
                                                 stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
                                                 color = ~ map_boundaries_fund_pal(state_boundaries2$funding),
-                                                popup = ~ str_c(state_boundaries2$NAME, state_boundaries2$funding, sep = "<br/>")
-                                        )
-                                
-                                
-                                # leafletProxy("map_boundaries", data = data_table5_filtered) %>%
-                                #         clearMarkers() %>%
-                                #         addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
-                                #                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                #                          fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
-                                #         clearControls() %>%
-                                #         addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                #                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                                                popup = default_popup) %>%
+                                        clearControls() %>%
+                                        addLegend("bottomright", pal = map_boundaries_fund_pal, values = funding_values,
+                                                  title = "EDA Funding Level", opacity = 1, labFormat = labelFormat(prefix = "$"))
                         }
                 }
         })
@@ -662,6 +661,25 @@ shinyServer(function(input, output, session){
                                 clearControls()
                 }
         })
+        
+        # checkbox to display legend or not on geographic boundaries map
+        # observeEvent(input$display_legend, {
+        #         selected_pal <- selected_pal()
+        #         selected_title <- selected_title()
+        #         # selected_values <- selected_values()
+        #         selected_values <- selected_values_placeholder$value
+        #         selected_size <- selected_size()
+        #         selected_format <- selected_format()
+        #         if(input$display_legend == TRUE && input$refresh_map > 0){
+        #                 leafletProxy("map") %>%
+        #                         addLegend("bottomright", pal = selected_pal, values = selected_values,
+        #                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+        #         }
+        #         if(input$display_legend == FALSE && input$refresh_map > 0){
+        #                 leafletProxy("map") %>%
+        #                         clearControls()
+        #         }
+        # })
         
         # reactive for selected_values
         # selected_values <- reactive({
