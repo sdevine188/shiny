@@ -202,7 +202,15 @@ shinyUI(
                             fluidRow(
                                     column(12, align = "center",
                                            # textOutput("rows_all"),
-                                           leafletOutput("map", width = 1200, height = 700)
+                                           conditionalPanel(
+                                                   condition = "input.map_radio == 'Map with award icons'",
+                                                   leafletOutput("map", width = 1200, height = 700)
+                                           ),
+                                           conditionalPanel(
+                                                   condition = "input.map_radio == 'Map with geographic boundaries'",
+                                                   leafletOutput("map_boundaries", width = 1200, height = 700)
+                                           )
+                                           # leafletOutput("map", width = 1200, height = 700)
                                     )
                             ),
                             fluidRow(

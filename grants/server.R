@@ -7,6 +7,7 @@ library(DT)
 library(rjson)
 library(readr)
 library(lubridate)
+library(rgdal)
 
 
 
@@ -20,12 +21,9 @@ shiny_data_filename <- str_c("data/", shiny_data_filename)
 #                "Appl.Short.Name" = "factor", "Appr.Desc" = "factor"))
 #save(datafile, file = "C:/Users/SDevine/Documents/datafile.RData")
 # load("C:/Users/SDevine/Documents/datafile.RData")
-datafile <- read_csv(shiny_data_filename)
+datafile <- data.frame(read_csv(shiny_data_filename))
 # datafile <- read_csv(shiny_data_filename, col_types = list(Status = col_factor()))
 
-
-
-datafile <- data.frame(datafile)
 # read small data to start map without delay
 # datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
@@ -76,6 +74,10 @@ is.odd <- function(x) x %% 2 != 0
 state_arr <- arrange(datafile, Appl.State.Abbr)
 state_list <- unique(state_arr$Appl.State.Abbr)
 state_list <- state_list[-1]
+
+# load geographic boundary data
+state_boundaries <- readOGR("data/cb_2015_us_state_20m/cb_2015_us_state_20m.shp",
+                  layer = "cb_2015_us_state_20m", verbose = FALSE)
 
 # shiny server
 shinyServer(function(input, output, session){
@@ -507,6 +509,11 @@ shinyServer(function(input, output, session){
                         fitBounds(-160.0583, 20.65798, -60.954694, 60.60825)
         })
         
+        output$map_boundaries <- renderLeaflet({
+                leaflet(datafile_small) %>% addTiles() %>%
+                        fitBounds(-160.0583, 20.65798, -60.954694, 60.60825)
+        })
+        
         # create reactive variable for filtered data
         data_table5_filtered <- reactive({
                 data_table5 <- data_table()
@@ -532,68 +539,112 @@ shinyServer(function(input, output, session){
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
-                data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
+                data_table5_filtered <- select(data_table5_filtered, Control., Appl.FIPS.ST, Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
                 
-                # only run if at least one row of data is selected
-                if(data_table5_filtered[1,1] != "no projects"){
+                # update map_marker, if selected, when refresh_map button is hit
+                if(input$map_radio == "Map with award icons"){
                         
-                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
-                #                 str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "),
-                #                 str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                #                 str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                #                 str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
-                #                 str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "),
-                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",",
-                #                                                scientific = FALSE),  sep = ""),
-                #                                                 sep = "<br/>")
+                        # only run if at least one row of data is selected
+                        if(data_table5_filtered[1,1] != "no projects"){
+                                
+                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
+                                #                 str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "),
+                                #                 str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
+                                #                 str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                                #                 str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
+                                #                 str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "),
+                                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",",
+                                #                                                scientific = FALSE),  sep = ""),
+                                #                                                 sep = "<br/>")
+                                
+                                default_popup <- default_popup()
+                                selected_pal <- selected_pal()
+                                selected_title <- selected_title()
+                                selected_size <- selected_size()
+                                selected_format <- selected_format()
+                                # selected_values <- selected_values()
+                                selected_values <- if(data_table5_filtered[1,1] != "no projects"){
                 
-                default_popup <- default_popup()
-                selected_pal <- selected_pal()
-                selected_title <- selected_title()
-                selected_size <- selected_size()
-                selected_format <- selected_format()
-                # selected_values <- selected_values()
-                selected_values <- if(data_table5_filtered[1,1] != "no projects"){
-
-                        selected_values <- data_table5_filtered$Appr.Desc
-                        if(input$marker_type == "By program"){
-                                selected_values <- data_table5_filtered$Appr.Desc
+                                        selected_values <- data_table5_filtered$Appr.Desc
+                                        if(input$marker_type == "By program"){
+                                                selected_values <- data_table5_filtered$Appr.Desc
+                                        }
+                                        if(input$marker_type == "By appropriation"){
+                                                selected_values <- data_table5_filtered$Appropriation
+                                        }
+                                        if(input$marker_type == "By fiscal year awarded"){
+                                                # selected_values <- factor(data_table5_filtered$FY)
+                                                selected_values <- data_table5_filtered$FY
+                                        }
+                                        if(input$marker_type == "By EDA funding level"){
+                                                selected_values <- data_table5_filtered$Best.EDA..
+                                        }
+                                        selected_values
+                                }
+                               
+                                selected_values_placeholder$value <- selected_values
+                                
+                                leafletProxy("map", data = data_table5_filtered) %>%
+                                        clearMarkers() %>%
+                                        addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
+                                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                                         fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
+                                        clearControls() %>%
+                                        addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                         }
-                        if(input$marker_type == "By appropriation"){
-                                selected_values <- data_table5_filtered$Appropriation
-                        }
-                        if(input$marker_type == "By fiscal year awarded"){
-                                # selected_values <- factor(data_table5_filtered$FY)
-                                selected_values <- data_table5_filtered$FY
-                        }
-                        if(input$marker_type == "By EDA funding level"){
-                                selected_values <- data_table5_filtered$Best.EDA..
-                        }
-                        selected_values
                 }
-               
-                selected_values_placeholder$value <- selected_values
                 
-                leafletProxy("map", data = data_table5_filtered) %>%
-                        clearMarkers() %>%
-                        addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
-                                         color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
-                                         fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
-                        clearControls() %>%
-                        addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                # update map_boundaries, if selected, when refresh_map button is hit
+                if(input$map_radio == "Map with geographic boundaries"){
+                        
+                        if(data_table5_filtered[1,1] != "no projects"){
+                                
+                                # update map shape file with funding data for selected records
+                                datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST)) %>% select(Appl.FIPS.ST, Best.EDA..)
+                                state_list <- data.frame("state_fips" = state_boundaries$STATEFP)
+                                state_list$state_fips <- as.numeric(as.character(state_list$state_fips))
+                                state_list <- filter(state_list, state_fips %in% unique(datafile_map$Appl.FIPS.ST))
+                                state_funding <- datafile_map %>% group_by(Appl.FIPS.ST) %>% summarize(funding = sum(Best.EDA..))
+                                map_data <- left_join(state_list, state_funding, by = c("state_fips" = "Appl.FIPS.ST"))
+                                map_data$state_fips <- factor(str_pad(map_data$state_fips, width = 2, side = "left", pad = "0"))
+                                state_boundaries2 <- subset(state_boundaries, state_boundaries$STATEFP %in% unique(map_data$state_fips))
+                                state_boundaries2$funding <- map_data$funding
+                                
+                                map_boundaries_fund_pal <- colorNumeric(
+                                        palette = "Blues",
+                                        domain = state_boundaries2$funding
+                                )
+                                
+                                leafletProxy("map_boundaries", data = state_boundaries2) %>% addTiles() %>%
+                                        addPolygons(
+                                                stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
+                                                color = ~ map_boundaries_fund_pal(state_boundaries2$funding),
+                                                popup = ~ str_c(state_boundaries2$NAME, state_boundaries2$funding, sep = "<br/>")
+                                        )
+                                
+                                
+                                # leafletProxy("map_boundaries", data = data_table5_filtered) %>%
+                                #         clearMarkers() %>%
+                                #         addCircleMarkers(data = data_table5_filtered, lng = ~app_lon, lat = ~app_lat, popup = default_popup,
+                                #                          color = ~selected_pal(selected_values), opacity = 1, radius = selected_size,
+                                #                          fillColor = ~selected_pal(selected_values), fillOpacity = 0) %>%
+                                #         clearControls() %>%
+                                #         addLegend("bottomright", pal = selected_pal, values = selected_values,
+                                #                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
+                        }
                 }
         })
         
         # create reactiveValues variable, which can be updated from observers
-        # this is placeholder for selected_values() 
+        # this is placeholder for selected_values() with icon map 
         # this prevents error, since observeEvent for display legend needs it, but its not defined until map refresh button is hit
         selected_values_placeholder <- reactiveValues(
                 value = datafile$Appr.Desc
         )
         
-        # checkbox to display legend or not
+        # checkbox to display legend or not on award map
         observeEvent(input$display_legend, {
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
