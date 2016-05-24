@@ -541,7 +541,7 @@ shinyServer(function(input, output, session){
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
-                data_table5_filtered <- select(data_table5_filtered, Control., Appl.FIPS.ST, Appl.FIPS.Cnty, 
+                data_table5_filtered <- select(data_table5_filtered, Control., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
                                                Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, 
                                                Best.EDA.., app_lat, app_lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
@@ -623,6 +623,32 @@ shinyServer(function(input, output, session){
                                         geography <- "State"
                                 }
                                 
+                                if(input$map_geography == "Congressional District"){
+                                        datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), !is.na(Appl.Cong.Dist), Best.EDA.. < 50000000) %>% 
+                                                select(Appl.FIPS.ST, Appl.Cong.Dist, Best.EDA..)
+                                        datafile_map$state_cd_fips <- str_c(str_pad(datafile_map$Appl.FIPS.ST, width = 2, side = "left", pad = "0"),
+                                                                            str_pad(datafile_map$Appl.Cong.Dist, width = 2, side = "left", pad = "0"))
+                                        cd_list <- data.frame("state_fips" = cd_boundaries$STATEFP, "cd_fips" = cd_boundaries$CD114FP)
+                                        for(i in 1:nrow(cd_list)){
+                                                if(cd_list$cd_fips[i] == "00"){
+                                                        cd_list$cd_fips[i] <- "01"
+                                                }
+                                        }
+                                        cd_list$cd_fips <- str_pad(cd_list$cd_fips, width = 2, side = "left", pad = "0")
+                                        cd_list$state_cd_fips <- str_pad(str_c(cd_list$state_fips, cd_list$cd_fips), width = 4, 
+                                                                         side = "left", pad = "0")
+                                        cd_boundaries$state_cd_fips <- cd_list$state_cd_fips
+                                        cd_list <- filter(cd_list, as.character(state_cd_fips) %in% unique(datafile_map$state_cd_fips))
+                                        cd_funding <- datafile_map %>% group_by(state_cd_fips) %>% summarize(funding = sum(Best.EDA..), count = n())
+                                        map_data <- left_join(cd_list, cd_funding, by = c("state_cd_fips" = "state_cd_fips"))
+                                        map_data$state_cd_fips <- factor(map_data$state_cd_fips)
+                                        map_boundaries <- subset(cd_boundaries, cd_boundaries$state_cd_fips %in% unique(map_data$state_cd_fips))
+                                        map_boundaries$funding <- map_data$funding
+                                        map_boundaries$count <- map_data$count
+                                        
+                                        geography = "Congressional District"
+                                }
+                                
                                 if(input$map_geography == "County"){
                                         
                                         # update map shape file with funding data for selected records
@@ -664,7 +690,7 @@ shinyServer(function(input, output, session){
                                         clearShapes() %>%
                                         addPolygons(
                                                 stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
-                                                color = ~ map_boundaries_fund_pal(map_boundaries$funding),
+                                                fillColor = ~ map_boundaries_fund_pal(map_boundaries$funding),
                                                 popup = default_popup) %>%
                                         clearControls() %>%
                                         addLegend("bottomright", pal = map_boundaries_fund_pal, values = funding_values,

@@ -209,7 +209,7 @@ shinyUI(
                                            
                                            column(3, offset = 3, align = "center",
                                                   selectInput("map_geography", "Select geographic boundaries to display", choices = 
-                                                        c("State", "County", "Congressional District"), multiple = FALSE, selected = "State")
+                                                        c("State", "Congressional District", "County"), multiple = FALSE, selected = "State")
                                                   ),
                                            column(3, align = "center",
                                                   checkboxInput("display_legend_geography", "Display map legend", value = TRUE)

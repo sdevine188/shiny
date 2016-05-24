@@ -4,6 +4,9 @@ state_boundaries <- readOGR("data/cb_2015_us_state_20m/cb_2015_us_state_20m.shp"
 county_boundaries <- readOGR("data/cb_2015_us_county_20m/cb_2015_us_county_20m.shp",
                             layer = "cb_2015_us_county_20m", verbose = FALSE)
 
+cd_boundaries <- readOGR("data/cb_2014_us_cd114_20m/cb_2014_us_cd114_20m.shp",
+                             layer = "cb_2014_us_cd114_20m", verbose = FALSE)
+
 pal <- colorNumeric(
         palette = "Blues",
         domain = as.numeric(as.character(state_boundaries$STATEFP))
@@ -14,11 +17,28 @@ pal <- colorNumeric(
         domain = as.numeric(as.character(county_boundaries$COUNTYFP))
 )
 
-leaflet(county_boundaries) %>% addTiles() %>% fitBounds(-160.0583, 20.65798, -60.954694, 60.60825) %>%
+pal <- colorNumeric(
+        palette = "Blues",
+        domain = as.numeric(as.character(cd_boundaries$CD114FP))
+)
+
+pal <- colorFactor(
+        palette = "Set1",
+        domain = factor(cd_boundaries$CD114FP)
+)
+
+leaflet(cd_boundaries) %>% addTiles() %>% fitBounds(-160.0583, 20.65798, -60.954694, 60.60825) %>%
         addPolygons(
                 stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
-                color = ~ pal(as.numeric(as.character(state_boundaries$STATEFP))),
-                popup = ~ state_boundaries$NAME
+                color = ~ pal(as.numeric(as.character(cd_boundaries$CD114FP))),
+                popup = ~ cd_boundaries$CD114FP
+        )
+
+leaflet(cd_boundaries) %>% addTiles() %>% fitBounds(-160.0583, 20.65798, -60.954694, 60.60825) %>%
+        addPolygons(
+                stroke = TRUE, color = "white", weight = 1, fillOpacity = 0.75, smoothFactor = 0.5,
+                fillColor = ~ pal(cd_boundaries$CD114FP),
+                popup = ~ cd_boundaries$CD114FP
         )
 
 leaflet(county_boundaries) %>% addTiles() %>%
@@ -27,6 +47,7 @@ leaflet(county_boundaries) %>% addTiles() %>%
                 color = ~ pal(as.numeric(as.character(county_boundaries$COUNTYFP))),
                 popup = ~ county_boundaries$NAME
         )
+
 
 
 
@@ -43,6 +64,66 @@ map_data <- left_join(state_list, state_funding, by = c("state_fips" = "Appl.FIP
 map_data$state_fips <- factor(str_pad(map_data$state_fips, width = 2, side = "left", pad = "0"))
 state_boundaries2 <- subset(state_boundaries, state_boundaries$STATEFP %in% unique(map_data$state_fips))
 state_boundaries2$funding <- map_data$funding
+
+
+
+
+# for cd map
+datafile_map <- shiny_app_data %>% filter(!is.na(Appl.FIPS.ST), !is.na(Appl.Cong.Dist), Best.EDA.. < 50000000) %>% 
+        select(Appl.FIPS.ST, Appl.Cong.Dist, Best.EDA..)
+datafile_map$state_cd_fips <- str_c(str_pad(datafile_map$Appl.FIPS.ST, width = 2, side = "left", pad = "0"),
+                                    str_pad(datafile_map$Appl.Cong.Dist, width = 2, side = "left", pad = "0"))
+cd_list <- data.frame("state_fips" = cd_boundaries$STATEFP, "cd_fips" = cd_boundaries$CD114FP)
+for(i in 1:nrow(cd_list)){
+        if(cd_list$cd_fips[i] == "00"){
+                cd_list$cd_fips[i] <- "01"
+        }
+}
+cd_list$cd_fips <- str_pad(cd_list$cd_fips, width = 2, side = "left", pad = "0")
+cd_list$state_cd_fips <- str_pad(str_c(cd_list$state_fips, cd_list$cd_fips), width = 4, 
+                                 side = "left", pad = "0")
+cd_boundaries$state_cd_fips <- cd_list$state_cd_fips
+cd_list <- filter(cd_list, as.character(state_cd_fips) %in% unique(datafile_map$state_cd_fips))
+cd_funding <- datafile_map %>% group_by(state_cd_fips) %>% summarize(funding = sum(Best.EDA..), count = n())
+map_data <- left_join(cd_list, cd_funding, by = c("state_cd_fips" = "state_cd_fips"))
+map_data$state_cd_fips <- factor(map_data$state_cd_fips)
+map_boundaries <- subset(cd_boundaries, cd_boundaries$state_cd_fips %in% unique(map_data$state_cd_fips))
+map_boundaries$funding <- map_data$funding
+map_boundaries$count <- map_data$count
+
+fund_pal <- colorNumeric(
+        palette = "Blues",
+        domain = map_boundaries$funding
+)
+
+leaflet(map_boundaries) %>% addTiles() %>%
+        addPolygons(
+                stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
+                color = ~ fund_pal(funding),
+                popup = ~ str_c(CD114FP, funding, count, sep = "<br/>")
+        )
+
+
+x <- filter(datafile_map, Appl.FIPS.ST == 16)
+head(x)
+unique(x$state_cd_fips)
+filter(shiny_app_data, Appl.FIPS.ST == 10) %>% select(Appl.FIPS.ST, Appl.Cong.Dist, Appl.State.Abbr) %>% head(.)
+filter(cd_list, state_fips == 10)
+filter(cd_list, state_fips == 16)
+x <- shiny_app_data %>% filter(Appl.FIPS.ST == 16) %>% select(Appl.State.Abbr, Appl.Cong.Dist)
+unique(x$Appl.Cong.Dist)
+filter(x, Appl.Cong.Dist == 98)
+cd_boundaries$STATEFP[which(!(cd_boundaries$STATEFP %in% map_boundaries$STATEFP))]
+unique(datafile_map$Appl.FIPS.ST)
+datafile_map %>% filter(Appl.FIPS.ST == 10) %>% head(.)
+which(cd_list$state_cd_fips == 1001)
+which(unique(datafile_map$Appl.FIPS.ST == 10))
+which(unique(map_boundaries$STATEFP) == 16) # delaware, ak, sd, nd, mt, wy, vt
+which(unique(cd_boundaries$STATEFP) == 10)
+shiny_app_data %>% filter(Appl.FIPS.ST == 10) %>% select(Appl.State.Abbr, Appl.Cong.Dist) %>% head(.)
+state.fips %>% filter(fips == 50) %>% select(fips, polyname)
+
+
 
 # for county map
 datafile_map <- shiny_app_data %>% filter(!is.na(Appl.FIPS.ST), !is.na(Appl.FIPS.Cnty)) %>% 
