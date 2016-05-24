@@ -173,8 +173,8 @@ shinyUI(
                                         ),
                                     column(3,
                                            radioButtons("map_radio", "Select type of map to display:",
-                                                        choices = c("Map with award icons", "Map with geographic boundaries"),
-                                                        selected = "Map with award icons")
+                                                        choices = c("Map with application icons", "Map with geographic boundaries"),
+                                                        selected = "Map with application icons")
                                         ),
                                     column(3,
                                            actionButton("refresh_map", "Refresh map")
@@ -183,12 +183,9 @@ shinyUI(
                                            checkboxInput("display_legend", "Display map legend", value = TRUE)
                                            )
                                    ),
-                            fluidRow(column(12,
-                                            br())
-                            ),
-                            fluidRow(column(12,
+                            fluidRow(column(12, align = "center",
                                     conditionalPanel(
-                                            condition = "input.map_radio == 'Map with award icons'",
+                                            condition = "input.map_radio == 'Map with application icons'",
                                             
                                             column(3, offset = 3, 
                                                   selectInput("marker_type", "Select color-coding of award icons:", 
@@ -198,21 +195,22 @@ shinyUI(
                                             column(3, 
                                                    selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
                                                                                         "Large circles"), selected = "Large circles")
+                                                   ),
+                                            column(12, 
+                                                   br()),
+                                            column(12, align = "center",
+                                                   leafletOutput("map", width = 1200, height = 700)
                                                    )
                                         )
                                 )),
                             fluidRow(
                                     column(12, align = "center",
-                                           # textOutput("rows_all"),
-                                           conditionalPanel(
-                                                   condition = "input.map_radio == 'Map with award icons'",
-                                                   leafletOutput("map", width = 1200, height = 700)
-                                           ),
                                            conditionalPanel(
                                                    condition = "input.map_radio == 'Map with geographic boundaries'",
+                                                   selectInput("map_geography", "Select geographic boundaries to display", choices = 
+                                                                       c("State", "County", "Congressional District"), multiple = FALSE, selected = "State"),
                                                    leafletOutput("map_boundaries", width = 1200, height = 700)
                                            )
-                                           # leafletOutput("map", width = 1200, height = 700)
                                     )
                             ),
                             fluidRow(
