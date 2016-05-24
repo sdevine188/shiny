@@ -178,23 +178,23 @@ shinyUI(
                                         ),
                                     column(3,
                                            actionButton("refresh_map", "Refresh map")
-                                    ),
-                                    column(3,
-                                           checkboxInput("display_legend", "Display map legend", value = TRUE)
-                                           )
+                                    )
                                    ),
                             fluidRow(column(12, align = "center",
                                     conditionalPanel(
                                             condition = "input.map_radio == 'Map with application icons'",
                                             
-                                            column(3, offset = 3, 
+                                            column(3, offset = 3, align = "center",
                                                   selectInput("marker_type", "Select color-coding of award icons:", 
                                                                 choices = c("By appropriation", "By program", "By fiscal year awarded", 
                                                               "By EDA funding level"), selected = "By appropriation")
                                                 ),
-                                            column(3, 
+                                            column(3, align = "center",
                                                    selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
                                                                                         "Large circles"), selected = "Large circles")
+                                                   ),
+                                            column(3, align = "center",
+                                                   checkboxInput("display_legend_applications", "Display map legend", value = TRUE)
                                                    ),
                                             column(12, 
                                                    br()),
@@ -203,15 +203,22 @@ shinyUI(
                                                    )
                                         )
                                 )),
-                            fluidRow(
-                                    column(12, align = "center",
-                                           conditionalPanel(
-                                                   condition = "input.map_radio == 'Map with geographic boundaries'",
-                                                   selectInput("map_geography", "Select geographic boundaries to display", choices = 
-                                                                       c("State", "County", "Congressional District"), multiple = FALSE, selected = "State"),
-                                                   leafletOutput("map_boundaries", width = 1200, height = 700)
-                                           )
-                                    )
+                            fluidRow(column(12, align = "center",
+                                   conditionalPanel(
+                                           condition = "input.map_radio == 'Map with geographic boundaries'",
+                                           
+                                           column(3, offset = 3, align = "center",
+                                                  selectInput("map_geography", "Select geographic boundaries to display", choices = 
+                                                        c("State", "County", "Congressional District"), multiple = FALSE, selected = "State")
+                                                  ),
+                                           column(3, align = "center",
+                                                  checkboxInput("display_legend_geography", "Display map legend", value = TRUE)
+                                                  ),
+                                           column(12, align = "center",
+                                                  leafletOutput("map_boundaries", width = 1200, height = 700)
+                                                  )
+                                   )
+                            )
                             ),
                             fluidRow(
                                     column(12, 

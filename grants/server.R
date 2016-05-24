@@ -607,17 +607,6 @@ shinyServer(function(input, output, session){
                                 
                                 if(input$map_geography == "State"){
                                 
-                                        # # update map shape file with funding data for selected records
-                                        # datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST)) %>% select(Appl.FIPS.ST, Best.EDA..)
-                                        # state_list <- data.frame("state_fips" = state_boundaries$STATEFP)
-                                        # state_list$state_fips <- as.numeric(as.character(state_list$state_fips))
-                                        # state_list <- filter(state_list, state_fips %in% unique(datafile_map$Appl.FIPS.ST))
-                                        # state_funding <- datafile_map %>% group_by(Appl.FIPS.ST) %>% summarize(funding = sum(Best.EDA..))
-                                        # map_data <- left_join(state_list, state_funding, by = c("state_fips" = "Appl.FIPS.ST"))
-                                        # map_data$state_fips <- factor(str_pad(map_data$state_fips, width = 2, side = "left", pad = "0"))
-                                        # state_boundaries2 <- subset(state_boundaries, state_boundaries$STATEFP %in% unique(map_data$state_fips))
-                                        # state_boundaries2$funding <- map_data$funding
-                                
                                         # update map shape file with funding data for selected records
                                         datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), Best.EDA.. < 50000000) %>% 
                                                 select(Appl.FIPS.ST, Best.EDA..)
@@ -661,33 +650,15 @@ shinyServer(function(input, output, session){
                                 funding_values <- map_data$funding
                                 funding_values_placeholder$value <- funding_values
                                 
-                                # map_boundaries_fund_pal <- colorNumeric(
-                                #         palette = "Blues",
-                                #         domain = state_boundaries2$funding
-                                
                                 map_boundaries_fund_pal <- colorNumeric(
                                         palette = "Blues",
                                         domain = map_boundaries$funding
                                 )
                                 
-                                # default_popup <- str_c(str_c("State: ", state_boundaries2$NAME),
-                                #                 str_c("EDA funds: $", prettyNum(state_boundaries2$funding, big.mark = ",", scientific = FALSE),  sep = ""),
-                                #                 sep = "<br/>")
-                                
                                 default_popup <- str_c(str_c(geography, ": ", map_boundaries$NAME),
                                                        str_c("EDA funds: $", prettyNum(map_boundaries$funding, big.mark = ",", scientific = FALSE),  sep = ""),
                                                        str_c("Count of applications: ", prettyNum(map_boundaries$count, big.mark = ",", scientific = FALSE)),
                                                        sep = "<br/>")
-                                
-                                # leafletProxy("map_boundaries", data = state_boundaries2) %>% addTiles() %>%
-                                #         clearShapes() %>%
-                                #         addPolygons(
-                                #                 stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
-                                #                 color = ~ map_boundaries_fund_pal(state_boundaries2$funding),
-                                #                 popup = default_popup) %>%
-                                #         clearControls() %>%
-                                #         addLegend("bottomright", pal = map_boundaries_fund_pal, values = funding_values,
-                                #                   title = "EDA Funding Level", opacity = 1, labFormat = labelFormat(prefix = "$"))
                                 
                                 leafletProxy("map_boundaries", data = map_boundaries) %>% addTiles() %>%
                                         clearShapes() %>%
@@ -715,90 +686,43 @@ shinyServer(function(input, output, session){
         )
         
         # checkbox to display legend or not on award map
-        observeEvent(input$display_legend, {
+        observeEvent(input$display_legend_applications, {
                 selected_pal <- selected_pal()
                 selected_title <- selected_title()
-                # selected_values <- selected_values()
                 selected_values <- selected_values_placeholder$value
                 selected_size <- selected_size()
                 selected_format <- selected_format()
                 
-                # toggle legend for application icon map
-                if(input$map_radio == "Map with application icons"){
-                        if(input$display_legend == TRUE && input$refresh_map > 0){
-                                leafletProxy("map") %>%
-                                        addLegend("bottomright", pal = selected_pal, values = selected_values,
-                                                  title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-                        }
-                        if(input$display_legend == FALSE && input$refresh_map > 0){
-                                leafletProxy("map") %>%
-                                        clearControls()
-                        }
+                if(input$display_legend_applications == TRUE && input$refresh_map > 0){
+                        leafletProxy("map") %>%
+                        addLegend("bottomright", pal = selected_pal, values = selected_values,
+                        title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
                 }
-                if(input$map_radio == "Map with geographic boundaries"){
-                        map_boundaries_fund_pal <- colorNumeric(
-                                palette = "Blues",
-                                domain = funding_values_placeholder$value
-                        )
-                        
-                        if(input$display_legend == TRUE && input$refresh_map > 0){
-                                leafletProxy("map_boundaries") %>%
-                                        addLegend("bottomright", pal = map_boundaries_fund_pal, 
-                                                  values = funding_values_placeholder$value,
-                                                  title = "Requested EDA Funding", opacity = 1, 
-                                                  labFormat = labelFormat(prefix = "$"))
-                        }
-                        if(input$display_legend == FALSE && input$refresh_map > 0){
-                                leafletProxy("map_boundaries") %>%
-                                        clearControls()
-                        }
+                if(input$display_legend_applications == FALSE && input$refresh_map > 0){
+                        leafletProxy("map") %>%
+                                clearControls()
                 }
         })
         
-        # checkbox to display legend or not on geographic boundaries map
-        # observeEvent(input$display_legend, {
-        #         selected_pal <- selected_pal()
-        #         selected_title <- selected_title()
-        #         # selected_values <- selected_values()
-        #         selected_values <- selected_values_placeholder$value
-        #         selected_size <- selected_size()
-        #         selected_format <- selected_format()
-        #         if(input$display_legend == TRUE && input$refresh_map > 0){
-        #                 leafletProxy("map") %>%
-        #                         addLegend("bottomright", pal = selected_pal, values = selected_values,
-        #                                   title = selected_title, opacity = 1, labFormat = labelFormat(prefix = selected_format))
-        #         }
-        #         if(input$display_legend == FALSE && input$refresh_map > 0){
-        #                 leafletProxy("map") %>%
-        #                         clearControls()
-        #         }
-        # })
-        
-        # reactive for selected_values
-        # selected_values <- reactive({
-        #         data_table5_filtered <- data_table5_filtered()
-        #         data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
-        #         data_table5_filtered <- na.omit(data_table5_filtered)
-        # 
-        #         if(data_table5_filtered[1,1] != "no projects"){
-        # 
-        #                 selected_values <- data_table5_filtered$Appr.Desc
-        #                 if(input$marker_type == "By program"){
-        #                         selected_values <- data_table5_filtered$Appr.Desc
-        #                 }
-        #                 if(input$marker_type == "By appropriation"){
-        #                         selected_values <- data_table5_filtered$Appropriation
-        #                 }
-        #                 if(input$marker_type == "By fiscal year awarded"){
-        #                         # selected_values <- factor(data_table5_filtered$FY)
-        #                         selected_values <- data_table5_filtered$FY
-        #                 }
-        #                 if(input$marker_type == "By EDA funding level"){
-        #                         selected_values <- data_table5_filtered$Best.EDA..
-        #                 }
-        #                 selected_values
-        #         }
-        # })
+        # toggle legend checkbox for geographic boundaries map
+        observeEvent(input$display_legend_geography, {
+                map_boundaries_fund_pal <- colorNumeric(
+                        palette = "Blues",
+                        domain = funding_values_placeholder$value
+                )
+
+                if(input$display_legend_geography == TRUE && input$refresh_map > 0){
+                        leafletProxy("map_boundaries") %>%
+                                addLegend("bottomright", pal = map_boundaries_fund_pal,
+                                          values = funding_values_placeholder$value,
+                                          title = "Requested EDA Funding", opacity = 1,
+                                          labFormat = labelFormat(prefix = "$"))
+                }
+                if(input$display_legend_geography == FALSE && input$refresh_map > 0){
+                        leafletProxy("map_boundaries") %>%
+                                clearControls()
+                }
+        })
         
         # reactive to create default map popups
         default_popup <- reactive({
