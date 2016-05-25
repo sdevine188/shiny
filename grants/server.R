@@ -78,6 +78,8 @@ state_list <- state_list[-1]
 # load geographic boundary data
 state_boundaries <- readOGR("data/cb_2015_us_state_20m/cb_2015_us_state_20m.shp",
                   layer = "cb_2015_us_state_20m", verbose = FALSE)
+cd_boundaries <- readOGR("data/cb_2014_us_cd114_20m/cb_2014_us_cd114_20m.shp",
+                         layer = "cb_2014_us_cd114_20m", verbose = FALSE)
 county_boundaries <- readOGR("data/cb_2015_us_county_20m/cb_2015_us_county_20m.shp",
                             layer = "cb_2015_us_county_20m", verbose = FALSE)
 
@@ -620,7 +622,10 @@ shinyServer(function(input, output, session){
                                         map_boundaries$funding <- map_data$funding
                                         map_boundaries$count <- map_data$count
                                         
-                                        geography <- "State"
+                                        default_popup <- str_c(str_c("State: ", map_boundaries$NAME),
+                                                               str_c("EDA funds requested: $", prettyNum(map_boundaries$funding, big.mark = ",", scientific = FALSE),  sep = ""),
+                                                               str_c("Count of applications: ", prettyNum(map_boundaries$count, big.mark = ",", scientific = FALSE)),
+                                                               sep = "<br/>")
                                 }
                                 
                                 if(input$map_geography == "Congressional District"){
@@ -646,7 +651,10 @@ shinyServer(function(input, output, session){
                                         map_boundaries$funding <- map_data$funding
                                         map_boundaries$count <- map_data$count
                                         
-                                        geography = "Congressional District"
+                                        default_popup <- str_c(str_c("Congressional District: ", map_boundaries$CD114FP),
+                                                               str_c("EDA funds requested: $", prettyNum(map_boundaries$funding, big.mark = ",", scientific = FALSE),  sep = ""),
+                                                               str_c("Count of applications: ", prettyNum(map_boundaries$count, big.mark = ",", scientific = FALSE)),
+                                                               sep = "<br/>")
                                 }
                                 
                                 if(input$map_geography == "County"){
@@ -669,7 +677,10 @@ shinyServer(function(input, output, session){
                                         map_boundaries$funding <- map_data$funding
                                         map_boundaries$count <- map_data$count
                                         
-                                        geography = "County"
+                                        default_popup <- str_c(str_c("County: ", map_boundaries$NAME),
+                                                               str_c("EDA funds requested: $", prettyNum(map_boundaries$funding, big.mark = ",", scientific = FALSE),  sep = ""),
+                                                               str_c("Count of applications: ", prettyNum(map_boundaries$count, big.mark = ",", scientific = FALSE)),
+                                                               sep = "<br/>")
                                 }
                                         
                                 funding <- map_data$funding
@@ -681,15 +692,10 @@ shinyServer(function(input, output, session){
                                         domain = map_boundaries$funding
                                 )
                                 
-                                default_popup <- str_c(str_c(geography, ": ", map_boundaries$NAME),
-                                                       str_c("EDA funds: $", prettyNum(map_boundaries$funding, big.mark = ",", scientific = FALSE),  sep = ""),
-                                                       str_c("Count of applications: ", prettyNum(map_boundaries$count, big.mark = ",", scientific = FALSE)),
-                                                       sep = "<br/>")
-                                
                                 leafletProxy("map_boundaries", data = map_boundaries) %>% addTiles() %>%
                                         clearShapes() %>%
                                         addPolygons(
-                                                stroke = FALSE, fillOpacity = 0.75, smoothFactor = 0.5,
+                                                stroke = TRUE, color = "black", weight = "1", fillOpacity = 0.75, smoothFactor = 0.5,
                                                 fillColor = ~ map_boundaries_fund_pal(map_boundaries$funding),
                                                 popup = default_popup) %>%
                                         clearControls() %>%
