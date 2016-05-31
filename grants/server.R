@@ -17,16 +17,19 @@ library(rpivotTable)
 shiny_data_filename <- list.files(str_c(getwd(), "/data"))[str_detect(list.files(str_c(getwd(), "/data")), "shiny_app_data_20")]
 shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read main data file
-# datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE)
-#datafile <- read.csv(shiny_data_filename, stringsAsFactors = FALSE, colClasses = c("Status" = "factor",
-#                "Appl.Short.Name" = "factor", "Appr.Desc" = "factor"))
-#save(datafile, file = "C:/Users/SDevine/Documents/datafile.RData")
-# load("C:/Users/SDevine/Documents/datafile.RData")
 datafile <- data.frame(read_csv(shiny_data_filename))
-# datafile <- read_csv(shiny_data_filename, col_types = list(Status = col_factor()))
+
+# clean variable names 
+datafile <- rename(datafile, "Control.No." = Control., "EDA.Funding" = Best.EDA.., "Construction" = Cons.Non, 
+                   "Total.Proj.Cost" = Total.Project.., "CFDA" = CFDA.., "Appl.County.Name" = Appl.Cnty.Name, 
+                   "Appl.Zip" = Appl..Zip, "Proj.State.Abbr" = Proj.ST.Abbr, "Region.Code" = RO.., "IRS" = IRS.., 
+                   "DUNS" = DUNS.., "Proj.Comp.Code" = Proj.Comp..Code, "DEC.Code" = X.DEC._Action.Code, 
+                   "DEC.Date" = X.DEC._Date, "PPR.Code" = X.PPR._Action.Code, "PPR.Date" = X.PPR._Date, 
+                   "PRD.Code" = X.PRD._Action.Code, "PRD.Date" = X.PRD._Date, "PCL.Date" = X.PCL._Date, 
+                   "PPS.Date" = X.PPS._Date, "PPE.Date" = X.PPE._Date, "PX1.Date" = X.PX1._Date, 
+                   "PX2.Date" = X.PX2._Date, "GSD.Date" = X.GSD._Date, "GPE.Date" = X.GPE._Date)
 
 # read small data to start map without delay
-# datafile_small <- read.csv("data/shiny_app_data_small_20160209.csv", stringsAsFactors = FALSE)
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
 
 # provide data "as of date"
@@ -35,9 +38,9 @@ date <- str_sub(shiny_data_filename, str_locate(shiny_data_filename, "20")[1],
                 str_locate(shiny_data_filename, ".csv")[1] - 1)
 date <- str_replace(ymd(date), " UTC", "")
 
-# convert Control. to a character, so it can be searched with table filter, instead of numeric slider
+# convert Control.No. to a character, so it can be searched with table filter, instead of numeric slider
 # can place this code in clean_shiny_data script later
-datafile$Control. <- as.character(datafile$Control.)
+datafile$Control.No. <- as.character(datafile$Control.No.)
 
 # create map color palettes
 program_options <- unique(datafile$Appr.Desc)
@@ -49,8 +52,8 @@ appropriation_pal <- colorFactor("Set1", domain = appropriation_options)
 year_pal <- colorFactor("Set1", domain = year_options)
 
 # create default columns to display
-default_columns <- c("Control.", "Status", "FY", "Appr.Desc", "Best.EDA..", "Appl.Short.Name", 
-                     "Project.Short.Descrip", "Initiatives", "Proj.ST.Abbr", "RO..")
+default_columns <- c("Control.No.", "Status", "FY", "Appr.Desc", "EDA.Funding", "Appl.Short.Name", 
+                     "Project.Short.Descrip", "Initiatives", "Proj.State.Abbr", "Region.Name")
 
 
 # create columns names in proper display order
@@ -211,13 +214,13 @@ shinyServer(function(input, output, session){
                 selected_states <- c()                
                 
                 if("All states" %in% input$state && input$project_applicant_radio == "Project state/county"){
-                        selected_states <- unique(datafile$Proj.ST.Abbr)
+                        selected_states <- unique(datafile$Proj.State.Abbr)
                 }
                 if("All states" %in% input$state && input$project_applicant_radio == "Applicant state/county"){
                         selected_states <- unique(datafile$Appl.State.Abbr)
                 }
                 if("All states" %in% input$state && input$project_applicant_radio == "Either project or applicant state/county"){
-                        selected_states_proj <- unique(datafile$Proj.ST.Abbr)
+                        selected_states_proj <- unique(datafile$Proj.State.Abbr)
                         selected_states_app <- unique(datafile$Appl.State.Abbr)
                         selected_states_combined <- c(selected_states_proj, selected_states_app)
                         selected_states <- unique(selected_states_combined)
@@ -227,13 +230,13 @@ shinyServer(function(input, output, session){
                 }
 
                 if(input$project_applicant_radio == "Project state/county"){
-                        return(filter(datafile, Proj.ST.Abbr %in% selected_states))        
+                        return(filter(datafile, Proj.State.Abbr %in% selected_states))        
                 }
                 if(input$project_applicant_radio == "Applicant state/county"){
                         return(filter(datafile, Appl.State.Abbr %in% selected_states))        
                 }
                 if(input$project_applicant_radio == "Either project or applicant state/county"){
-                        return(filter(datafile, Proj.ST.Abbr %in% selected_states | Appl.State.Abbr %in% selected_states))        
+                        return(filter(datafile, Proj.State.Abbr %in% selected_states | Appl.State.Abbr %in% selected_states))        
                 }
         })
         
@@ -246,12 +249,12 @@ shinyServer(function(input, output, session){
                         return(unique(state_counties$Proj.County.Name)) 
                 }
                 if(input$project_applicant_radio == "Applicant state/county"){
-                        state_counties <- arrange(state_data, Appl.Cnty.Name)
-                        return(unique(state_counties$Appl.Cnty.Name)) 
+                        state_counties <- arrange(state_data, Appl.County.Name)
+                        return(unique(state_counties$Appl.County.Name)) 
                 }
                 if(input$project_applicant_radio == "Either project or applicant state/county"){
                         state_counties_proj <- state_data$Proj.County.Name
-                        state_counties_app <- state_data$Appl.Cnty.Name
+                        state_counties_app <- state_data$Appl.County.Name
                         state_counties_combined <- c(state_counties_proj, state_counties_app)
                         state_counties <- sort(state_counties_combined)
                         return(unique(state_counties)) 
@@ -291,10 +294,10 @@ shinyServer(function(input, output, session){
                         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
                 }
                 if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Applicant state/county")){
-                        data_table1 <- filter(state_data, Appl.Cnty.Name %in% input$counties)                        
+                        data_table1 <- filter(state_data, Appl.County.Name %in% input$counties)                        
                 }
                 if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Either project or applicant state/county")){
-                        data_table1 <- filter(state_data, Proj.County.Name %in% input$counties | Appl.Cnty.Name %in% input$counties)                        
+                        data_table1 <- filter(state_data, Proj.County.Name %in% input$counties | Appl.County.Name %in% input$counties)                        
                 }
                 
                 data_table1
@@ -316,7 +319,7 @@ shinyServer(function(input, output, session){
         #                 data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
         #         }
         #         if(input$JobsPIFlag == TRUE){
-        #                 data_table3 <- filter(data_table2, Cons.Non == "C" | Cons.Non == "B")
+        #                 data_table3 <- filter(data_table2, Construction == "C" | Construction == "B")
         #         }      
         #         data_table3
         # })
@@ -498,9 +501,9 @@ shinyServer(function(input, output, session){
                         data_table_output2 <- data_table_output
                         data_table_output2$Status <- factor(data_table_output2$Status)
                         data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
-                        data_table_output2$RO.. <- factor(data_table_output2$RO..)
+                        data_table_output2$Region.Name <- factor(data_table_output2$Region.Name)
                         
-                        # data_table_output2$Proj.ST.Abbr <- factor(data_table_output2$Proj.ST.Abbr)
+                        # data_table_output2$Proj.State.Abbr <- factor(data_table_output2$Proj.State.Abbr)
                         # data_table_output2$Appl.City.Name <- factor(data_table_output2$Appl.City.Name)
 #                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                         return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
@@ -544,9 +547,9 @@ shinyServer(function(input, output, session){
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
                 
-                data_table5_filtered <- select(data_table5_filtered, Control., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
+                data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
                                                Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, 
-                                               Best.EDA.., app_lat, app_lon)
+                                               EDA.Funding, app_lat, app_lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
                 
                 # update map_marker, if selected, when refresh_map button is hit
@@ -555,13 +558,13 @@ shinyServer(function(input, output, session){
                         # only run if at least one row of data is selected
                         if(data_table5_filtered[1,1] != "no projects"){
                                 
-                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
+                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
                                 #                 str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "),
                                 #                 str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
                                 #                 str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
                                 #                 str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
                                 #                 str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "),
-                                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",",
+                                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",",
                                 #                                                scientific = FALSE),  sep = ""),
                                 #                                                 sep = "<br/>")
                                 
@@ -585,7 +588,7 @@ shinyServer(function(input, output, session){
                                                 selected_values <- data_table5_filtered$FY
                                         }
                                         if(input$marker_type == "By EDA funding level"){
-                                                selected_values <- data_table5_filtered$Best.EDA..
+                                                selected_values <- data_table5_filtered$EDA.Funding
                                         }
                                         selected_values
                                 }
@@ -611,12 +614,12 @@ shinyServer(function(input, output, session){
                                 if(input$map_geography == "State"){
                                 
                                         # update map shape file with funding data for selected records
-                                        datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), Best.EDA.. < 50000000) %>% 
-                                                select(Appl.FIPS.ST, Best.EDA..)
+                                        datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), EDA.Funding < 50000000) %>% 
+                                                select(Appl.FIPS.ST, EDA.Funding)
                                         state_list <- data.frame("state_fips" = state_boundaries$STATEFP)
                                         state_list$state_fips <- as.numeric(as.character(state_list$state_fips))
                                         state_list <- filter(state_list, state_fips %in% unique(datafile_map$Appl.FIPS.ST))
-                                        state_funding <- datafile_map %>% group_by(Appl.FIPS.ST) %>% summarize(funding = sum(Best.EDA..), count = n())
+                                        state_funding <- datafile_map %>% group_by(Appl.FIPS.ST) %>% summarize(funding = sum(EDA.Funding), count = n())
                                         map_data <- left_join(state_list, state_funding, by = c("state_fips" = "Appl.FIPS.ST"))
                                         map_data$state_fips <- factor(str_pad(map_data$state_fips, width = 2, side = "left", pad = "0"))
                                         map_boundaries <- subset(state_boundaries, state_boundaries$STATEFP %in% unique(map_data$state_fips))
@@ -630,8 +633,8 @@ shinyServer(function(input, output, session){
                                 }
                                 
                                 if(input$map_geography == "Congressional District"){
-                                        datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), !is.na(Appl.Cong.Dist), Best.EDA.. < 50000000) %>% 
-                                                select(Appl.FIPS.ST, Appl.Cong.Dist, Best.EDA..)
+                                        datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), !is.na(Appl.Cong.Dist), EDA.Funding < 50000000) %>% 
+                                                select(Appl.FIPS.ST, Appl.Cong.Dist, EDA.Funding)
                                         datafile_map$state_cd_fips <- str_c(str_pad(datafile_map$Appl.FIPS.ST, width = 2, side = "left", pad = "0"),
                                                                             str_pad(datafile_map$Appl.Cong.Dist, width = 2, side = "left", pad = "0"))
                                         cd_list <- data.frame("state_fips" = cd_boundaries$STATEFP, "cd_fips" = cd_boundaries$CD114FP)
@@ -645,7 +648,7 @@ shinyServer(function(input, output, session){
                                                                          side = "left", pad = "0")
                                         cd_boundaries$state_cd_fips <- cd_list$state_cd_fips
                                         cd_list <- filter(cd_list, as.character(state_cd_fips) %in% unique(datafile_map$state_cd_fips))
-                                        cd_funding <- datafile_map %>% group_by(state_cd_fips) %>% summarize(funding = sum(Best.EDA..), count = n())
+                                        cd_funding <- datafile_map %>% group_by(state_cd_fips) %>% summarize(funding = sum(EDA.Funding), count = n())
                                         map_data <- left_join(cd_list, cd_funding, by = c("state_cd_fips" = "state_cd_fips"))
                                         map_data$state_cd_fips <- factor(map_data$state_cd_fips)
                                         map_boundaries <- subset(cd_boundaries, cd_boundaries$state_cd_fips %in% unique(map_data$state_cd_fips))
@@ -662,8 +665,8 @@ shinyServer(function(input, output, session){
                                         
                                         # update map shape file with funding data for selected records
                                         datafile_map <- data_table5_filtered %>% 
-                                                filter(!is.na(Appl.FIPS.ST), !is.na(Appl.FIPS.Cnty), Best.EDA.. < 50000000) %>% 
-                                                select(Appl.FIPS.ST, Appl.FIPS.Cnty, Best.EDA..)
+                                                filter(!is.na(Appl.FIPS.ST), !is.na(Appl.FIPS.Cnty), EDA.Funding < 50000000) %>% 
+                                                select(Appl.FIPS.ST, Appl.FIPS.Cnty, EDA.Funding)
                                         datafile_map$state_county_fips <- str_c(str_pad(datafile_map$Appl.FIPS.ST, width = 2, side = "left", pad = "0"),
                                                                                 str_pad(datafile_map$Appl.FIPS.Cnty, width = 3, side = "left", pad = "0"))
                                         county_list <- data.frame("state_fips" = county_boundaries$STATEFP, "county_fips" = county_boundaries$COUNTYFP)
@@ -671,7 +674,7 @@ shinyServer(function(input, output, session){
                                                                                  side = "left", pad = "0")
                                         county_boundaries$state_county_fips <- county_list$state_county_fips
                                         county_list <- filter(county_list, as.character(state_county_fips) %in% unique(datafile_map$state_county_fips))
-                                        county_funding <- datafile_map %>% group_by(state_county_fips) %>% summarize(funding = sum(Best.EDA..), count = n())
+                                        county_funding <- datafile_map %>% group_by(state_county_fips) %>% summarize(funding = sum(EDA.Funding), count = n())
                                         map_data <- left_join(county_list, county_funding, by = c("state_county_fips" = "state_county_fips"))
                                         map_data$state_county_fips <- factor(map_data$state_county_fips)
                                         map_boundaries <- subset(county_boundaries, county_boundaries$state_county_fips %in% unique(map_data$state_county_fips))
@@ -715,7 +718,7 @@ shinyServer(function(input, output, session){
         
         # create reactiveValue for geographic boundary map funding legend
         funding_values_placeholder <- reactiveValues(
-                value = datafile$Best.EDA..
+                value = datafile$EDA.Funding
         )
         
         # checkbox to display legend or not on award map
@@ -760,16 +763,16 @@ shinyServer(function(input, output, session){
         # reactive to create default map popups
         default_popup <- reactive({
                 data_table5_filtered <- data_table5_filtered()
-                data_table5_filtered <- select(data_table5_filtered, Control., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, Best.EDA.., app_lat, app_lon)
+                data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, EDA.Funding, app_lat, app_lon)
                 data_table5_filtered <- na.omit(data_table5_filtered)
                 
-                str_c(str_c("Control #:", data_table5_filtered$Control., sep = " "),
+                str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
                        str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
                        str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
                        str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
                        str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
                        str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
-                       str_c("EDA funds: $", prettyNum(data_table5_filtered$Best.EDA.., big.mark = ",", 
+                       str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
                                                        scientific = FALSE),  sep = ""), 
                        sep = "<br/>")
         })
@@ -785,7 +788,7 @@ shinyServer(function(input, output, session){
                         # create funds palette
                         colorNumeric(
                                 palette = "Blues",
-                                domain = data_table5_filtered$Best.EDA..
+                                domain = data_table5_filtered$EDA.Funding
                         )
                 }
         })
@@ -858,15 +861,15 @@ shinyServer(function(input, output, session){
         output$pivot_table <- renderRpivotTable({
                 data_table5_filtered <- data_table5_filtered()
                 data_table5_filtered <- select(data_table5_filtered, FY, Status, Appr.Desc, Initiatives, 
-                        Best.EDA.., Total.Project.., Region.Name, Appl.State.Abbr, Appl.Cnty.Name,
-                        Appl.City.Name, Proj.ST.Abbr, Proj.County.Name, Proj.City.Name,  
+                        EDA.Funding, Total.Proj.Cost, Region.Name, Appl.State.Abbr, Appl.County.Name,
+                        Appl.City.Name, Proj.State.Abbr, Proj.County.Name, Proj.City.Name,  
                         Appl.Short.Name)
                 rpivotTable(data_table5_filtered)
         })
         
         output$rows_all <- renderText({
                 data_table5_filtered <- data_table5_filtered()
-                data_table5_filtered$Control.[1]
+                data_table5_filtered$Control.No.[1]
         })
         
         # create download file
