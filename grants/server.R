@@ -213,53 +213,62 @@ shinyServer(function(input, output, session){
                 # create placeholder selected_states variable to assign in if statements
                 selected_states <- c()                
                 
-                if("All states" %in% input$state && input$project_applicant_radio == "Project state/county"){
+                if("All states" %in% input$state){
                         selected_states <- unique(datafile$Proj.State.Abbr)
                 }
-                if("All states" %in% input$state && input$project_applicant_radio == "Applicant state/county"){
-                        selected_states <- unique(datafile$Appl.State.Abbr)
-                }
-                if("All states" %in% input$state && input$project_applicant_radio == "Either project or applicant state/county"){
-                        selected_states_proj <- unique(datafile$Proj.State.Abbr)
-                        selected_states_app <- unique(datafile$Appl.State.Abbr)
-                        selected_states_combined <- c(selected_states_proj, selected_states_app)
-                        selected_states <- unique(selected_states_combined)
-                }
+                
+                # if("All states" %in% input$state && input$project_applicant_radio == "Project state/county"){
+                #         selected_states <- unique(datafile$Proj.State.Abbr)
+                # }
+                # if("All states" %in% input$state && input$project_applicant_radio == "Applicant state/county"){
+                #         selected_states <- unique(datafile$Appl.State.Abbr)
+                # }
+                # if("All states" %in% input$state && input$project_applicant_radio == "Either project or applicant state/county"){
+                #         selected_states_proj <- unique(datafile$Proj.State.Abbr)
+                #         selected_states_app <- unique(datafile$Appl.State.Abbr)
+                #         selected_states_combined <- c(selected_states_proj, selected_states_app)
+                #         selected_states <- unique(selected_states_combined)
+                # }
                 if(!("All states" %in% input$state)){
                         selected_states <- input$state
                 }
+                
+                return(filter(datafile, Proj.State.Abbr %in% selected_states))
 
-                if(input$project_applicant_radio == "Project state/county"){
-                        return(filter(datafile, Proj.State.Abbr %in% selected_states))        
-                }
-                if(input$project_applicant_radio == "Applicant state/county"){
-                        return(filter(datafile, Appl.State.Abbr %in% selected_states))        
-                }
-                if(input$project_applicant_radio == "Either project or applicant state/county"){
-                        return(filter(datafile, Proj.State.Abbr %in% selected_states | Appl.State.Abbr %in% selected_states))        
-                }
+                # if(input$project_applicant_radio == "Project state/county"){
+                #         return(filter(datafile, Proj.State.Abbr %in% selected_states))        
+                # }
+                # if(input$project_applicant_radio == "Applicant state/county"){
+                #         return(filter(datafile, Appl.State.Abbr %in% selected_states))        
+                # }
+                # if(input$project_applicant_radio == "Either project or applicant state/county"){
+                #         return(filter(datafile, Proj.State.Abbr %in% selected_states | Appl.State.Abbr %in% selected_states))        
+                # }
         })
         
         # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
-        counties <- reactive({
-                state_data <- state_data()
-
-                if(input$project_applicant_radio == "Project state/county"){
-                        state_counties <- arrange(state_data, Proj.County.Name)
-                        return(unique(state_counties$Proj.County.Name)) 
-                }
-                if(input$project_applicant_radio == "Applicant state/county"){
-                        state_counties <- arrange(state_data, Appl.County.Name)
-                        return(unique(state_counties$Appl.County.Name)) 
-                }
-                if(input$project_applicant_radio == "Either project or applicant state/county"){
-                        state_counties_proj <- state_data$Proj.County.Name
-                        state_counties_app <- state_data$Appl.County.Name
-                        state_counties_combined <- c(state_counties_proj, state_counties_app)
-                        state_counties <- sort(state_counties_combined)
-                        return(unique(state_counties)) 
-                }
-        })
+        # counties <- reactive({
+        #         state_data <- state_data()
+        # 
+        #         state_counties <- arrange(state_data, Proj.County.Name)
+        #         return(unique(state_counties$Proj.County.Name)) 
+        #         
+        #         # if(input$project_applicant_radio == "Project state/county"){
+        #         #         state_counties <- arrange(state_data, Proj.County.Name)
+        #         #         return(unique(state_counties$Proj.County.Name)) 
+        #         # }
+        #         # if(input$project_applicant_radio == "Applicant state/county"){
+        #         #         state_counties <- arrange(state_data, Appl.County.Name)
+        #         #         return(unique(state_counties$Appl.County.Name)) 
+        #         # }
+        #         # if(input$project_applicant_radio == "Either project or applicant state/county"){
+        #         #         state_counties_proj <- state_data$Proj.County.Name
+        #         #         state_counties_app <- state_data$Appl.County.Name
+        #         #         state_counties_combined <- c(state_counties_proj, state_counties_app)
+        #         #         state_counties <- sort(state_counties_combined)
+        #         #         return(unique(state_counties)) 
+        #         # }
+        # })
         
         # populate the select state input menu
         observe({
@@ -268,61 +277,57 @@ shinyServer(function(input, output, session){
         })
         
         # populate the select county input menu
-        observe({
-                counties_all <- c("All counties", as.character(counties()))
-                updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
-        })
+        # observe({
+        #         counties_all <- c("All counties", as.character(counties()))
+        #         updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
+        # })
         
         # filter data to only those states/counties selected
-        data_table1 <- reactive({
-                # assign previously created reactive variables to regular variables
-                state_data <- state_data()
-                counties <- counties()
-                datafile1 <- data.frame()
-                
-                # create if statements to handle "All counties" option in dropdown menu
-                if("All counties" %in% input$counties && input$project_applicant_radio == "Project state/county"){
-                        data_table1 <- state_data                        
-                }
-                if("All counties" %in% input$counties && input$project_applicant_radio == "Applicant state/county"){
-                        data_table1 <- state_data                    
-                }
-                if("All counties" %in% input$counties && input$project_applicant_radio == "Either project or applicant state/county"){
-                        data_table1 <- state_data                    
-                }
-                if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Project state/county")){
-                        data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
-                }
-                if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Applicant state/county")){
-                        data_table1 <- filter(state_data, Appl.County.Name %in% input$counties)                        
-                }
-                if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Either project or applicant state/county")){
-                        data_table1 <- filter(state_data, Proj.County.Name %in% input$counties | Appl.County.Name %in% input$counties)                        
-                }
-                
-                data_table1
-        })
+        # data_table1 <- reactive({
+        #         # assign previously created reactive variables to regular variables
+        #         state_data <- state_data()
+        #         # counties <- counties()
+        #         datafile1 <- data.frame()
+        #         
+        #         # create if statements to handle "All counties" option in dropdown menu
+        #         # if("All counties" %in% input$counties){
+        #         #         data_table1 <- state_data                        
+        #         # }
+        #         # if(!("All counties" %in% input$counties)){
+        #         #                 data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)
+        #         # }
+        #         
+        #         # create if statements to handle "All counties" option in dropdown menu
+        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Project state/county"){
+        #         #         data_table1 <- state_data                        
+        #         # }
+        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Applicant state/county"){
+        #         #         data_table1 <- state_data                    
+        #         # }
+        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Either project or applicant state/county"){
+        #         #         data_table1 <- state_data                    
+        #         # }
+        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Project state/county")){
+        #         #         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
+        #         # }
+        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Applicant state/county")){
+        #         #         data_table1 <- filter(state_data, Appl.County.Name %in% input$counties)                        
+        #         # }
+        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Either project or applicant state/county")){
+        #         #         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties | Appl.County.Name %in% input$counties)                        
+        #         # }
+        #         
+        #         data_table1
+        # })
         
         # filter data based on year input
         data_table2 <- reactive({
-                data_table1 <- data_table1()
+                # data_table1 <- data_table1()
+                data_table1 <- state_data()
                 range <- seq(input$years[1], input$years[2])
                 data_table2 <- filter(data_table1, FY %in% range)
                 data_table2
         })
-        
-        # subset data to include/not include jobs or PI columns and show/not show Construction-only projects based on checkbox input
-        # data_table3 <- reactive({
-        #         data_table2 <- data_table2()
-        # 
-        #         if(input$JobsPIFlag == FALSE){
-        #                 data_table3 <- select(data_table2, -Jobs.Created, -Jobs.Saved, -Private.Investment)
-        #         }
-        #         if(input$JobsPIFlag == TRUE){
-        #                 data_table3 <- filter(data_table2, Construction == "C" | Construction == "B")
-        #         }      
-        #         data_table3
-        # })
         
         # filter data based on advanced query inputs
         data_table4 <- reactive({

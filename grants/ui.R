@@ -18,9 +18,6 @@ shinyUI(
                                            h2(strong("Grants Viewer"), align = "center", style = "font-size:30pt"),
                                            h2("EDA Performance and National Programs", align = "center",
                                               style = "font-size:20pt")
-                                           # h2("EDA Performance and National Programs", align = "center",
-                                           #    style = "font-family: 'Open Sans', sans-serif"),
-                                           # h2("EDA Performance and National Programs", align = "center"),
                                     ),
                                     column(3,                       
                                            textOutput("as_of_date")
@@ -31,16 +28,17 @@ shinyUI(
                             ),
                             fluidRow(
                                     column(3,                       
-                                           selectInput("state", "Select states", choices = "", multiple = TRUE),
-                                           selectInput("counties", "Select counties:", choices = "", multiple = TRUE)                    
+                                           selectInput("state", "Select project states", choices = "", multiple = TRUE)
+                                           # selectInput("counties", "Select project counties:", choices = "", multiple = TRUE)                    
                                     ),
-                                    column(3, 
-                                           radioButtons("project_applicant_radio", "Select state/county based on:",
-                                                        choices = c("Project state/county", "Applicant state/county", "Either project or applicant state/county"),
-                                                        selected = "Project state/county")
-                                    ),
-                                    column(3, 
-                                           sliderInput("years", label = "Select fiscal years", min = 1990, max = 2016, value = c(1990, 2016), sep = "")                     
+                                    # column(3, 
+                                    #        radioButtons("project_applicant_radio", "Select state/county based on:",
+                                    #                     choices = c("Project state/county", "Applicant state/county", "Either project or applicant state/county"),
+                                    #                     selected = "Project state/county")
+                                    # ),
+                                    column(6, 
+                                           sliderInput("years", label = "Select fiscal years", min = 1990, max = 2016, 
+                                                       value = c(1990, 2016), width = "100%", sep = "")                     
                                     )
                             ),
                             fluidRow(
