@@ -4,10 +4,11 @@ library(stringr)
 library(leaflet)
 library(DT)
 library(shinythemes)
+library(rpivotTable)
 
 shinyUI(
         navbarPage("", id = "navbar",
-           tabPanel("View data",
+           tabPanel("Data",
                     fluidPage(theme = shinytheme("cerulean"),
                             fluidRow(
                                     column(3,
@@ -43,17 +44,6 @@ shinyUI(
                                     )
                             ),
                             fluidRow(
-                                    # column(6,
-                                    #        checkboxInput("JobsPIFlag", "Include grantee estimates for jobs and private investment", value = FALSE),
-                                    #        conditionalPanel(
-                                    #                condition = "input.JobsPIFlag == true",
-                                    #                helpText("Please note that checking the box to request projects containing grantee estimates for jobs and private investment 
-                                    #                         will cause the dataset to be truncated."), 
-                                    #                helpText("The truncated dataset will only include construction-related projects made under 
-                                    #                         the Public Works or Economic Adjustment Assistance programs, since these are the only projects 
-                                    #                         containing grantee estimates for jobs and private investment.")
-                                    #                )
-                                    #     ),
                                         column(3,
                                                downloadButton("downloadData", "Download Data")
                                         )
@@ -72,7 +62,7 @@ shinyUI(
                             )
                     ),
            
-           tabPanel("Advanced query",
+           tabPanel("Query",
                     fluidPage( 
                             fluidRow(
                                     column(3,
@@ -165,7 +155,7 @@ shinyUI(
                     )
            ),
            
-           tabPanel("View map",
+           tabPanel("Maps",
                     fluidPage( 
                             fluidRow(
                                     column(3,
@@ -227,5 +217,17 @@ shinyUI(
                                            br())
                                      )
                         )
+                    ),
+           
+           tabPanel("Pivot Table",
+                    fluidPage( 
+                            fluidRow(
+                                    # column(3,
+                                    #        img(src = "eda_logo.jpg", height = 150, width = 150)
+                                    # ),
+                                    column(12, rpivotTableOutput("pivot_table")
+                                           )
+                            )
                     )
-           ))
+           )
+))

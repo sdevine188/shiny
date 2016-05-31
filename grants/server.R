@@ -8,6 +8,7 @@ library(rjson)
 library(readr)
 library(lubridate)
 library(rgdal)
+library(rpivotTable)
 
 
 
@@ -851,6 +852,16 @@ shinyServer(function(input, output, session){
                         selected_format <- "$"
                 }
                 selected_format
+        })
+        
+        # create pivot table
+        output$pivot_table <- renderRpivotTable({
+                data_table5_filtered <- data_table5_filtered()
+                data_table5_filtered <- select(data_table5_filtered, FY, Status, Appr.Desc, Initiatives, 
+                        Best.EDA.., Total.Project.., Region.Name, Appl.State.Abbr, Appl.Cnty.Name,
+                        Appl.City.Name, Proj.ST.Abbr, Proj.County.Name, Proj.City.Name,  
+                        Appl.Short.Name)
+                rpivotTable(data_table5_filtered)
         })
         
         output$rows_all <- renderText({
