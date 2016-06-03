@@ -1,3 +1,8 @@
+list.of.packages <- c("shiny", "dplyr", "datasets", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "rgdal", "rpivotTable")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages) > 0){
+        install.packages(new.packages)
+}
 library(shiny)
 library(dplyr)
 library(datasets)
@@ -22,7 +27,7 @@ datafile <- data.frame(read_csv(shiny_data_filename))
 # clean variable names 
 datafile <- rename(datafile, "Control.No." = Control., "EDA.Funding" = Best.EDA.., "Construction" = Cons.Non, 
                    "Total.Proj.Cost" = Total.Project.., "CFDA" = CFDA.., "Appl.County.Name" = Appl.Cnty.Name, 
-                   "Appl.Zip" = Appl..Zip, "Proj.State.Abbr" = Proj.ST.Abbr, "Region.Code" = RO.., "IRS" = IRS.., 
+                   "Appl.ZIP" = Appl..Zip, "Proj.State.Abbr" = Proj.ST.Abbr, "Region.Code" = RO.., "IRS" = IRS.., 
                    "DUNS" = DUNS.., "Proj.Comp.Code" = Proj.Comp..Code, "DEC.Code" = X.DEC._Action.Code, 
                    "DEC.Date" = X.DEC._Date, "PPR.Code" = X.PPR._Action.Code, "PPR.Date" = X.PPR._Date, 
                    "PRD.Code" = X.PRD._Action.Code, "PRD.Date" = X.PRD._Date, "PCL.Date" = X.PCL._Date, 
@@ -43,6 +48,7 @@ date <- str_replace(ymd(date), " UTC", "")
 datafile$Control.No. <- as.character(datafile$Control.No.)
 
 # create map color palettes
+# program_options <- unique(datafile$Appr.Desc)
 program_options <- unique(datafile$Appr.Desc)
 appropriation_options <- unique(datafile$Appropriation)
 year_options <- factor(seq(1995, 2016))
@@ -216,59 +222,12 @@ shinyServer(function(input, output, session){
                 if("All states" %in% input$state){
                         selected_states <- unique(datafile$Proj.State.Abbr)
                 }
-                
-                # if("All states" %in% input$state && input$project_applicant_radio == "Project state/county"){
-                #         selected_states <- unique(datafile$Proj.State.Abbr)
-                # }
-                # if("All states" %in% input$state && input$project_applicant_radio == "Applicant state/county"){
-                #         selected_states <- unique(datafile$Appl.State.Abbr)
-                # }
-                # if("All states" %in% input$state && input$project_applicant_radio == "Either project or applicant state/county"){
-                #         selected_states_proj <- unique(datafile$Proj.State.Abbr)
-                #         selected_states_app <- unique(datafile$Appl.State.Abbr)
-                #         selected_states_combined <- c(selected_states_proj, selected_states_app)
-                #         selected_states <- unique(selected_states_combined)
-                # }
                 if(!("All states" %in% input$state)){
                         selected_states <- input$state
                 }
                 
                 return(filter(datafile, Proj.State.Abbr %in% selected_states))
-
-                # if(input$project_applicant_radio == "Project state/county"){
-                #         return(filter(datafile, Proj.State.Abbr %in% selected_states))        
-                # }
-                # if(input$project_applicant_radio == "Applicant state/county"){
-                #         return(filter(datafile, Appl.State.Abbr %in% selected_states))        
-                # }
-                # if(input$project_applicant_radio == "Either project or applicant state/county"){
-                #         return(filter(datafile, Proj.State.Abbr %in% selected_states | Appl.State.Abbr %in% selected_states))        
-                # }
         })
-        
-        # counties is a reactive variable that identifies the counties assosciated with the user's selection from the state input menu
-        # counties <- reactive({
-        #         state_data <- state_data()
-        # 
-        #         state_counties <- arrange(state_data, Proj.County.Name)
-        #         return(unique(state_counties$Proj.County.Name)) 
-        #         
-        #         # if(input$project_applicant_radio == "Project state/county"){
-        #         #         state_counties <- arrange(state_data, Proj.County.Name)
-        #         #         return(unique(state_counties$Proj.County.Name)) 
-        #         # }
-        #         # if(input$project_applicant_radio == "Applicant state/county"){
-        #         #         state_counties <- arrange(state_data, Appl.County.Name)
-        #         #         return(unique(state_counties$Appl.County.Name)) 
-        #         # }
-        #         # if(input$project_applicant_radio == "Either project or applicant state/county"){
-        #         #         state_counties_proj <- state_data$Proj.County.Name
-        #         #         state_counties_app <- state_data$Appl.County.Name
-        #         #         state_counties_combined <- c(state_counties_proj, state_counties_app)
-        #         #         state_counties <- sort(state_counties_combined)
-        #         #         return(unique(state_counties)) 
-        #         # }
-        # })
         
         # populate the select state input menu
         observe({
@@ -276,53 +235,8 @@ shinyServer(function(input, output, session){
                 updateSelectInput(session, "state", choices = states_all, selected = states_all[1])
         })
         
-        # populate the select county input menu
-        # observe({
-        #         counties_all <- c("All counties", as.character(counties()))
-        #         updateSelectInput(session, "counties", choices = counties_all, selected = counties_all[1])
-        # })
-        
-        # filter data to only those states/counties selected
-        # data_table1 <- reactive({
-        #         # assign previously created reactive variables to regular variables
-        #         state_data <- state_data()
-        #         # counties <- counties()
-        #         datafile1 <- data.frame()
-        #         
-        #         # create if statements to handle "All counties" option in dropdown menu
-        #         # if("All counties" %in% input$counties){
-        #         #         data_table1 <- state_data                        
-        #         # }
-        #         # if(!("All counties" %in% input$counties)){
-        #         #                 data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)
-        #         # }
-        #         
-        #         # create if statements to handle "All counties" option in dropdown menu
-        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Project state/county"){
-        #         #         data_table1 <- state_data                        
-        #         # }
-        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Applicant state/county"){
-        #         #         data_table1 <- state_data                    
-        #         # }
-        #         # if("All counties" %in% input$counties && input$project_applicant_radio == "Either project or applicant state/county"){
-        #         #         data_table1 <- state_data                    
-        #         # }
-        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Project state/county")){
-        #         #         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties)                        
-        #         # }
-        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Applicant state/county")){
-        #         #         data_table1 <- filter(state_data, Appl.County.Name %in% input$counties)                        
-        #         # }
-        #         # if(!("All counties" %in% input$counties) && (input$project_applicant_radio == "Either project or applicant state/county")){
-        #         #         data_table1 <- filter(state_data, Proj.County.Name %in% input$counties | Appl.County.Name %in% input$counties)                        
-        #         # }
-        #         
-        #         data_table1
-        # })
-        
         # filter data based on year input
         data_table2 <- reactive({
-                # data_table1 <- data_table1()
                 data_table1 <- state_data()
                 range <- seq(input$years[1], input$years[2])
                 data_table2 <- filter(data_table1, FY %in% range)
@@ -331,7 +245,6 @@ shinyServer(function(input, output, session){
         
         # filter data based on advanced query inputs
         data_table4 <- reactive({
-                # data_table3 <- data_table3()
                 data_table3 <- data_table2()
                 data_table4 <- data.frame()
                 submit_query <- input$submit_query
@@ -415,13 +328,13 @@ shinyServer(function(input, output, session){
              query_term <- query_term_placeholder$value
              column_input <- input$column_input
              download_columns <- input$download_columns
-             counties <- input$counties
+             # counties <- input$counties
              state <- input$state
              years <- input$years
-             saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, counties, 
+             saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, 
                                       state, years)
              names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
-                                          "counties", "state", "years")
+                                          "state", "years")
              saved_query_list_json <- toJSON(saved_query_list)
              saved_query_list_json
         })
@@ -450,8 +363,8 @@ shinyServer(function(input, output, session){
                                                   choices = initiatives_display, selected = uploaded_query$initiatives_input)
                                 query_term_placeholder$value <- uploaded_query$query_term
                                 updateCheckboxInput(session, "download_columns", value = uploaded_query$download_columns)
-                                counties_all <- c("All counties", as.character(counties()))
-                                updateSelectInput(session, "counties", choices = counties_all, selected = uploaded_query$counties)
+                                # counties_all <- c("All counties", as.character(counties()))
+                                # updateSelectInput(session, "counties", choices = counties_all, selected = uploaded_query$counties)
                                 states_all <- c("All states", state_list)
                                 updateSelectInput(session, "state", choices = states_all, selected = uploaded_query$state)
                                 updateSliderInput(session, "years", value = c(uploaded_query$years[1], uploaded_query$years[2]))
@@ -562,16 +475,6 @@ shinyServer(function(input, output, session){
                         
                         # only run if at least one row of data is selected
                         if(data_table5_filtered[1,1] != "no projects"){
-                                
-                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
-                                #                 str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "),
-                                #                 str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                                #                 str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                                #                 str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
-                                #                 str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "),
-                                #                 str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",",
-                                #                                                scientific = FALSE),  sep = ""),
-                                #                                                 sep = "<br/>")
                                 
                                 default_popup <- default_popup()
                                 selected_pal <- selected_pal()
@@ -873,8 +776,7 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                data_table5_filtered <- data_table5_filtered()
-                data_table5_filtered$Control.No.[1]
+                is.null(input$status_filter)
         })
         
         # create download file

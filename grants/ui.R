@@ -10,7 +10,8 @@ shinyUI(
         navbarPage("", id = "navbar",
            tabPanel("Data",
                     fluidPage(theme = shinytheme("cerulean"),
-                            fluidRow(
+                            # create logo, title, and date
+                              fluidRow(
                                     column(3,
                                            img(src = "eda_logo.jpg", height = 150, width = 150)
                                     ),
@@ -26,26 +27,19 @@ shinyUI(
                             fluidRow(column(12,
                                             br())
                             ),
+                            # create state and year drop down menus
                             fluidRow(
                                     column(3,                       
                                            selectInput("state", "Select project states", choices = "", multiple = TRUE)
-                                           # selectInput("counties", "Select project counties:", choices = "", multiple = TRUE)                    
                                     ),
-                                    # column(3, 
-                                    #        radioButtons("project_applicant_radio", "Select state/county based on:",
-                                    #                     choices = c("Project state/county", "Applicant state/county", "Either project or applicant state/county"),
-                                    #                     selected = "Project state/county")
-                                    # ),
-                                    column(6, 
+                                    column(6, align = "center",
                                            sliderInput("years", label = "Select fiscal years", min = 1990, max = 2016, 
-                                                       value = c(1990, 2016), width = "100%", sep = "")                     
+                                                       value = c(1990, 2016), width = "100%", sep = "")
+                                    ),
+                                    column(3, align = "center",
+                                           downloadButton("downloadData", "Download Data")
                                     )
                             ),
-                            fluidRow(
-                                        column(3,
-                                               downloadButton("downloadData", "Download Data")
-                                        )
-                           ),
                            fluidRow(
                                    column(12, 
                                           br()
@@ -53,7 +47,7 @@ shinyUI(
                            ),
                             fluidRow(
                                     column(12,
-                                           # textOutput("rows_all"),   
+                                           # textOutput("rows_all"),
                                            DT::dataTableOutput("table")
                                     )
                             )
@@ -106,9 +100,11 @@ shinyUI(
                                     
                                     column(6, 
                                            wellPanel(
-                                                   selectInput("program_input", "Select EDA programs to display", choices = 
-                                                                       c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
-                                                                         "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
+                                                   # selectInput("program_input", "Select EDA programs to display", choices = 
+                                                   #                     c("All programs", "Public Works", "Planning", "Econ Adjst", "Tech Asst", "Trade Adjst", "Disaster Supp",
+                                                   #                       "GCCMIF", "Research", "CTAA"), multiple = TRUE, selected = "All programs"),
+                                                   selectInput("program_input", "Select EDA programs to display", choices = "",
+                                                                       multiple = TRUE, selected = "All programs"),
                                                    actionButton("reset_programs", "Reset to all programs")
                                            )
                                     )
