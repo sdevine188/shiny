@@ -1,4 +1,4 @@
-list.of.packages <- c("shiny", "dplyr", "datasets", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "rgdal")
+list.of.packages <- c("shiny", "dplyr", "datasets", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "rgdal", "devtools")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages) > 0){
         install.packages(new.packages)
