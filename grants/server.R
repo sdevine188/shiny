@@ -1,8 +1,13 @@
-list.of.packages <- c("shiny", "dplyr", "datasets", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "rgdal", "rpivotTable")
+list.of.packages <- c("shiny", "dplyr", "datasets", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "rgdal")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages) > 0){
         install.packages(new.packages)
 }
+rpivotTable_not_installed <- !("rpivotTable" %in% installed.packages()[,"Package"])
+if(rpivotTable_not_installed){
+        devtools::install_github(c("ramnathv/htmlwidgets", "smartinsightsfromdata/rpivotTable"))
+}
+
 library(shiny)
 library(dplyr)
 library(datasets)
@@ -476,12 +481,21 @@ shinyServer(function(input, output, session){
                         # only run if at least one row of data is selected
                         if(data_table5_filtered[1,1] != "no projects"){
                                 
-                                default_popup <- default_popup()
+                                # default_popup <- default_popup()
+                                default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
+                                      str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
+                                      str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
+                                      str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                                      str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
+                                      str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
+                                      str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
+                                                                      scientific = FALSE),  sep = ""), 
+                                      sep = "<br/>")
+                                
                                 selected_pal <- selected_pal()
                                 selected_title <- selected_title()
                                 selected_size <- selected_size()
                                 selected_format <- selected_format()
-                                # selected_values <- selected_values()
                                 selected_values <- if(data_table5_filtered[1,1] != "no projects"){
                 
                                         selected_values <- data_table5_filtered$Appr.Desc
@@ -666,23 +680,6 @@ shinyServer(function(input, output, session){
                         leafletProxy("map_boundaries") %>%
                                 clearControls()
                 }
-        })
-        
-        # reactive to create default map popups
-        default_popup <- reactive({
-                data_table5_filtered <- data_table5_filtered()
-                data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, EDA.Funding, app_lat, app_lon)
-                data_table5_filtered <- na.omit(data_table5_filtered)
-                
-                str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
-                       str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
-                       str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                       str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
-                       str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
-                       str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
-                                                       scientific = FALSE),  sep = ""), 
-                       sep = "<br/>")
         })
         
         # create reactive fund_pal seperately to avoid timeout/race conditions
