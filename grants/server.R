@@ -473,7 +473,8 @@ shinyServer(function(input, output, session){
                 data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
                                                Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, 
                                                EDA.Funding, app_lat, app_lon)
-                data_table5_filtered <- na.omit(data_table5_filtered)
+                # data_table5_filtered <- na.omit(data_table5_filtered)
+                data_table5_filtered <- filter(data_table5_filtered, !is.na(app_lat), !is.na(app_lon))
                 
                 # update map_marker, if selected, when refresh_map button is hit
                 if(input$map_radio == "Map with application icons"){
@@ -481,16 +482,33 @@ shinyServer(function(input, output, session){
                         # only run if at least one row of data is selected
                         if(data_table5_filtered[1,1] != "no projects"){
                                 
-                                # default_popup <- default_popup()
-                                default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
-                                      str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
-                                      str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                                      str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                                      str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
-                                      str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
-                                      str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
-                                                                      scientific = FALSE),  sep = ""), 
-                                      sep = "<br/>")
+                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
+                                #       str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
+                                #       str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
+                                #       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
+                                #       str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
+                                #       str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
+                                #       str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
+                                #                                       scientific = FALSE),  sep = ""), 
+                                #       sep = "<br/>")
+                                
+                                popup_control <- sapply(data_table5_filtered$Control.No., function(x) ifelse(is.na(x), "NA", x))
+                                popup_control <- sapply(popup_control, function(x) str_c("Control #: ", x))
+                                popup_app_name <- sapply(data_table5_filtered$Appl.Short.Name, function(x) ifelse(is.na(x), "NA", x))
+                                popup_app_name <- sapply(popup_app_name, function(x) str_c("Applicant name: ", x))
+                                popup_app_address <- sapply(data_table5_filtered$app_address, function(x) ifelse(is.na(x), "NA", x))
+                                popup_app_address <- sapply(popup_app_address, function(x) str_c("Applicant Address: ", x))
+                                popup_fy <- sapply(data_table5_filtered$FY, function(x) ifelse(is.na(x), "NA", x))
+                                popup_fy <- sapply(popup_fy, function(x) str_c("Fiscal year: FY ", x))
+                                popup_program <- sapply(data_table5_filtered$Appr.Desc, function(x) ifelse(is.na(x), "NA", x))
+                                popup_program <- sapply(popup_program, function(x) str_c("Program: ", x))
+                                popup_appropriation <- sapply(data_table5_filtered$Appropriation, function(x) ifelse(is.na(x), "NA", x))
+                                popup_appropriation <- sapply(popup_appropriation, function(x) str_c("Appropriation: ", x))
+                                popup_funds <- sapply(data_table5_filtered$EDA.Funding, function(x) ifelse(is.na(x), "NA", x))
+                                popup_funds <- sapply(popup_funds, function(x) str_c("EDA funds: $", prettyNum(x, big.mark = ",",
+                                                        scientific = FALSE)))
+                                default_popup <- str_c(popup_control, popup_app_name, popup_app_address, popup_fy, popup_program,
+                                                       popup_appropriation, popup_funds, sep = "<br/>")
                                 
                                 selected_pal <- selected_pal()
                                 selected_title <- selected_title()

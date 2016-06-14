@@ -225,7 +225,8 @@ shinyUI(
                                     # column(3,
                                     #        img(src = "eda_logo.jpg", height = 150, width = 150)
                                     # ),
-                                    column(12, rpivotTableOutput("pivot_table")
+                                    column(12, align = "center",
+                                           rpivotTableOutput("pivot_table")
                                            )
                             )
                     )
