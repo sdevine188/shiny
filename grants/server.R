@@ -3,6 +3,10 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages) > 0){
         install.packages(new.packages)
 }
+rstudio_DT_not_installed <- !("DT" %in% installed.packages()[,"Package"])
+if(rstudio_DT_not_installed){
+        devtools::install_github(c("rstudio/DT"))
+}
 rpivotTable_not_installed <- !("rpivotTable" %in% installed.packages()[,"Package"])
 if(rpivotTable_not_installed){
         devtools::install_github(c("ramnathv/htmlwidgets", "smartinsightsfromdata/rpivotTable"))
@@ -33,11 +37,11 @@ datafile <- data.frame(read_csv(shiny_data_filename))
 datafile <- rename(datafile, "Control.No." = Control., "EDA.Funding" = Best.EDA.., "Construction" = Cons.Non, 
                    "Total.Proj.Cost" = Total.Project.., "CFDA" = CFDA.., "Appl.County.Name" = Appl.Cnty.Name, 
                    "Appl.ZIP" = Appl..Zip, "Proj.State.Abbr" = Proj.ST.Abbr, "Region.Code" = RO.., "IRS" = IRS.., 
-                   "DUNS" = DUNS.., "Proj.Comp.Code" = Proj.Comp..Code, "DEC.Code" = X.DEC._Action.Code, 
-                   "DEC.Date" = X.DEC._Date, "PPR.Code" = X.PPR._Action.Code, "PPR.Date" = X.PPR._Date, 
-                   "PRD.Code" = X.PRD._Action.Code, "PRD.Date" = X.PRD._Date, "PCL.Date" = X.PCL._Date, 
+                   "DUNS" = DUNS.., "Proj.Comp.Code" = Proj.Comp..Code,  
+                   # "PPR.Code" = PPR.Act, "DEC.Code" = DEC.Act, "GPE.Date" = X.GPE._Date, "GSD.Date" = X.GSD._Date,
+                   # "PRD.Code" = X.PRD._Action.Code, "PRD.Date" = X.PRD._Date, "PCL.Date" = X.PCL._Date, 
                    "PPS.Date" = X.PPS._Date, "PPE.Date" = X.PPE._Date, "PX1.Date" = X.PX1._Date, 
-                   "PX2.Date" = X.PX2._Date, "GSD.Date" = X.GSD._Date, "GPE.Date" = X.GPE._Date)
+                   "PX2.Date" = X.PX2._Date)
 
 # read small data to start map without delay
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
@@ -333,7 +337,6 @@ shinyServer(function(input, output, session){
              query_term <- query_term_placeholder$value
              column_input <- input$column_input
              download_columns <- input$download_columns
-             # counties <- input$counties
              state <- input$state
              years <- input$years
              saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, 
@@ -342,6 +345,12 @@ shinyServer(function(input, output, session){
                                           "state", "years")
              saved_query_list_json <- toJSON(saved_query_list)
              saved_query_list_json
+        })
+        
+        # test filtered columns
+        column_filters <- reactive({
+                # input$table_search_columns
+                input$table_state
         })
         
         # process an uploaded saved query
@@ -425,11 +434,9 @@ shinyServer(function(input, output, session){
                         data_table_output2$Status <- factor(data_table_output2$Status)
                         data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
                         data_table_output2$Region.Name <- factor(data_table_output2$Region.Name)
+                        # return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
+                        return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE)))
                         
-                        # data_table_output2$Proj.State.Abbr <- factor(data_table_output2$Proj.State.Abbr)
-                        # data_table_output2$Appl.City.Name <- factor(data_table_output2$Appl.City.Name)
-#                         return(datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
-                        return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
                 }
         },
                 server = TRUE
@@ -481,16 +488,6 @@ shinyServer(function(input, output, session){
                         
                         # only run if at least one row of data is selected
                         if(data_table5_filtered[1,1] != "no projects"){
-                                
-                                # default_popup <- str_c(str_c("Control #:", data_table5_filtered$Control.No., sep = " "),
-                                #       str_c("Applicant name:", data_table5_filtered$Appl.Short.Name, sep = " "), 
-                                #       str_c("Applicant Address:", data_table5_filtered$app_address, sep = " "),
-                                #       str_c("Fiscal year: FY", data_table5_filtered$FY, sep = " "),
-                                #       str_c("Program:", data_table5_filtered$Appr.Desc, sep = " "),
-                                #       str_c("Appropriation:", data_table5_filtered$Appropriation, sep = " "), 
-                                #       str_c("EDA funds: $", prettyNum(data_table5_filtered$EDA.Funding, big.mark = ",", 
-                                #                                       scientific = FALSE),  sep = ""), 
-                                #       sep = "<br/>")
                                 
                                 popup_control <- sapply(data_table5_filtered$Control.No., function(x) ifelse(is.na(x), "NA", x))
                                 popup_control <- sapply(popup_control, function(x) str_c("Control #: ", x))
@@ -791,7 +788,8 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderText({
-                is.null(input$status_filter)
+                # input$table_search_columns
+                # input$table_state$columns
         })
         
         # create download file
