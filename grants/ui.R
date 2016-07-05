@@ -54,6 +54,7 @@ shinyUI(
                             fluidRow(
                                     column(12,
                                            # textOutput("rows_all"),
+                                           verbatimTextOutput("rows_all"),
                                            DT::dataTableOutput("table")
                                     )
                             )

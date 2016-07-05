@@ -33,16 +33,6 @@ shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read main data file
 datafile <- data.frame(read_csv(shiny_data_filename))
 
-# clean variable names 
-datafile <- rename(datafile, "Control.No." = Control., "EDA.Funding" = Best.EDA.., "Construction" = Cons.Non, 
-                   "Total.Proj.Cost" = Total.Project.., "CFDA" = CFDA.., "Appl.County.Name" = Appl.Cnty.Name, 
-                   "Appl.ZIP" = Appl..Zip, "Proj.State.Abbr" = Proj.ST.Abbr, "Region.Code" = RO.., "IRS" = IRS.., 
-                   "DUNS" = DUNS.., "Proj.Comp.Code" = Proj.Comp..Code,  
-                   # "PPR.Code" = PPR.Act, "DEC.Code" = DEC.Act, "GPE.Date" = X.GPE._Date, "GSD.Date" = X.GSD._Date,
-                   # "PRD.Code" = X.PRD._Action.Code, "PRD.Date" = X.PRD._Date, "PCL.Date" = X.PCL._Date, 
-                   "PPS.Date" = X.PPS._Date, "PPE.Date" = X.PPE._Date, "PX1.Date" = X.PX1._Date, 
-                   "PX2.Date" = X.PX2._Date)
-
 # read small data to start map without delay
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
 
@@ -330,6 +320,21 @@ shinyServer(function(input, output, session){
                 })
         })
         
+        # create variable storing the current column filter keywords
+        column_filter_keywords <- reactive({
+        #         # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
+        #         # input$table_state$search[[1]] # this works for global search
+                # input$table_state$columns[[8]]$search$search
+                # input$table_state$columns$search$search # not work
+                length(input$table_state$columns)
+                keyword_series <- c()
+                for(i in 2:length(input$table_state$columns)){
+                        # use 2 as starting index since 2 is the index for the first column, not sure what table_state#columns[[1]] refers too??
+                        keyword_series <- c(keyword_series, input$table_state$columns[[i]]$search$search)
+                }
+                keyword_series
+        })
+        
         # create variable storing the full query term submitted so it can be downloaded
         saved_query <- reactive({
              program_input <- input$program_input
@@ -339,18 +344,13 @@ shinyServer(function(input, output, session){
              download_columns <- input$download_columns
              state <- input$state
              years <- input$years
+             column_filter_keywords <- column_filter_keywords()
              saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, 
                                       state, years)
              names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
                                           "state", "years")
              saved_query_list_json <- toJSON(saved_query_list)
              saved_query_list_json
-        })
-        
-        # test filtered columns
-        column_filters <- reactive({
-                # input$table_search_columns
-                input$table_state
         })
         
         # process an uploaded saved query
@@ -382,6 +382,8 @@ shinyServer(function(input, output, session){
                                 states_all <- c("All states", state_list)
                                 updateSelectInput(session, "state", choices = states_all, selected = uploaded_query$state)
                                 updateSliderInput(session, "years", value = c(uploaded_query$years[1], uploaded_query$years[2]))
+                                
+                                
                         }
                 })
         })
@@ -787,10 +789,21 @@ shinyServer(function(input, output, session){
                 rpivotTable(data_table5_filtered)
         })
         
-        output$rows_all <- renderText({
-                # input$table_search_columns
-                # input$table_state$columns
+        output$rows_all <- renderPrint({
+                # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
+                # input$table_state$search[[1]] # this works for global search
+                # input$table_state
+                # length(input$table_state$columns)
+                # input$column_input
+                # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
+                column_filter_keywords <- column_filter_keywords()
+                column_filter_keywords
         })
+
+        # output$rows_all <- renderText({
+        #         # str(input$table_state)
+        #         input$tbl_state$search
+        # })
         
         # create download file
         download_file <- reactive({
