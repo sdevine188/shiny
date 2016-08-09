@@ -1,9 +1,3 @@
-list.of.packages <- c("shiny", "dplyr", "leaflet", "stringr", "DT", "rjson", "readr", "lubridate", "shinythemes")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages) > 0){
-        install.packages(new.packages)
-}
-
 library(shiny)
 library(dplyr)
 library(stringr)
@@ -54,7 +48,8 @@ shinyUI(
                             fluidRow(
                                     column(12,
                                            # textOutput("rows_all"),
-                                           verbatimTextOutput("rows_all"),
+                                           # verbatimTextOutput("rows_all"),
+                                           # DT::dataTableOutput("table2"),
                                            DT::dataTableOutput("table")
                                     )
                             )
