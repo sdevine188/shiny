@@ -323,11 +323,6 @@ shinyServer(function(input, output, session){
         
         # create variable storing the current column filter keywords
         column_filter_keywords <- reactive({
-                # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
-                # input$table_state$search[[1]] # this works for global search
-                # input$table_state$columns[[8]]$search$search
-                # input$table_state$columns$search$search # not work
-                # length(input$table_state$columns)
                 keyword_series <- c()
                 for(i in 1:length(input$table_state$columns)){
                         # use 2 as starting index since 2 is the index for the first column, not sure what table_state$columns[[1]] refers to??
@@ -346,14 +341,7 @@ shinyServer(function(input, output, session){
                 if(input$saved_query_radio == "Apply uploaded query"  && !(is.null(uploaded_query))){
                         column_filter_keywords_loaded <- uploaded_query$column_filter_keywords
                 }
-                
-                # for test with mtcars datatable
-                # column_filter_keywords_loaded <- c("m", "15 ... 25", "", "", "", "", "")
-                
-                # for test with grant datatable
-                # note that when building column_filter_keywords_loaded manually, you need to add extra first space that doesn't correspond to column??
-                # column_filter_keywords_loaded <- c("", "", "", "", "", "", "james")
-                
+
                 # create function to convert keywords into the list needed by DT function
                 create_column_keywords_list <- function(keyword_series) {
                         column_keywords_list <- list()
@@ -394,13 +382,6 @@ shinyServer(function(input, output, session){
                         global_search_keywords_loaded <- uploaded_query$global_search_keywords
                 }
                 
-                # test for mtcars datatable, it works
-                # global_search_keywords_loaded <- "mer"
-                
-                # test for grants datatable, it works
-                # global_search_keywords_loaded <- "jame"
-                
-                
                 # create function to convert keywords into the list needed by DT function
                 create_global_keywords_list <- function(global_input) {
                         global_keywords_list <- list(regex = TRUE, caseInsensitive = TRUE, search = global_input)
@@ -422,12 +403,8 @@ shinyServer(function(input, output, session){
              years <- input$years
              column_filter_keywords <- column_filter_keywords()
              global_search_keywords <- global_search_keywords()
-             # saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, 
-             #                          state, years)
              saved_query_list <- list(program_input, initiatives_input, query_term, column_input, download_columns, 
                                       state, years, column_filter_keywords, global_search_keywords)
-             # names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
-             #                              "state", "years")
              names(saved_query_list) <- c("program_input", "initiatives_input", "query_term", "column_input", "download_columns",
                                           "state", "years", "column_filter_keywords", "global_search_keywords")
              saved_query_list_json <- toJSON(saved_query_list)
@@ -463,8 +440,6 @@ shinyServer(function(input, output, session){
                                 states_all <- c("All states", state_list)
                                 updateSelectInput(session, "state", choices = states_all, selected = uploaded_query$state)
                                 updateSliderInput(session, "years", value = c(uploaded_query$years[1], uploaded_query$years[2]))
-                                
-                                
                         }
                 })
         })
@@ -493,7 +468,6 @@ shinyServer(function(input, output, session){
                 data_table_output <- data_table()
                 data_table_output2 <- data.frame()
                 
-                
                 # set columns to be displayed based on column dropdown menu
                 if(is.null(input$column_input)){
                         data_table_output <- data_table_output[ , default_columns]
@@ -506,175 +480,37 @@ shinyServer(function(input, output, session){
                 no_projects2 <- data.frame("No matching records found")
                 names(no_projects2)[1] <- ""
                 
-                # assign either the placeholder data or the user-selected data (if rows > 1) to be fed into datatable
+                # assign either the placeholder data or the user-selected data (if rows < 1) to be fed into datatable
                 if(nrow(data_table_output) < 1){
                         data_table_output2 <- no_projects2
                         
-                        # create column_keywords_list to auto-populate column filters based on saved query
-                        # create_column_keywords_list <- function(keyword_series) {
-                        #         column_keywords_list <- list()
-                        #         for(i in 1:length(keyword_series)) {
-                        #                 if(keyword_series[i] == "") {
-                        #                         column_keywords_list[[i]] <- NULL
-                        #                 } else {
-                        #                         column_keywords_list[[i]] <- list(search = keyword_series[i])
-                        #                 }
-                        #         }
-                        #         column_keywords_list
-                        # }
-                        # isolate({
-                        #         column_filter_keywords <- column_filter_keywords()
-                        # })
-                        # column_keywords_list <- create_column_keywords_list(column_filter_keywords)
-                        
-                        # create global_keyword_list to auto-populate global search based on saved query
-                        # create_global_keyword_list <- function(global_input) {
-                        #         global_keyword_list <- list(regex = TRUE, caseInsensitive = TRUE, search = global_input)
-                        #         global_keyword_list
-                        # }
-                        # isolate({
-                        #         global_search_keywords <- global_search_keywords()
-                        # })
-                        # global_keyword_list <- create_global_keyword_list(global_search_keywords)
-                        
                         return(DT::datatable(data_table_output2, filter = "none", rownames = FALSE, options = list(pageLength = 5)))
-                        # return(DT::datatable(data_table_output2, filter = "top", rownames = FALSE, options = list(pageLength = 5,
-                        #                         searchCols = column_keywords_list, search = global_keyword_list)))
-
                 }
+                
+                # build datatable if rows > 1
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
                         data_table_output2$Status <- factor(data_table_output2$Status)
                         data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
                         data_table_output2$Region.Name <- factor(data_table_output2$Region.Name)
                         
-                        # create column_keywords_list to auto-populate column filters based on saved query
-                        # create_column_keywords_list <- function(keyword_series) {
-                        #         column_keywords_list <- list()
-                        #         if(length(keyword_series) > 0) {
-                        #                 for(i in 1:length(keyword_series)) {
-                        #                         if(keyword_series[i] == "") {
-                        #                                 column_keywords_list[[i]] <- NULL
-                        #                         } else {
-                        #                                 column_keywords_list[[i]] <- list(search = keyword_series[i])
-                        #                         }
-                        # 
-                        #                 }
-                        #                 column_keywords_list
-                        #         } else {
-                        #                 column_keywords_list[[1]] <- NULL
-                        #         }
-                        # }
-                        
-                        # isolate({
-                        #         column_filter_keywords <- column_filter_keywords()
-                        # })
-                        # this won't work, since column_filter_keywords is only defined after the table is built, which is what this code chunk is in the process of doing
-                        # column_keywords_list <- create_column_keywords_list(column_filter_keywords)
-                        # column_keywords_list_placeholder <- column_keywords_list
-
-                        # # create global_keyword_list to auto-populate global search based on saved query
-                        # create_global_keyword_list <- function(global_input) {
-                        #         global_keyword_list <- list(regex = TRUE, caseInsensitive = TRUE, search = global_input)
-                        #         global_keyword_list
-                        # }
-
-                        # isolate({
-                        #         global_search_keywords <- global_search_keywords()
-                        # })
-                        # global_keyword_list <- create_global_keyword_list(global_search_keywords)
-                        
-                        # return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5)))
-                        # return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE)))
-                        
-                        # this works
-                        # DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = FALSE,
-                        #                                 searchCols = list(NULL, list(search = '12')),
-                        #                                 search = list(regex = TRUE, caseInsensitive = TRUE, search = 'jam')))
-                        
-                        # this also seems to work, i can change the search and it updates with a refresh or re-run
-                        # DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = FALSE,
-                        #                                          searchCols = list(NULL, list(search = '12')),
-                        #                                          search = list(regex = TRUE, caseInsensitive = TRUE, search = 'ja')),
-                        #               callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-                        
-                        
-                        # try with state save = TRUE, since global search and column filters cant be extracted otherwise
-                        # this seems to work, reloading to the preset search and filter options, even if they are deleted and the app closed
-                        # DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE,
-                        #          searchCols = list(NULL, list(search = '12')),
-                        #          search = list(regex = TRUE, caseInsensitive = TRUE, search = 'ja')),
-                        #               callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-                        
-                        # try with functionized column filter
+                        # add column filter and global search keywords uploaded from saved query 
                         isolate({
                                 column_keywords_list <- column_keywords_list()
                         })
-                        
                         isolate({
                                 global_keywords_list <- global_keywords_list()
                         })
                         
-                        # test with just column filters, it works
-                        # DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE,
-                        #                                                                  searchCols = column_keywords_list,
-                        #                                                                  search = list(regex = TRUE, caseInsensitive = TRUE, search = '')),
-                        #               callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-                        
-                        # test with column filters and global search
+                        # build datatable
                         DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE,
                                                                                          searchCols = column_keywords_list,
                                                                                          search = global_keywords_list),
                                       callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-                        
-                        # this didn't work, need to tweak loading of keyword lists
-                        # DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = FALSE,
-                        #                                                                  searchCols = column_keywords_list,
-                        #                                                                  search = global_keyword_list),
-                        #               callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-                        
-                        # return(DT::datatable(data_table_output2, filter = "top", options = list(pageLength = 5, stateSave = TRUE,
-                        #                                 searchCols = column_keywords_list, search = global_keyword_list)))
-                        
                 }
         },
                 server = TRUE
         )
-        
-        # create table2 output
-        # output$table2 <- DT::renderDataTable({
-        #         # DT::datatable(
-        #         #         mtcars2, colnames = c('model' = 1),
-        #         #         filter = list(position = 'top', clear = FALSE),
-        #         #         options = list(pageLength = 5, stateSave = FALSE, searchCols = list(list(search = 'er'), list(search = '15 ... 25'),
-        #         #                                 NULL, NULL, NULL, NULL), search = list(regex = TRUE, caseInsensitive = TRUE, search = 'M[ae]')))
-        #         # },
-        #         # server = TRUE
-        #         
-        #         # test with state save and callback
-        #         # test works
-        #         DT::datatable(
-        #                 mtcars2, colnames = c('model' = 1),
-        #                 filter = list(position = 'top', clear = FALSE),
-        #                 options = list(pageLength = 5, stateSave = TRUE, searchCols = list(list(search = 'er'), list(search = '15 ... 25'),
-        #                 NULL, NULL, NULL, NULL), search = list(regex = TRUE, caseInsensitive = TRUE, search = 'M[ae]')),
-        #                 callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-        #         },
-        #         server = TRUE
-        #         
-        #         # this test works
-        #         # column_keywords_list <- column_keywords_list()
-        #         # global_keywords_list <- global_keywords_list()
-        #         # 
-        #         # DT::datatable(
-        #         #         mtcars2, colnames = c('model' = 1),
-        #         #         filter = list(position = 'top', clear = FALSE),
-        #         #         options = list(pageLength = 5, stateSave = TRUE, searchCols = column_keywords_list, search = global_keywords_list),
-        #         #         callback = DT::JS("$(window).unload(function() { table.state.clear(); })"))
-        #         # },
-        #         # server = TRUE
-        #         
-        # )
         
         output$map <- renderLeaflet({
                 leaflet(datafile_small) %>% addTiles() %>%
@@ -1023,32 +859,9 @@ shinyServer(function(input, output, session){
         })
         
         output$rows_all <- renderPrint({
-                # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
-                # input$table_state$search[[1]] # this works for global search
-                # input$table_state
-                # length(input$table_state$columns)
-                # input$column_input
-                # input$table_state$columns[[8]]$search$search # this works for columns, note column returned is 1 less than specified, eg 8 returns column 7
-                # column_filter_keywords <- column_filter_keywords()
-                # column_filter_keywords
-                # global_search_keywords <- global_search_keywords()
-                # global_search_keywords
-                # column_keywords_list_placeholder <- column_keywords_list_placeholder()
-                # column_keywords_list_placeholder
-                # column_keywords_list <- column_keywords_list()
-                # column_keywords_list
-                global_keywords_list <- global_keywords_list()
-                global_keywords_list
-                # uploaded_query <- uploaded_query()
-                # uploaded_query$column_filter_keywords
                 # uploaded_query <- uploaded_query()
                 # uploaded_query$global_search_keywords
         })
-
-        # output$rows_all <- renderText({
-        #         # str(input$table_state)
-        #         input$tbl_state$search
-        # })
         
         # create download file
         download_file <- reactive({
