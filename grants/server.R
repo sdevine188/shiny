@@ -48,7 +48,6 @@ date <- str_replace(ymd(date), " UTC", "")
 datafile$Control.No. <- as.character(datafile$Control.No.)
 
 # create map color palettes
-# program_options <- unique(datafile$Appr.Desc)
 program_options <- unique(datafile$Program)
 appropriation_options <- unique(datafile$Appropriation)
 year_options <- factor(seq(1995, 2016))
@@ -58,8 +57,6 @@ appropriation_pal <- colorFactor("Set1", domain = appropriation_options)
 year_pal <- colorFactor("Set1", domain = year_options)
 
 # create default columns to display
-# default_columns <- c("Control.No.", "Status", "FY", Appr.Desc", "EDA.Funding", "Appl.Short.Name", 
-#                      "Project.Short.Descrip", "Initiatives", "Proj.State.Abbr", "Region.Name")
 default_columns <- c("Control.No.", "Status", "FY", "Program", "EDA.Funding", "Appl.Short.Name", 
                      "Project.Short.Descrip", "Initiatives", "Proj.State.Abbr", "Region.Name")
 
@@ -256,9 +253,6 @@ shinyServer(function(input, output, session){
                         if("All programs" %in% input$program_input){
                                 data_table4 <- data_table3
                         }
-                        # if(!("All programs" %in% input$program_input)){
-                        #         data_table4 <- filter(data_table3, Appr.Desc %in% input$program_input)
-                        # }
                         if(!("All programs" %in% input$program_input)){
                                 data_table4 <- filter(data_table3, Program %in% input$program_input)
                         }
@@ -495,7 +489,6 @@ shinyServer(function(input, output, session){
                 if(nrow(data_table_output) >= 1){
                         data_table_output2 <- data_table_output
                         data_table_output2$Status <- factor(data_table_output2$Status)
-                        # data_table_output2$Appr.Desc <- factor(data_table_output2$Appr.Desc)
                         data_table_output2$Program <- factor(data_table_output2$Program)
                         data_table_output2$Region.Name <- factor(data_table_output2$Region.Name)
                         
@@ -551,9 +544,6 @@ shinyServer(function(input, output, session){
         # update map when hitting refresh_map button
         observeEvent(input$refresh_map, {
                 data_table5_filtered <- data_table5_filtered()
-                # data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
-                #                                Appl.Short.Name, app_address, FY, Appr.Desc, Appropriation, 
-                #                                EDA.Funding, app_lat, app_lon)
                 data_table5_filtered <- select(data_table5_filtered, Control.No., Appl.FIPS.ST, Appl.FIPS.Cnty, Appl.Cong.Dist, 
                                                Appl.Short.Name, app_address, FY, Program, Appropriation, 
                                                EDA.Funding, app_lat, app_lon)
@@ -573,7 +563,6 @@ shinyServer(function(input, output, session){
                                 popup_app_address <- sapply(popup_app_address, function(x) str_c("Applicant Address: ", x))
                                 popup_fy <- sapply(data_table5_filtered$FY, function(x) ifelse(is.na(x), "NA", x))
                                 popup_fy <- sapply(popup_fy, function(x) str_c("Fiscal year: FY ", x))
-                                # popup_program <- sapply(data_table5_filtered$Appr.Desc, function(x) ifelse(is.na(x), "NA", x))
                                 popup_program <- sapply(data_table5_filtered$Program, function(x) ifelse(is.na(x), "NA", x))
                                 popup_program <- sapply(popup_program, function(x) str_c("Program: ", x))
                                 popup_appropriation <- sapply(data_table5_filtered$Appropriation, function(x) ifelse(is.na(x), "NA", x))
@@ -591,11 +580,7 @@ shinyServer(function(input, output, session){
                                 selected_format <- selected_format()
                                 selected_values <- if(data_table5_filtered[1,1] != "no projects"){
                 
-                                        # selected_values <- data_table5_filtered$Appr.Desc
                                         selected_values <- data_table5_filtered$Program
-                                        # if(input$marker_type == "By program"){
-                                        #         selected_values <- data_table5_filtered$Appr.Desc
-                                        # }
                                         if(input$marker_type == "By program"){
                                                 selected_values <- data_table5_filtered$Program
                                         }
@@ -731,9 +716,6 @@ shinyServer(function(input, output, session){
         # create reactiveValues variable, which can be updated from observers
         # this is placeholder for selected_values() with icon map 
         # this prevents error, since observeEvent for display legend needs it, but its not defined until map refresh button is hit
-        # selected_values_placeholder <- reactiveValues(
-        #         value = datafile$Appr.Desc
-        # )
         selected_values_placeholder <- reactiveValues(
                 value = datafile$Program
         )
@@ -865,10 +847,6 @@ shinyServer(function(input, output, session){
         # create pivot table
         output$pivot_table <- renderRpivotTable({
                 data_table5_filtered <- data_table5_filtered()
-                # data_table5_filtered <- select(data_table5_filtered, FY, Status, Appr.Desc, Initiatives, 
-                #         EDA.Funding, Total.Proj.Cost, Region.Name, Appl.State.Abbr, Appl.County.Name,
-                #         Appl.City.Name, Proj.State.Abbr, Proj.County.Name, Proj.City.Name,  
-                #         Appl.Short.Name)
                 data_table5_filtered <- select(data_table5_filtered, FY, Status, Program, Initiatives, 
                                        EDA.Funding, Total.Proj.Cost, Region.Name, Appl.State.Abbr, Appl.County.Name,
                                        Appl.City.Name, Proj.State.Abbr, Proj.County.Name, Proj.City.Name,  
