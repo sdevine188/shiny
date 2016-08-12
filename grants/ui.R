@@ -172,8 +172,8 @@ shinyUI(
                                             
                                             column(3, offset = 3, align = "center",
                                                   selectInput("marker_type", "Select color-coding of award icons:", 
-                                                                choices = c("By appropriation", "By program", "By fiscal year awarded", 
-                                                              "By EDA funding level"), selected = "By appropriation")
+                                                                choices = c("By program", "By appropriation", "By fiscal year awarded", 
+                                                              "By EDA funding level"), selected = "By program")
                                                 ),
                                             column(3, align = "center",
                                                    selectInput("circle_size", "Select size of award icons:", choices = c("Small circles", 
