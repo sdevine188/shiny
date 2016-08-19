@@ -25,8 +25,6 @@ library(lubridate)
 library(rgdal)
 library(rpivotTable)
 
-
-
 # Read in data
 # find current shiny data filename
 shiny_data_filename <- list.files(str_c(getwd(), "/data"))[str_detect(list.files(str_c(getwd(), "/data")), "shiny_app_data_20")]
@@ -63,7 +61,7 @@ default_columns <- c("Control.No.", "Status", "FY", "Program", "EDA.Funding", "A
 # create columns names in proper display order
 # will need to specify columns to display once final dataset is arranged, since lat/lon etc aren't needed
 non_default_columns <- names(datafile[ , !(names(datafile)%in% default_columns)])
-column_display <- c(default_columns, non_default_columns)
+column_display <- sort(c(default_columns, non_default_columns))
 
 # read in initatives data
 initiatives <- read.csv("data/initiatives.csv", stringsAsFactors = FALSE)
@@ -81,7 +79,7 @@ is.odd <- function(x) x %% 2 != 0
 # these will only show when all states is selected bc we drop them so there is no "" showing in select state menu
 state_arr <- arrange(datafile, Appl.State.Abbr)
 state_list <- unique(state_arr$Appl.State.Abbr)
-state_list <- state_list[-1]
+state_list <- state_list
 
 # load geographic boundary data
 state_boundaries <- readOGR("data/cb_2015_us_state_20m/cb_2015_us_state_20m.shp",
@@ -90,6 +88,17 @@ cd_boundaries <- readOGR("data/cb_2014_us_cd114_20m/cb_2014_us_cd114_20m.shp",
                          layer = "cb_2014_us_cd114_20m", verbose = FALSE)
 county_boundaries <- readOGR("data/cb_2015_us_county_20m/cb_2015_us_county_20m.shp",
                             layer = "cb_2015_us_county_20m", verbose = FALSE)
+
+# log user accessing Grants Viewer
+user <- Sys.info()[6]
+date <- str_split(Sys.time(), " ")[[1]][1]
+time <- str_split(Sys.time(), " ")[[1]][2]
+time_zone <- Sys.timezone(location = FALSE)
+time <- str_c(time, time_zone, sep = " ")
+log_entry <- data.frame(user, date, time, row.names = NULL)
+log <- read_csv("log/log.csv")
+log <- rbind(log, log_entry)
+write_csv(log, "log/log.csv")
 
 # shiny server
 shinyServer(function(input, output, session){
@@ -862,11 +871,14 @@ shinyServer(function(input, output, session){
         # create download file
         download_file <- reactive({
                 data_table5_filtered <- data_table5_filtered()
+                
                 if(input$download_columns == TRUE){
-                        return(data_table5_filtered[ , input$column_input])
+                        # return(data_table5_filtered[ , input$column_input])
+                        return(data_table5_filtered)
                 }
                 if(input$download_columns == FALSE){
-                        return(data_table5_filtered)
+                        # return(data_table5_filtered)
+                        return(data_table5_filtered[ , input$column_input])
                 }
         })
         

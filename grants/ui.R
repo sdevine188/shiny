@@ -96,7 +96,8 @@ shinyUI(
                                                    selectInput("column_input", label = "Select columns to display:", choices = "", 
                                                                multiple = TRUE),
                                                    actionButton("reset_columns", "Reset to default columns"),
-                                                   checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
+                                                   # checkboxInput("download_columns", "Truncate data download to include only displayed columns", value = FALSE)
+                                                   checkboxInput("download_columns", "Expand data download to include all possible columns, not just those displayed.", value = FALSE)
                                            )
                                     ),
                                     
