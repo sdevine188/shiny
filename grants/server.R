@@ -96,9 +96,9 @@ time <- str_split(Sys.time(), " ")[[1]][2]
 time_zone <- Sys.timezone(location = FALSE)
 time <- str_c(time, time_zone, sep = " ")
 log_entry <- data.frame(user, date, time, row.names = NULL)
-log <- read_csv("log/log.csv")
+log <- read_csv("G:/Shared/EDA ALL INFORMATION/Performance and Budget Metrics/EDA Grants Viewer/log/log.csv")
 log <- rbind(log, log_entry)
-write_csv(log, "log/log.csv")
+write_csv(log, "G:/Shared/EDA ALL INFORMATION/Performance and Budget Metrics/EDA Grants Viewer/log/log.csv")
 
 # shiny server
 shinyServer(function(input, output, session){
@@ -284,7 +284,7 @@ shinyServer(function(input, output, session){
                                 data_table4 <- data_table4
                         }
                         if(query_term_placeholder$value != ""){
-                                data_table_placeholder <- data_table4        
+                                data_table_placeholder <- data.frame(data_table4)        
                                 term_value <- NULL
                                 term_var <- NULL
                                 term_pieces <- NULL
@@ -311,7 +311,7 @@ shinyServer(function(input, output, session){
                                         }
                                         if(grepl(" | ", term_value[i])){
                                                 new_value <- str_sub(term_value[i], start = 2, end = -2)
-                                                new_value <- str_replace_all(new_value, "' \\| '", "|")
+                                                new_value <- str_replace_all(new_value, " ' \\| ' ", "|")
                                                 term_value[i] <- new_value
                                         }
                                 }
@@ -630,7 +630,7 @@ shinyServer(function(input, output, session){
                                         datafile_map <- data_table5_filtered %>% filter(!is.na(Appl.FIPS.ST), EDA.Funding < 50000000) %>% 
                                                 select(Appl.FIPS.ST, EDA.Funding)
                                         state_list <- data.frame("state_fips" = state_boundaries$STATEFP)
-                                        state_list$state_fips <- as.numeric(as.character(state_list$state_fips))
+                                        state_list$state_fips <- state_list$state_fips
                                         state_list <- filter(state_list, state_fips %in% unique(datafile_map$Appl.FIPS.ST))
                                         state_funding <- datafile_map %>% group_by(Appl.FIPS.ST) %>% summarize(funding = sum(EDA.Funding), count = n())
                                         map_data <- left_join(state_list, state_funding, by = c("state_fips" = "Appl.FIPS.ST"))
@@ -866,6 +866,7 @@ shinyServer(function(input, output, session){
         output$rows_all <- renderPrint({
                 # uploaded_query <- uploaded_query()
                 # uploaded_query$global_search_keywords
+                query_term_placeholder$value
         })
         
         # create download file
@@ -873,11 +874,9 @@ shinyServer(function(input, output, session){
                 data_table5_filtered <- data_table5_filtered()
                 
                 if(input$download_columns == TRUE){
-                        # return(data_table5_filtered[ , input$column_input])
                         return(data_table5_filtered)
                 }
                 if(input$download_columns == FALSE){
-                        # return(data_table5_filtered)
                         return(data_table5_filtered[ , input$column_input])
                 }
         })
