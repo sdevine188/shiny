@@ -37,9 +37,8 @@ datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
 
 # provide data "as of date"
 # date <- "20160209"
-date <- str_sub(shiny_data_filename, str_locate(shiny_data_filename, "20")[1], 
-                str_locate(shiny_data_filename, ".csv")[1] - 1)
-date <- str_replace(ymd(date), " UTC", "")
+as_of_date <- str_sub(shiny_data_filename, str_locate(shiny_data_filename, "20")[1], str_locate(shiny_data_filename, ".csv")[1] - 1)
+as_of_date <- str_replace(ymd(as_of_date), " UTC", "")
 
 # convert Control.No. to a character, so it can be searched with table filter, instead of numeric slider
 # can place this code in clean_shiny_data script later
@@ -105,7 +104,7 @@ shinyServer(function(input, output, session){
 
         # create as_of_date display
         output$as_of_date <- renderText({
-                str_c("Data as of: ", date)
+                str_c("Data as of: ", as_of_date)
         })
         
         # create query_term output variable
@@ -866,7 +865,8 @@ shinyServer(function(input, output, session){
         output$rows_all <- renderPrint({
                 # uploaded_query <- uploaded_query()
                 # uploaded_query$global_search_keywords
-                query_term_placeholder$value
+                # query_term_placeholder$value
+                # date1
         })
         
         # create download file
