@@ -25,12 +25,18 @@ library(lubridate)
 library(rgdal)
 library(rpivotTable)
 
+# turn off scientific notation
+options(scipen=999)
+
 # Read in data
 # find current shiny data filename
 shiny_data_filename <- list.files(str_c(getwd(), "/data"))[str_detect(list.files(str_c(getwd(), "/data")), "shiny_app_data_20")]
 shiny_data_filename <- str_c("data/", shiny_data_filename)
 # read main data file
-datafile <- data.frame(read_csv(shiny_data_filename))
+datafile <- data.frame(read_csv(shiny_data_filename, col_types = list(DUNS = col_character(), Local.Applicant.Match = col_number(), Total.Proj.Cost = col_number(), EDA.Funding = col_number(),
+                                                                      Private.Investment = col_number(), Control.No. = col_character(), Project.No. = col_character(), Proj.ZIP = col_character(),
+                                                                      Appl.ZIP = col_character(), Initiatives = col_character(), Coapp.Appl.ZIP.4 = col_character(), IRS = col_character(),
+                                                                      Coapp.DUNS = col_character(), Coapp.IRS = col_character())))
 
 # read small data to start map without delay
 datafile_small <- read_csv("data/shiny_app_data_small_20160209.csv")
@@ -47,7 +53,7 @@ datafile$Control.No. <- as.character(datafile$Control.No.)
 # create map color palettes
 program_options <- unique(datafile$Program)
 appropriation_options <- unique(datafile$Appropriation)
-year_options <- factor(seq(1995, 2016))
+year_options <- factor(seq(1995, 2017))
 
 program_pal <- colorFactor("Set1", domain = program_options)
 appropriation_pal <- colorFactor("Set1", domain = appropriation_options)

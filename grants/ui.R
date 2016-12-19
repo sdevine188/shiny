@@ -33,8 +33,8 @@ shinyUI(
                                            selectInput("state", "Select project states", choices = "", multiple = TRUE)
                                     ),
                                     column(6, align = "center",
-                                           sliderInput("years", label = "Select fiscal years", min = 1995, max = 2016, 
-                                                       value = c(1995, 2016), width = "100%", sep = "")
+                                           sliderInput("years", label = "Select fiscal years", min = 1995, max = 2017, 
+                                                       value = c(1995, 2017), width = "100%", sep = "")
                                     ),
                                     column(3, align = "center",
                                            downloadButton("downloadData", "Download Data")
